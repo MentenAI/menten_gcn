@@ -72,6 +72,10 @@ def estimate_CB_xyz( C_xyz, N_xyz, CA_xyz ):
 
 class WrappedPose:
 
+    """
+    TODO
+    """
+    
     def __init__( self ):
         #print( "HAHAHA" )
         #exit( 0 )
