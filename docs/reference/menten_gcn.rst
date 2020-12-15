@@ -5,6 +5,6 @@ menten_gcn
    :members:
    :undoc-members:
 
-.. autoclass:: WrappedPose
+.. autoclass:: menten_gcn.WrappedPose
    :members:
    :undoc-members:
