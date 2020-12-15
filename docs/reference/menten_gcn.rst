@@ -7,3 +7,6 @@ menten_gcn
 
 .. automodule:: menten_gcn
     :members:
+
+.. automodule:: menten_gcn.decorators
+   :members: Decorator
