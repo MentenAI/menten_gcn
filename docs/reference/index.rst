@@ -5,5 +5,3 @@ Reference
     :glob:
 
     menten_gcn*
-    
-    DataMaker*
