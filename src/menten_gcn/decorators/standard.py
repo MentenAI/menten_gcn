@@ -2,9 +2,9 @@ import numpy as np
 import math
 
 import menten_gcn as mg
-from mg.decorators.base import Decorator
-from mg.decorators.geometry import *
-from mg.decorators.sequence import *
+from menten_gcn.decorators.base import Decorator
+from menten_gcn.decorators.geometry import *
+from menten_gcn.decorators.sequence import *
 
 class BareBonesDecorator( Decorator ):
 

@@ -2,9 +2,9 @@ import numpy as np
 import math
 
 import menten_gcn as mg
-from mg.decorators.standard import *
-from mg.decorators.base import *
-from mg.wrappers import *
+from menten_gcn.decorators.standard import *
+from menten_gcn.decorators.base import *
+from menten_gcn.wrappers import *
 
 #import scipy
 #from scipy import sparse as sp
