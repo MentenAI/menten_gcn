@@ -4,9 +4,7 @@ menten_gcn
 .. testsetup::
 
     from menten_gcn import *
+    from menten_gcn.decorators import *
 
 .. automodule:: menten_gcn
-    :members:
-
-.. automodule:: menten_gcn.decorators
-   :members: Decorator
+    :members: decorators.Decorator
