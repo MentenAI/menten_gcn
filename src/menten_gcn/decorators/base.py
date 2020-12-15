@@ -1,7 +1,7 @@
 #import numpy as np
 #import math
 
-from wrappers import *
+from menten_gcn.wrappers import *
 
 class DecoratorDataCache:
     def __init__( self, wrapped_pose ):

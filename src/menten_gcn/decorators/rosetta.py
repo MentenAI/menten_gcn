@@ -1,8 +1,8 @@
 import numpy as np
 import math
 
-from decorators._base import *
-from wrappers import RosettaPoseWrapper
+from menten_gcn.decorators.base import *
+from menten_gcn.wrappers import RosettaPoseWrapper
 
 
 from pyrosetta import rosetta

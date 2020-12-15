@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from decorators._base import *
+from menten_gcn.decorators.base import *
 
 def angle_rad( a, b, c ):
     #https://stackoverflow.com/questions/35176451/python-code-to-calculate-angle-between-three-point-using-their-3d-coordinates

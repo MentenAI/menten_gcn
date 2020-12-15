@@ -1,10 +1,10 @@
 import numpy as np
 import math
 
-from decorators._base import Decorator
-
-from decorators.geometry import *
-from decorators.sequence import *
+import menten_gcn as mg
+from mg.decorators.base import Decorator
+from mg.decorators.geometry import *
+from mg.decorators.sequence import *
 
 class BareBonesDecorator( Decorator ):
 

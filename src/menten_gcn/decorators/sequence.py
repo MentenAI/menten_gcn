@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from decorators._base import Decorator
+from menten_gcn.decorators.base import Decorator
         
 class Sequence( Decorator ):
 
