@@ -3,16 +3,14 @@ menten_gcn
 
 .. testsetup::
 
-    from menten_gcn import DataMaker
+   import menten_gcn
+   import menten_gcn as mg
+   from menten_gcn import DataMaker
 
 .. automodule:: menten_gcn
    :members:
    :undoc-members:     
-
-.. automodule:: menten_gcn.menten_gcn
-   :members:
-   :undoc-members:     
       
-.. autoclass:: DataMaker
+.. autoclass:: menten_gcn.DataMaker
    :members:
    :undoc-members:
