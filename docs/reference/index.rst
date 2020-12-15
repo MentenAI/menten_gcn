@@ -4,4 +4,6 @@ Reference
 .. toctree::
     :glob:
 
-    menten_gcn.decorators.*
+    menten_gcn*
+    
+    DataMaker*
