@@ -4,4 +4,4 @@ Reference
 .. toctree::
     :glob:
 
-    menten_gcn*
+    menten_gcn.decorators.*
