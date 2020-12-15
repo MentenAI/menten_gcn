@@ -14,7 +14,16 @@ import tensorflow as tf
 from tensorflow.keras.layers import Input
         
 class DataMaker:
+
+    '''
+    TODO
+    '''
+    
     def __init__( self, decorators, edge_distance_cutoff_A, max_residues, exclude_bbdec = False, nbr_distance_cutoff_A = None ):
+        '''
+        TODO
+        '''
+
         self.bare_bones_decorator = BareBonesDecorator()
         self.exclude_bbdec = exclude_bbdec
         if exclude_bbdec:
@@ -32,22 +41,34 @@ class DataMaker:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
 
     def get_N_F_S( self ):
+        '''
+        TODO
+        '''
         N = self.max_residues
         F = self.all_decs.n_node_features()
         S = self.all_decs.n_edge_features()
         return N, F, S
 
     def get_node_details( self ):
+        '''
+        TODO
+        '''
         node_details = self.all_decs.describe_node_features()
         assert len( node_details ) == self.all_decs.n_node_features()
         return node_details
 
     def get_edge_details( self ):
+        '''
+        TODO
+        '''
         edge_details = self.all_decs.describe_edge_features()
         assert len( edge_details ) == self.all_decs.n_edge_features()
         return edge_details
         
     def summary( self ):
+        '''
+        TODO
+        '''
         node_details = self.get_node_details()
         edge_details = self.get_edge_details()
 
@@ -74,11 +95,17 @@ class DataMaker:
         print( "\nPlease cite: TODO\n" )
 
     def make_data_cache( self, wrapped_pose ):
+        '''
+        TODO
+        '''
         cache = DecoratorDataCache( wrapped_pose )
         self.all_decs.cache_data( wrapped_pose, cache.dict_cache )
         return cache
         
     def _calc_nbrs( self, wrapped_pose, focused_resids, legal_nbrs=None ):
+        '''
+        TODO
+        '''
         #includes focus in subset
 
         if legal_nbrs is None:
@@ -116,6 +143,9 @@ class DataMaker:
         return final_resids
 
     def _get_edge_data_for_pair( self, wrapped_pose, resid_i, resid_j, data_cache=None ):
+        '''
+        TODO
+        '''
         if data_cache.edge_cache is not None:
             if resid_j in data_cache.edge_cache[resid_i]:
                 assert resid_i in data_cache.edge_cache[resid_j]
@@ -133,6 +163,9 @@ class DataMaker:
         return f_ij,f_ji
     
     def _calc_adjacency_matrix_and_edge_data( self, wrapped_pose, all_resids, data_cache=None ):
+        '''
+        TODO
+        '''
         N, F, S = self.get_N_F_S()
         A_dense = np.zeros( shape=[N,N])
         E_dense = np.zeros( shape=[N,N,S])
@@ -155,6 +188,9 @@ class DataMaker:
         return A_dense, E_dense
     
     def _get_node_data( self, wrapped_pose, resids, data_cache ):
+        '''
+        TODO
+        '''
         N, F, S = self.get_N_F_S()
         X = np.zeros( shape=[N,F] )
         index = -1
@@ -188,6 +224,9 @@ class DataMaker:
         return X
     
     def generate_XAE_input_tensors( self ):
+        '''
+        TODO
+        '''
         N, F, S = self.get_N_F_S()
         X_in = Input( shape=(N,F), name='X_in')
         A_in = Input( shape=(N,N), sparse=False, name='A_in')
@@ -195,6 +234,9 @@ class DataMaker:
         return X_in, A_in, E_in
     
     def generate_input( self, wrapped_pose, focused_resids, data_cache=None, legal_nbrs=None ):
+        '''
+        TODO
+        '''
         if data_cache is None:
             data_cache = NullDecoratorDataCache()
             
@@ -214,44 +256,7 @@ class DataMaker:
         return X, A, E, all_resids
 
     def generate_input_for_resid( self, wrapped_pose, resid, data_cache=None, legal_nbrs=None ):
+        '''
+        TODO
+        '''
         return self.generate_input( wrapped_pose, focused_resids=[resid], data_cache=data_cache, legal_nbrs=legal_nbrs )
-    
-    
-'''
-    def _calc_sparse_adjacency_matrix_and_edge_data( self, wrapped_pose, all_resids ):
-        assert False #this is not supported at the moment
-        n_nodes = len( all_resids )
-        '#'#'
-        for i in range( 1, wrapped_pose.n_residues() + 1 ):
-            i_xyz = wrapped_pose.get_atom_xyz( i, "CA" )
-            for j in range( i + 1, wrapped_pose.n_residues() + 1 ):
-                j_xyz = wrapped_pose.get_atom_xyz( j, "CA" )
-                dist = np.linalg.norm( i_xyz - j_xyz )
-                if dist < self.distance_cutoff_A:
-                    A_dense[ i ][ j ] = 1.0
-                    A_dense[ j ][ i ] = 1.0
-        '#'#'
-        row=[]
-        col=[]
-        E = []
-        for i in range( 0, len(all_resids)-1 ):
-            resid_i = all_resids[ i ]
-            i_xyz = wrapped_pose.get_atom_xyz( resid_i, "CA" )
-            for j in range( i + 1, len(all_resids) ):
-                resid_j = all_resids[ j ]
-                j_xyz = wrapped_pose.get_atom_xyz( resid_j, "CA" )
-                dist = np.linalg.norm( i_xyz - j_xyz )
-                if dist < self.distance_cutoff_A:
-                    f_ij, f_ji = self._get_edge_data_for_pair( wrapped_pose, resid_i=resid_i, resid_j=resid_j )
-                    row.append( i )
-                    col.append( j )
-                    E.append( np.asarray(f_ij) )
-                    
-                    row.append( j )
-                    col.append( i )
-                    E.append( np.asarray(f_ji) )
-
-        data = np.ones( len( row ) )
-        A = scipy.sparse.csr.csr_matrix( (data, (row, col) ), shape=(n_nodes,n_nodes) )
-        return A, np.asarray( E )
-'''
