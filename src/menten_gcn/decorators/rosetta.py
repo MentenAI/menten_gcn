@@ -5,7 +5,12 @@ from menten_gcn.decorators.base import *
 from menten_gcn.wrappers import RosettaPoseWrapper
 
 
-from pyrosetta import rosetta
+try:
+    from pyrosetta import rosetta
+except:
+    rosetta = None
+
+#from pyrosetta import rosetta
 #Caller needs to call init()
 
 import scipy #Jump
