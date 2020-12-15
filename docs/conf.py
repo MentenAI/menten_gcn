@@ -7,7 +7,12 @@ import sys
 sys.path.append(os.path.abspath('../src'))
 sys.path.append(os.path.abspath('../../src'))
 sys.path.append(os.path.abspath('../../../src'))
-
+sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('../..'))
+sys.path.append(os.path.abspath('../../..'))
+for x in os.walk('../../src'):
+  sys.path.insert(0, x[0])
+  
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
