@@ -26,36 +26,6 @@ class RosettaResidueSelectorDecorator( Decorator ):
     - 1 Node Feature
     - 0 Edge Features
 
-    Example:
-    ```
-    import menten_gcn as mg
-    import menten_gcn.decorators as decs
-    import pyrosetta
-
-    pyrosetta.init()
-
-    buried = pyrosetta.rosetta.core.select.residue_selector.LayerSelector()
-    buried.set_layers( True, False, False )
-    buried_dec = decs.RosettaResidueSelectorDecorator( selector=buried, description='<Layer select_core="true" />' )
-
-    data_maker = mg.DataMaker( decorators=[ buried_dec ], edge_distance_cutoff_A=10.0, max_residues=30 )
-    data_maker.summary()    
-    ```
-
-    Gives:
-    ```
-    Summary:
-
-    2 Node Features:
-    1 : 1 if the node is a focus residue, 0 otherwise
-    2 : 1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: <Layer select_core="true" />
-
-    1 Edge Features:
-    1 : 1.0 if the two residues are polymer-bonded, 0.0 otherwise
-    ```
-
-    (Note that the additional features are due to the BareBonesDecorator, which is included by default )
-
     Parameters
     ---------
     selector: ResidueSelector
@@ -111,6 +81,20 @@ class RosettaResidueSelectorDecorator( Decorator ):
 
 
 class RosettaResidueSelectorFromXML( RosettaResidueSelectorDecorator ):
+    """
+    Takes a user-provided residue selctor via XML and labels each residue with a 1 or 0 accordingly.
+    
+    - 1 Node Feature
+    - 0 Edge Features
+
+    Parameters
+    ---------
+    xml_str: str
+        XML snippet that defines the selector
+    res_sele_name: str
+        The name of the selector within the snippet
+    """
+    
     #Useful resource: https://www.programmersought.com/article/87461668890/
     def __init__( self, xml_str: str, res_sele_name: str ):
         xml = rosetta.protocols.rosetta_scripts.XmlObjects.create_from_string( xml_str )

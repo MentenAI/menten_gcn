@@ -1,9 +1,6 @@
 Decorators
 ==========
 
-.. autoclass:: menten_gcn.decorators.Decorator
-   :members:
-
 .. autoclass:: menten_gcn.decorators.BareBonesDecorator
    :members:
 
@@ -26,8 +23,6 @@ Geometry
 .. autoclass:: menten_gcn.decorators.trRosettaEdges
    
    .. image:: https://www.pnas.org/content/pnas/117/3/1496/F1.large.jpg
-   
-   :members:
       
 .. autoclass:: menten_gcn.decorators.SimpleBBGeometry
    :members:
@@ -59,6 +54,9 @@ Rosetta
 *******
       
 .. autoclass:: menten_gcn.decorators.RosettaResidueSelectorDecorator
+
+
+   Example:
 	       
    .. code-block:: python
 		   
@@ -74,6 +72,8 @@ Rosetta
 
       data_maker = mg.DataMaker( decorators=[ buried_dec ], edge_distance_cutoff_A=10.0, max_residues=30 )
       data_maker.summary()    
+
+   Gives:
       
    .. code-block::
       
@@ -86,12 +86,50 @@ Rosetta
       1 Edge Features:
       1 : 1.0 if the two residues are polymer-bonded, 0.0 otherwise
 
-      
-   :members:
+   Note that the additional features are due to the BareBonesDecorator, which is included by default 
 
 .. autoclass:: menten_gcn.decorators.RosettaResidueSelectorFromXML
    :members:
 
+   Example:
+	       
+   .. code-block:: python
+      import menten_gcn as mg
+      import menten_gcn.decorators as decs
+      import pyrosetta
+
+      pyrosetta.init()
+      xml = '''
+      <RESIDUE_SELECTORS>
+      <Layer name="surface" select_surface="true" />
+      </RESIDUE_SELECTORS>
+      '''
+      surface_dec = decs.RosettaResidueSelectorFromXML( xml, "surface" )
+
+      max_res=30
+      data_maker = mg.DataMaker( decorators=[ surface_dec ], edge_distance_cutoff_A=10.0, max_residues=max_res )
+      data_maker.summary()
+      
+   Gives:
+      
+   .. code-block::
+      
+      Summary:
+
+      2 Node Features:
+      1 : 1 if the node is a focus residue, 0 otherwise
+      2 : 1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: Took the residue selector named surface from this XML: 
+      <RESIDUE_SELECTORS>
+      <Layer name="surface" select_surface="true" />
+      </RESIDUE_SELECTORS>
+
+
+      1 Edge Features:
+      1 : 1.0 if the two residues are polymer-bonded, 0.0 otherwise
+
+   Note that the additional features are due to the BareBonesDecorator, which is included by default 
+
+      
 .. autoclass:: menten_gcn.decorators.RosettaJumpDecorator
    :members:
 
