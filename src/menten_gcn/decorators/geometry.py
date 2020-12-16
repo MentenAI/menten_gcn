@@ -39,7 +39,21 @@ def dihedral_rad( p0, p1, p2, p3 ):
 
 class CACA_dist( Decorator ):
 
+    r"""
+    Measures distance between the two C-Alpha atoms of each residue
+    
+    0 Node Features
+    1 Edge Feature
+    """
+    
     def __init__( self, use_nm = False ):
+        r"""
+        Parameter
+        ---------
+        use_nm: bool
+            If true (default), measure distance in Angstroms.
+            Otherwise use nanometers.
+        """
         self.use_nm = use_nm
     
     def get_version_name( self ):
