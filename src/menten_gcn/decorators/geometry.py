@@ -84,7 +84,23 @@ class CACA_dist( Decorator ):
 
 class CBCB_dist( Decorator ):
 
+    r"""
+    Measures distance between the two C-Beta atoms of each residue.
+    Note: We will calculate the "ideal ALA" CB location even if this residue has a CB atom.
+    This may sound silly but it is intended to prevents noise from different native amino acid types.
+    
+    0 Node Features
+    1 Edge Feature
+    """
+    
     def __init__( self, use_nm = False ):
+        r"""
+        Parameter
+        ---------
+        use_nm: bool
+            If true (default), measure distance in Angstroms.
+            Otherwise use nanometers.
+        """
         self.use_nm = use_nm
     
     def get_version_name( self ):
