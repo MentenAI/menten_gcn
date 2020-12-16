@@ -8,6 +8,15 @@ from menten_gcn.decorators.sequence import *
 
 class BareBonesDecorator( Decorator ):
 
+    """
+    This decorator is included in all DataMakers by default.
+    Its goal is to be the starting point upon which everything else is built.
+    It labels focus nodes and labels edges for residues that are polymer bonded to one another.
+    
+    - 1 Node Feature
+    - 1 Edge Feature
+    """
+    
     def __init__( self ):
         self.focused_resids = []
     

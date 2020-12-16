@@ -94,6 +94,7 @@ Rosetta
    Example:
 	       
    .. code-block:: python
+
       import menten_gcn as mg
       import menten_gcn.decorators as decs
       import pyrosetta
