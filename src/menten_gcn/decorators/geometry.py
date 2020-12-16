@@ -42,12 +42,12 @@ class CACA_dist( Decorator ):
     """
     Measures distance between the two C-Alpha atoms of each residue
     
-    0 Node Features
-    1 Edge Feature
+    - 0 Node Features
+    - 1 Edge Feature
     
     Parameters
     ---------
-    `use_nm`: bool
+    use_nm: bool
         If true (default), measure distance in Angstroms.
         Otherwise use nanometers.
     """
