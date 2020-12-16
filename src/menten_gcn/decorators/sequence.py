@@ -5,6 +5,13 @@ from menten_gcn.decorators.base import Decorator
         
 class Sequence( Decorator ):
 
+    """
+    One-hot encode the canonical amino acid identity on each node.
+    
+    - 20 Node Features
+    - 0 Edge Features
+    """    
+    
     def get_version_name( self ):
         return "Sequence"
     
@@ -54,6 +61,17 @@ class Sequence( Decorator ):
 
 class DesignableSequence( Decorator ):
 
+    """
+    One-hot encode the canonical amino acid identity on each node,
+    with a 21st value for residues that are not yet
+    assigned an amino acid identity.
+    
+    Note: requires you to call WrappedPose.set_designable_resids first
+    
+    - 21 Node Features
+    - 0 Edge Features
+    """    
+    
     def get_version_name( self ):
         return "DesignableSequence"
         

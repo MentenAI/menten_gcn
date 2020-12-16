@@ -76,11 +76,10 @@ class WrappedPose:
     TODO
     """
     
-    def __init__( self ):
-        #print( "HAHAHA" )
-        #exit( 0 )
+    def __init__( self, designable_resids = None ):
         self.CB_estimates = None
         self.legal_nbrs = None
+        self.designable_resids = designable_resids
 
     def get_legal_nbrs( self ):
         return self.legal_nbrs
@@ -114,8 +113,12 @@ class WrappedPose:
     def resids_are_same_chain( self, resid1, resid2 ):
         raise NotImplementedError
 
+    def set_designable_resids( self, resids ):
+        self.designable_resids = resids
+    
     def resid_is_designable( self, resid ):
-        raise NotImplementedError
+        assert self.designable_resids is not None
+        return resid in self.designable_resids
 
     def approximate_ALA_CB( self, resid ):
         assert hasattr( self, 'CB_estimates' )
