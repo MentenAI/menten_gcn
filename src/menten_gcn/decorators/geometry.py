@@ -46,11 +46,11 @@ class CACA_dist( Decorator ):
     1 Edge Feature
     """
     
-    def __init__( self, use_nm = False ):
+    def __init__( self, use_nm: bool = False ):
         r"""
         Parameter
         ---------
-        use_nm: bool
+        `use_nm`: bool
             If true (default), measure distance in Angstroms.
             Otherwise use nanometers.
         """
@@ -62,7 +62,7 @@ class CACA_dist( Decorator ):
     def n_edge_features( self ):
         return 1
 
-    def calc_edge_features( self, wrapped_protein, resid1, resid2, dict_cache=None ):
+    def calc_edge_features( self, wrapped_protein, resid1: int, resid2: int, dict_cache=None ):
         xyz1 = wrapped_protein.get_atom_xyz( resid1, "CA" )
         xyz2 = wrapped_protein.get_atom_xyz( resid2, "CA" )
         distance = [ np.linalg.norm( xyz1 - xyz2 ) ]
@@ -93,11 +93,11 @@ class CBCB_dist( Decorator ):
     1 Edge Feature
     """
     
-    def __init__( self, use_nm = False ):
+    def __init__( self, use_nm: bool = False ):
         r"""
         Parameter
         ---------
-        use_nm: bool
+        `use_nm`: bool
             If true (default), measure distance in Angstroms.
             Otherwise use nanometers.
         """
@@ -109,7 +109,7 @@ class CBCB_dist( Decorator ):
     def n_edge_features( self ):
         return 1
 
-    def calc_edge_features( self, wrapped_protein, resid1, resid2, dict_cache=None ):
+    def calc_edge_features( self, wrapped_protein, resid1: int, resid2: int, dict_cache=None ):
         CB1_xyz = wrapped_protein.approximate_ALA_CB( resid1 )
         CB2_xyz = wrapped_protein.approximate_ALA_CB( resid2 )
         distance = [ np.linalg.norm( CB1_xyz - CB2_xyz ) ]
@@ -129,7 +129,20 @@ class CBCB_dist( Decorator ):
 
 class PhiPsiRadians( Decorator ):
 
-    def __init__( self, sincos = False ):
+    r"""
+    Returns the phi and psi values of each residue position.
+    
+    2-4 Node Features
+    0 Edge Features
+    """
+    
+    def __init__( self, sincos: bool = False ):
+        r"""
+        Parameter
+        ---------
+        `sincos`: bool
+            Return the sine and cosine of phi and psi instead of just the raw values. 
+        """
         self.sincos = sincos
     
     def get_version_name( self ):
@@ -171,7 +184,27 @@ class PhiPsiRadians( Decorator ):
 
 class trRosettaEdges( Decorator ):
 
-    def __init__( self, sincos = False, use_nm = False ):
+    r"""
+    Use the residue pair geometries used in this paper:
+    https://www.pnas.org/content/117/3/1496/tab-figures-data
+    
+    0 Node Features
+    4-7 Edge Features
+    """
+    
+    def __init__( self, sincos: bool = False, use_nm: bool = False ):
+        r"""
+        Parameter
+        ---------
+        `sincos`: bool
+            Return the sine and cosine of phi and psi instead of just the raw values.
+        `use_nm`: bool
+            If true, measure distance in Angstroms.
+            Otherwise use nanometers.
+            
+            Note: This default value does not match the default of other decorators.
+            This is for the sake of matching the trRosetta paper.
+        """
         self.sincos = sincos
         self.use_nm = use_nm
     
