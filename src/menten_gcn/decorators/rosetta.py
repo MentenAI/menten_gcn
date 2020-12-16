@@ -457,7 +457,7 @@ class Ref2015Decorator( CombinedDecorator ):
     """
     Meta-decorator that combines Rosetta_Ref2015_OneBodyEneriges and Rosetta_Ref2015_TwoBodyEneriges
     
-    - 1 - 20-ish Edge Features
+    - 1 - 20-ish Node Features
     - 1 - 20-ish Edge Features
 
     Parameters
