@@ -64,7 +64,7 @@ class RosettaResidueSelectorDecorator( Decorator ):
         This is the string that will label this feature in the final summary. Not technically required but highly recommended
     """
     
-    def __init__( self, selector: rosetta.core.select.residue_selector.ResidueSelector, description: str ):
+    def __init__( self, selector, description: str ):
         assert isinstance( selector, rosetta.core.select.residue_selector.ResidueSelector )
         assert isinstance( description, str )
         self.selector = selector
@@ -112,7 +112,7 @@ class RosettaResidueSelectorDecorator( Decorator ):
 
 class RosettaResidueSelectorFromXML( RosettaResidueSelectorDecorator ):
     #Useful resource: https://www.programmersought.com/article/87461668890/
-    def __init__( self, xml_str, res_sele_name ):
+    def __init__( self, xml_str: str, res_sele_name: str ):
         xml = rosetta.protocols.rosetta_scripts.XmlObjects.create_from_string( xml_str )
         selector = xml.get_residue_selector( res_sele_name )
         description = "Took the residue selector named " + res_sele_name + " from this XML: " + xml_str
