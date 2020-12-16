@@ -22,11 +22,9 @@ Geometry
 
 .. autoclass:: menten_gcn.decorators.CACA_dist
    :members:
-   :undoc-members:
    
 .. autoclass:: menten_gcn.decorators.CBCB_dist
    :members:
-   :undoc-members:
    
 .. autoclass:: menten_gcn.decorators.PhiPsiRadians
    :members:
