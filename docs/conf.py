@@ -51,8 +51,9 @@ if not on_rtd:  # only set the theme if we're building docs locally
 html_static_path = ['_static']
 html_logo = "_static/white_logo.png"
 html_theme_options = {
-    'logo_only': True,
-    'display_version': False,
+  'logo_only': True,
+  'display_version': False,
+  'logo_url': "https://menten.ai/"
 }
 
 html_use_smartypants = True
