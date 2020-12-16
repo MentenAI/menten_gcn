@@ -21,23 +21,22 @@ Geometry
    
 .. autoclass:: menten_gcn.decorators.PhiPsiRadians
    :members:
-   :undoc-members:
    
 .. autoclass:: menten_gcn.decorators.ChiAngleDecorator
    :members:
-   :undoc-members:
 
+.. autoclass:: menten_gcn.decorators.trRosettaEdges
+   .. image:: https://www.pnas.org/content/pnas/117/3/1496/F1.large.jpg
+   :members:
+      
 .. autoclass:: menten_gcn.decorators.SimpleBBGeometry
    :members:
-   :undoc-members:
    
 .. autoclass:: menten_gcn.decorators.StandardBBGeometry
    :members:
-   :undoc-members:
 
 .. autoclass:: menten_gcn.decorators.AdvancedBBGeometry
    :members:
-   :undoc-members:
 
 ********
 Sequence

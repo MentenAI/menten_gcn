@@ -83,17 +83,17 @@ class CACA_dist( Decorator ):
 
 class CBCB_dist( Decorator ):
 
-    r"""
+    """
     Measures distance between the two C-Beta atoms of each residue.
     Note: We will calculate the "ideal ALA" CB location even if this residue has a CB atom.
     This may sound silly but it is intended to prevents noise from different native amino acid types.
     
-    0 Node Features
-    1 Edge Feature
+    - 0 Node Features
+    - 1 Edge Feature
     
     Parameters
     ---------
-    `use_nm`: bool
+    use_nm: bool
         If true (default), measure distance in Angstroms.
         Otherwise use nanometers.
     """
@@ -130,12 +130,12 @@ class PhiPsiRadians( Decorator ):
     """
     Returns the phi and psi values of each residue position.
     
-    2-4 Node Features
-    0 Edge Features
+    - 2-4 Node Features
+    - 0 Edge Features
     
     Parameters
     ---------
-    `sincos`: bool
+    sincos: bool
         Return the sine and cosine of phi and psi instead of just the raw values.
     """
     
@@ -185,14 +185,14 @@ class trRosettaEdges( Decorator ):
     Use the residue pair geometries used in this paper:
     https://www.pnas.org/content/117/3/1496/tab-figures-data
     
-    0 Node Features
-    4-7 Edge Features
+    - 0 Node Features
+    - 4-7 Edge Features
     
     Parameters
     ---------
-    `sincos`: bool
+    sincos: bool
         Return the sine and cosine of phi and psi instead of just the raw values.
-    `use_nm`: bool
+    use_nm: bool
         If true, measure distance in Angstroms.
         Otherwise use nanometers.
             
@@ -320,7 +320,29 @@ class _AdvancedBBGeometry_v0( CombinedDecorator ):
         return "_AdvancedBBGeometry_v0"
 
 class ChiAngleDecorator( Decorator ):
-    #Isn't great with MDTraj, which doesn't accept proton chis
+
+    """
+    Returns the chi values of each residue position. Ranges from -pi to pi or -1 to 1 if sincos=True.
+
+    WARNING: This can behave inconsistantly for proton chis accross modeling frameworks. Rosetta adds hydrogens when they are absent from the input file but MDtraj does not. This results in Rosetta calculating a chi value in some cases that MDtraj skips!
+    
+    - 0-8 Node Features
+    - 0 Edge Features
+    
+    Parameters
+    ---------
+    chi1: bool
+        Include chi1's value
+    chi2: bool
+        Include chi2's value
+    chi3: bool
+        Include chi3's value
+    chi4: bool
+        Include chi4's value
+    sincos: bool
+        Return the sine and cosine of chi instead of just the raw values
+    """
+
     def __init__( self, chi1 = True, chi2 = True, chi3 = True, chi4 = True, sincos=True ):
         self.chis = []
         if chi1:
@@ -377,11 +399,47 @@ class ChiAngleDecorator( Decorator ):
         return desc
     
 class SimpleBBGeometry( _SimpleBBGeometry_v0 ):
+    """
+    Meta-decorator that combines PhiPsiRadians(sincos=False) and CBCB_dist
+    
+    - 2 Node Features
+    - 1 Edge Feature
+    
+    Parameters
+    ---------
+    use_nm: bool
+        If true, measure distance in Angstroms.
+        Otherwise use nanometers.
+    """    
     pass
 
 class StandardBBGeometry( _StandardBBGeometry_v0 ):
+    """
+    Meta-decorator that combines PhiPsiRadians(sincos=True) and trRosettaEdges(sincos=False)
+    
+    - 4 Node Features
+    - 4 Edge Features
+    
+    Parameters
+    ---------
+    use_nm: bool
+        If true, measure distance in Angstroms.
+        Otherwise use nanometers.
+    """    
     pass
 
 class AdvancedBBGeometry( _AdvancedBBGeometry_v0 ):
+    """
+    Meta-decorator that combines PhiPsiRadians(sincos=True), CACA_dist, and trRosettaEdges(sincos=True)
+    
+    - 4 Node Features
+    - 8 Edge Features
+    
+    Parameters
+    ---------
+    use_nm: bool
+        If true, measure all distances in Angstroms.
+        Otherwise use nanometers.
+    """    
     pass
     
