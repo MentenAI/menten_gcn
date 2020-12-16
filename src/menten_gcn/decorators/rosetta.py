@@ -19,7 +19,22 @@ from scipy.spatial.transform import Rotation as R
 #Convention: All decorators must start with "Rosetta". This allows us to standardize them later while still maintaining backwards compatability
 
 class RosettaResidueSelectorDecorator( Decorator ):
-    def __init__( self, selector, description ):
+
+    """
+    Takes a user-provided residue selctor and labels each residue with a 1 or 0 accordingly.
+    
+    - 1 Node Feature
+    - 0 Edge Features
+    
+    Parameters
+    ---------
+    selector: ResidueSelector
+        This residue selector will be applied to the Rosetta pose
+    description: str
+        This is the string that will label this feature in the final summary. Not technically required but highly recommended
+    """
+    
+    def __init__( self, selector: rosetta.core.select.residue_selector.ResidueSelector, description: str ):
         assert isinstance( selector, rosetta.core.select.residue_selector.ResidueSelector )
         assert isinstance( description, str )
         self.selector = selector
