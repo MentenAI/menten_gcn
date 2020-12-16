@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+#Good resources:
+# https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html#theme-options
+# https://docs.readthedocs.io/en/latest/guides/adding-custom-css.html
+
 import os
 
 import sys
@@ -45,7 +49,7 @@ if not on_rtd:  # only set the theme if we're building docs locally
     html_theme = 'sphinx_rtd_theme'
 
 html_static_path = ['_static']
-html_logo = "white_logo.png"
+html_logo = "_static/white_logo.png"
 html_theme_options = {
     'logo_only': True,
     'display_version': False,
