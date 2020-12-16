@@ -297,7 +297,7 @@ class RosettaJumpDecorator( Decorator ):
     """
     Measures the translational and rotational relationships between all residue pairs. This uses internal coordinate frames so it is agnostic to the global coordinate system. You can move/rotate your protein around and these will stay the same.
     
-    - 0 Node Feature
+    - 0 Node Features
     - 6-12 Edge Features
 
     Parameters
@@ -395,7 +395,7 @@ class RosettaHBondDecorator( RosettaHBondDecorator_v0 ):
     """
     Takes a user-provided residue selctor via XML and labels each residue with a 1 or 0 accordingly.
     
-    - 0 Node Feature
+    - 0 Node Features
     - 1-5 Edge Features (depending on bb_only)
 
     Parameters
