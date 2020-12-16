@@ -39,21 +39,20 @@ def dihedral_rad( p0, p1, p2, p3 ):
 
 class CACA_dist( Decorator ):
 
-    r"""
+    """
     Measures distance between the two C-Alpha atoms of each residue
     
     0 Node Features
     1 Edge Feature
+    
+    Parameters
+    ---------
+    `use_nm`: bool
+        If true (default), measure distance in Angstroms.
+        Otherwise use nanometers.
     """
     
     def __init__( self, use_nm: bool = False ):
-        r"""
-        Parameter
-        ---------
-        `use_nm`: bool
-            If true (default), measure distance in Angstroms.
-            Otherwise use nanometers.
-        """
         self.use_nm = use_nm
     
     def get_version_name( self ):
@@ -91,16 +90,15 @@ class CBCB_dist( Decorator ):
     
     0 Node Features
     1 Edge Feature
+    
+    Parameters
+    ---------
+    `use_nm`: bool
+        If true (default), measure distance in Angstroms.
+        Otherwise use nanometers.
     """
     
     def __init__( self, use_nm: bool = False ):
-        r"""
-        Parameter
-        ---------
-        `use_nm`: bool
-            If true (default), measure distance in Angstroms.
-            Otherwise use nanometers.
-        """
         self.use_nm = use_nm
     
     def get_version_name( self ):
@@ -129,20 +127,19 @@ class CBCB_dist( Decorator ):
 
 class PhiPsiRadians( Decorator ):
 
-    r"""
+    """
     Returns the phi and psi values of each residue position.
     
     2-4 Node Features
     0 Edge Features
+    
+    Parameters
+    ---------
+    `sincos`: bool
+        Return the sine and cosine of phi and psi instead of just the raw values.
     """
     
     def __init__( self, sincos: bool = False ):
-        r"""
-        Parameter
-        ---------
-        `sincos`: bool
-            Return the sine and cosine of phi and psi instead of just the raw values. 
-        """
         self.sincos = sincos
     
     def get_version_name( self ):
@@ -184,27 +181,26 @@ class PhiPsiRadians( Decorator ):
 
 class trRosettaEdges( Decorator ):
 
-    r"""
+    """
     Use the residue pair geometries used in this paper:
     https://www.pnas.org/content/117/3/1496/tab-figures-data
     
     0 Node Features
     4-7 Edge Features
+    
+    Parameters
+    ---------
+    `sincos`: bool
+        Return the sine and cosine of phi and psi instead of just the raw values.
+    `use_nm`: bool
+        If true, measure distance in Angstroms.
+        Otherwise use nanometers.
+            
+        Note: This default value does not match the default of other decorators.
+        This is for the sake of matching the trRosetta paper.
     """
     
     def __init__( self, sincos: bool = False, use_nm: bool = False ):
-        r"""
-        Parameter
-        ---------
-        `sincos`: bool
-            Return the sine and cosine of phi and psi instead of just the raw values.
-        `use_nm`: bool
-            If true, measure distance in Angstroms.
-            Otherwise use nanometers.
-            
-            Note: This default value does not match the default of other decorators.
-            This is for the sake of matching the trRosetta paper.
-        """
         self.sincos = sincos
         self.use_nm = use_nm
     
