@@ -58,7 +58,20 @@ class BareBonesDecorator( Decorator ):
             ]
 
 class SequenceSeparation( Decorator ):
-    def __init__( self, ln=True ):
+
+    """
+    The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains.
+    
+    - 0 Node Features
+    - 1 Edge Feature
+
+    Parameters
+    ---------
+    ln: bool
+        Report the natural log of the distance instead of the raw count. Does not apply to -1 values
+    """    
+    
+    def __init__( self, ln: bool = True ):
         self.ln = ln
     
     def get_version_name( self ):
@@ -86,6 +99,13 @@ class SequenceSeparation( Decorator ):
             return [ "The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)", ]
     
 class SameChain( Decorator ):
+
+    """
+    1 if the two residues are part of the same protein chain. Otherwise 0.
+    
+    - 0 Node Features
+    - 1 Edge Feature
+    """    
     
     def get_version_name( self ):
         return "SameChain"
