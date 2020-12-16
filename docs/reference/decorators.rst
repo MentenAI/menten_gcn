@@ -1,25 +1,14 @@
-menten_gcn
-==========
-
-.. automodule:: menten_gcn
-   :members:
-   :undoc-members:
-
-.. autoclass:: menten_gcn.WrappedPose
-   :members:
-   :undoc-members:
-
-**********
 DECORATORS
-**********
+==========
 
 .. autoclass:: menten_gcn.decorators.Decorator
    :members:
    :undoc-members:
 
-Geometry
-=========
-
+********
+GEOMETRY
+********
+      
 .. autoclass:: menten_gcn.decorators.CACA_dist
    :members:
    
@@ -34,8 +23,7 @@ Geometry
    :members:
    :undoc-members:
    
-Combined
-=========
+# Combined
 
 .. autoclass:: menten_gcn.decorators.SimpleBBGeometry
    :members:
