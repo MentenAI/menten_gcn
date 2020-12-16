@@ -24,7 +24,9 @@ Geometry
    :members:
 
 .. autoclass:: menten_gcn.decorators.trRosettaEdges
+   
    .. image:: https://www.pnas.org/content/pnas/117/3/1496/F1.large.jpg
+   
    :members:
       
 .. autoclass:: menten_gcn.decorators.SimpleBBGeometry
@@ -57,6 +59,7 @@ Rosetta
 *******
       
 .. autoclass:: menten_gcn.decorators.RosettaResidueSelectorDecorator
+	       
    .. code-block:: python
       import menten_gcn as mg
       import menten_gcn.decorators as decs
