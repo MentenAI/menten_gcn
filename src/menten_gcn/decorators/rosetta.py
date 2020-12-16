@@ -104,14 +104,14 @@ class RosettaResidueSelectorFromXML( RosettaResidueSelectorDecorator ):
 
 class RosettaHBondDecorator_v0( Decorator ):
 
-    def __init__( self, scorefxn=None, bb_only = False ):
+    def __init__( self, sfxn=None, bb_only: bool = False ):
         self.key = "hbset"
         self.bb_only = bb_only
-        if scorefxn == None:
+        if sfxn == None:
             #self.sfxn = rosetta.core.scoring.ScoreFunctionFactory.get_score_function()
             self.sfxn = rosetta.core.scoring.get_score_function()
         else:
-            self.sfxn = scorefxn
+            self.sfxn = sfxn
 
     def get_version_name( self ):
         return "RosettaHBondDecorator_v0"
@@ -194,7 +194,7 @@ class RosettaHBondDecorator_v0( Decorator ):
 
 class _RosettaOnebodyEnergies_v0( Decorator ):
 
-    def __init__( self, sfxn, individual = False ):
+    def __init__( self, sfxn, individual: bool = False ):
         self.sfxn = sfxn
         self.ind = individual
         if individual:
@@ -244,7 +244,7 @@ class _RosettaOnebodyEnergies_v0( Decorator ):
     
 class _RosettaTwobodyEnergies_v0( Decorator ):
 
-    def __init__( self, sfxn, individual = False ):
+    def __init__( self, sfxn, individual: bool = False ):
         self.sfxn = sfxn
         self.ind = individual
         if individual:
@@ -293,8 +293,23 @@ class _RosettaTwobodyEnergies_v0( Decorator ):
 
 
 class RosettaJumpDecorator( Decorator ):
+    
+    """
+    Measures the translational and rotational relationships between all residue pairs. This uses internal coordinate frames so it is agnostic to the global coordinate system. You can move/rotate your protein around and these will stay the same.
+    
+    - 0 Node Feature
+    - 6-12 Edge Features
 
-    def __init__( self, use_nm = False, rottype = "euler_sincos" ):
+    Parameters
+    ---------
+    use_nm: bool
+        If true (default), measure distance in Angstroms.
+        Otherwise use nanometers.
+    rottype: str
+        How do you want to represent the rotational degrees of freedom? Options are "euler" (default), "euler_sincos", "matrix", "quat", "rotvec", and "rotvec_sincos".
+    """
+
+    def __init__( self, use_nm = False, rottype = "euler" ):
         assert( rottype in [ "euler", "euler_sincos", "matrix", "quat", "rotvec", "rotvec_sincos" ] )
         self.rottype = rottype
         self.use_nm = use_nm
@@ -377,10 +392,38 @@ class RosettaJumpDecorator( Decorator ):
 ### META ###
 
 class RosettaHBondDecorator( RosettaHBondDecorator_v0 ):
+    """
+    Takes a user-provided residue selctor via XML and labels each residue with a 1 or 0 accordingly.
+    
+    - 0 Node Feature
+    - 1-5 Edge Features (depending on bb_only)
+
+    Parameters
+    ---------
+    sfxn: ScoreFunction
+        Score function used to calculate hbonds.
+        We will use Rosetta's default if this is None
+    bb_only: bool
+        Only consider backbone-backbone hbonds.
+        Reduces the number of features from 5 down to 1
+    """    
     pass
 
 class Rosetta_Ref2015_OneBodyEneriges( _RosettaOnebodyEnergies_v0 ):
-    def __init__( self, individual = False ):
+    """
+    Label each node with its Rosetta one-body energy
+    
+    - 1 - 20-ish Node Features
+    - 0 Edge Features
+
+    Parameters
+    ---------
+    individual: bool
+        If true, list the score for each term individually.
+        Otherwise sum them all into one value.
+    """    
+    
+    def __init__( self, individual: bool = False ):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function( "ref2015.wts" )
         _RosettaOnebodyEnergies_v0.__init__( self, sfxn=sfxn, individual=individual )
 
@@ -388,7 +431,20 @@ class Rosetta_Ref2015_OneBodyEneriges( _RosettaOnebodyEnergies_v0 ):
         return "Rosetta_Ref2015_OneBodyEneriges"
 
 class Rosetta_Ref2015_TwoBodyEneriges( _RosettaTwobodyEnergies_v0 ):
-    def __init__( self, individual = False ):
+    """
+    Label each edge with its Rosetta two-body energy
+    
+    - 0 Node Features
+    - 1 - 20-ish Edge Features
+
+    Parameters
+    ---------
+    individual: bool
+        If true, list the score for each term individually.
+        Otherwise sum them all into one value.
+    """    
+
+    def __init__( self, individual: bool = False ):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function( "ref2015.wts" )
         _RosettaTwobodyEnergies_v0.__init__( self, sfxn=sfxn, individual=individual )
 
@@ -398,7 +454,21 @@ class Rosetta_Ref2015_TwoBodyEneriges( _RosettaTwobodyEnergies_v0 ):
 
 class Ref2015Decorator( CombinedDecorator ):
 
-    def __init__( self, individual = False ):
+    """
+    Meta-decorator that combines Rosetta_Ref2015_OneBodyEneriges and Rosetta_Ref2015_TwoBodyEneriges
+    
+    - 1 - 20-ish Edge Features
+    - 1 - 20-ish Edge Features
+
+    Parameters
+    ---------
+    individual: bool
+        If true, list the score for each term individually.
+        Otherwise sum them all into one value.
+    """    
+
+    
+    def __init__( self, individual: bool = False ):
         decorators=[Rosetta_Ref2015_OneBodyEneriges(individual=individual),Rosetta_Ref2015_TwoBodyEneriges(individual=individual)]
         CombinedDecorator.__init__( self, decorators )
 
