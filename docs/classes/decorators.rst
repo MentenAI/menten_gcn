@@ -59,32 +59,6 @@ Rosetta
 .. autoclass:: menten_gcn.decorators.RosettaResidueSelectorDecorator
    :members:
 
-Example::
-  import menten_gcn as mg
-  import menten_gcn.decorators as decs
-  import pyrosetta
-
-  pyrosetta.init()
-
-  buried = pyrosetta.rosetta.core.select.residue_selector.LayerSelector()
-  buried.set_layers( True, False, False )
-  buried_dec = decs.RosettaResidueSelectorDecorator( selector=buried, description='<Layer select_core="true" />' )
-
-  data_maker = mg.DataMaker( decorators=[ buried_dec ], edge_distance_cutoff_A=10.0, max_residues=30 )
-  data_maker.summary()
-      
-Output::
-  Summary:
-
-  2 Node Features:
-  1 : 1 if the node is a focus residue, 0 otherwise
-  2 : 1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: <Layer select_core="true" />
-
-  1 Edge Features:
-  1 : 1.0 if the two residues are polymer-bonded, 0.0 otherwise
-
-(Note that the additional features are due to the BareBonesDecorator, which is included by default )
-
 .. autoclass:: menten_gcn.decorators.RosettaResidueSelectorFromXML
    :members:
 
