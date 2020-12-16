@@ -13,10 +13,6 @@ menten_gcn
 DECORATORS
 **********
 
-.. automodule:: menten_gcn.decorators
-   :members:
-   :undoc-members:
-
 .. autoclass:: menten_gcn.decorators.Decorator
    :members:
    :undoc-members:
