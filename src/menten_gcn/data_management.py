@@ -6,21 +6,21 @@ import random
 import gc
 
 class DecoratorDataCache:
-    def __init__( self, wrapped_pose ):
 
-        """
-        DecoratorDataCache prevents re-calculating the same node/edge data many times.
-        You will need to create a different cache for each pose you work with.
+    """
+    DecoratorDataCache prevents re-calculating the same node/edge data many times.
+    You will need to create a different cache for each pose you work with.
 
-        Also, we highly recommend you make this inside the DataMaker (calling data_maker.make_data_cache() ).
-        This allows for further caching and speedups.
+    Also, we highly recommend you make this inside the DataMaker (calling data_maker.make_data_cache() ).
+    This allows for further caching and speedups.
 
-        Parameters
-        ----------
-        wrapped_pose: WrappedPose
-            Please pass the pose that we should make a cache for
-        """
-        
+    Parameters
+    ----------
+    wrapped_pose: WrappedPose
+        Please pass the pose that we should make a cache for
+    """    
+    
+    def __init__( self, wrapped_pose ):        
         #lookup is edge_cache[i][j]        
         self.edge_cache = [dict() for x in range(wrapped_pose.n_residues()+1)]
         self.node_cache = [ None for x in range(wrapped_pose.n_residues()+1) ]

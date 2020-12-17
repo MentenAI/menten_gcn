@@ -83,14 +83,15 @@ Data Management
    Example:
 	       
    .. code-block:: python
-      
+
+      #Setup: (See above for get_data_from_poses)
       data_maker = make_datamaker() #Hand-wavy
       train_poses = [ "A.pdb", "B.pdb", "C.pdb" ]
       train_dataholder = get_data_from_poses( train_poses, data_maker )
       val_poses = [ "D.pdb", "E.pdb" ]
       val_dataholder = get_data_from_poses( val_poses, data_maker )
-      # See above for get_data_from_poses
-		   
+
+      #Important Part:
       train_generator = DataHolderInputGenerator( train_dataholder )
       val_generator = DataHolderInputGenerator( val_dataholder )
       model.fit( train_generator, validation_data=val_generator, epochs=100 )

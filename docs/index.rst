@@ -5,6 +5,7 @@ Contents
 .. toctree::
    :maxdepth: 3
 
+   overview
    usage
    classes/index
    readme

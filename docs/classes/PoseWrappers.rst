@@ -1,7 +1,8 @@
 Pose Wrappers
 ==========
 
-.. autoclass:: menten_gcn.WrappedPose
+Want support for more pose representations?
+Get in touch!
 
 .. autoclass:: menten_gcn.RosettaPoseWrapper
 
