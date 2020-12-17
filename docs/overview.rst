@@ -87,20 +87,26 @@ Let's walk through this slowly:
 1. Start by loading your pose in python using any of our supported packages.
   - Just Rosetta and MDTraj right now. Get in touch if you want more!
   - You will hopefully be training on more than just one pose
-2. Wrap your pose using the appropiate wrapper for your package
+    
+2. Wrap your pose using the appropiate wrapper for your package.
   - See Classes -> Pose Wrappers
+    
 3. Define a list of decorators to use to represent your pose.
   - See Classes -> Decorators
   - An example decorator would be PhiPsiRadians,
     which decorates each node with its Phi and Psi value
+    
 4. Use this list of decorators to build a DataMaker
+   
 5. The DataMaker will then take your wrapped pose, ask for the focus residues, and return the X, A, and E tensors
-6. From here you can either...
-   - Train on these tensors directly
-   - Train on these tensors after wrapping them in a Keras generator
+   
+6. From here you have a few choices.
+   - You can train on these tensors directly
+   - You can train on these tensors after wrapping them in a Keras generator
      - See Classes -> Data Management
-   - Save these for later. Stick them on disk and come back to them when you're ready to train
-7. Of course in order to train you need to create a model
+   - Or you can save these for later. Stick them on disk and come back to them when you're ready to train
+     
+7. Of course in order to train you need to create a model.
    - Menten GCN doesn't do much in that regard.
      We highly recommend Spektral for this purpose.
    - However, we do recommend using the DataMaker to generate the input layers for your model.
