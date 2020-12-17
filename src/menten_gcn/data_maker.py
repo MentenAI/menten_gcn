@@ -17,11 +17,24 @@ from tensorflow.keras.layers import Input
         
 class DataMaker:
 
-    '''
-    TODO
-    '''
+    """
+    The DataMaker is the user's interface to controling the size and composition of their graph.
+
+    Parameters
+    ----------
+    decorators: list
+        List of decorators that you want to include
+    edge_distance_cutoff_A: float
+        An edge will be created between any two pairs of residues if their C-alpha atoms are within this distance (measured in Angstroms)
+    max_residues: int
+        What is the maximum number of nodes a graph can have? This includes focus and neighbor nodes. If the number of focus+neighbors exceeds this number, we will leave out the neighbors that are farthest away in 3D space.
+    exclude_bbdec: bool
+        Every DataMaker has a standard "bare bones" decorator that is prepended to the list of decorators you provide. Set this to false to remove it entirely.
+    nbr_distance_cutoff_A: float
+        A node will be included in the graph if it is within this distance (Angstroms) of any focus node. A value of None will set this equal to edge_distance_cutoff_A
+    """
     
-    def __init__( self, decorators, edge_distance_cutoff_A, max_residues, exclude_bbdec = False, nbr_distance_cutoff_A = None ):
+    def __init__( self, decorators: list, edge_distance_cutoff_A: float, max_residues: int, exclude_bbdec: bool = False, nbr_distance_cutoff_A: float=None):
         '''
         TODO
         '''
