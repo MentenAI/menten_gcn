@@ -144,7 +144,6 @@ class DataHolder:
             fileprefix="foo/bar.npz" will result in reading "./foo/bar.npz"
         """
 
-
         assert filename == None or fileprefix == None, "Please provide either fileprefix or filename"
         assert filename != None or fileprefix != None, "Please provide either fileprefix or filename"
 
@@ -163,9 +162,89 @@ class DataHolder:
         assert not np.isnan(np.sum( self.Es )), filename
         assert not np.isnan(np.sum( self.outs )), filename        
 
-class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
+class DataHolderInputGenerator( tf.keras.utils.Sequence ):
+
+    """
+    This class is used to feed a DataHolder directly into
+    Keras's model.fit() protocol. See the example code below.
+
+    Parameters
+    ----------
+    data_holder: DataHolder
+        A DataHolder that you just made
+    batch_size: int
+        How many elements should be grouped together
+        in batches during training?
+    """
     
-    def __init__(self, data_list_lines, cache=False, batch_size=32, autoshuffle=None):
+    def __init__(self, data_holder: DataHolder, batch_size: int = 32 ):
+        self.holder = data_holder            
+        self.batch_size = batch_size
+        self.indices = [ i for i in range( 0, data_holder.size() ) ]
+        
+    def n_elem( self ):
+        return self.holder.size()
+
+    def __len__(self):
+        return int((self.holder.size()+self.batch_size-1) / self.batch_size)
+
+    def __getitem__(self, item_index):
+        begin = item_index * self.batch_size
+        end = min( i + self.batch_size, len(self.indices) )
+
+        inds = self.indices[begin:end]
+        inp, out = self.holder.get_indices(inds)
+            
+        for i in inp:
+            assert np.isfinite( i ).all()
+        assert np.isfinite( out ).all()            
+        return inp, out
+
+    def on_epoch_end( self ):
+        np.random.shuffle( self.indices )
+        gc.collect()        
+
+        
+class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
+
+    """
+    This class is used to feed a DataHolder directly into
+    Keras's model.fit() protocol.
+
+    The difference with this class is that it reads one or more DataHolders
+    that have been saved onto disk.
+
+    See the example code below.
+
+    Parameters
+    ----------
+    data_list_lines: list
+        A list of filenames, each one for a different DataHolder.
+    cache: bool
+        If true, this class will load every DataHolder
+        into memory once and keep them there.
+        This can require a lot of memory.
+        Otherwise, we will only read in one DataHolder at a time
+        (once per epoch).
+        This increases disk IO but is often worth it.
+    batch_size: int
+        How many elements should be grouped together
+        in batches during training?
+    autoshuffle: bool
+        This is very nuanced so we recommend keeping the default value of None
+        (this lets us pick the appropriate action).
+        Long story short: YOU DO NOT WANT TO DO SHUFFLE=TRUE inside keras's
+        model.fit() when cache=False because disk IO goes through the roof.
+        To counter this, we handle shuffling internally
+        in a way that minimizes disk IO.
+        However you DO WANT TO DO SHUFFLE=TRUE if cache=True
+        because everything is in memory anyways.
+        I know this is confusing.
+        Maybe this will be cleaner in the future.
+    """
+
+    
+    def __init__(self, data_list_lines:list, cache:bool=False, batch_size:int=32, autoshuffle:bool=None):
         print( "Generating from", str(len(data_list_lines)), "files" )
         self.data_list_lines = data_list_lines
 
@@ -190,18 +269,18 @@ class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
             
         for i in range( 0, len( self.data_list_lines ) ):
             filename = self.data_list_lines[ i ]
-            gator = DataGator()
-            gator.load_from_file( filename=filename )
-            size = gator.size()
+            holder = DataHolder()
+            holder.load_from_file( filename=filename )
+            size = holder.size()
             size = ( int(math.floor(size / float(self.batch_size))) * self.batch_size )
-            print( "rounding", gator.size(), "to", size )
+            print( "rounding", holder.size(), "to", size )
             #round DOWN to nearest multiple of batch size
             self.sizes.append( size )
             self.total_size += size
             if self.cache:
-                self.cached_data[ i ] = gator
+                self.cached_data[ i ] = holder
             else:
-                del gator
+                del holder
             gc.collect()
         print( "    ", self.total_size, "elements" )
 
@@ -215,7 +294,7 @@ class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
 
     def __len__(self):
         """It is mandatory to implement it on Keras Sequence"""
-        #return int(len( self.gator.Xs ) / 100)
+        #return int(len( self.holder.Xs ) / 100)
         return int(self.total_size / self.batch_size)
 
     def get_npz_index_for_item( self, item_index ):
@@ -231,24 +310,24 @@ class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
     def __getitem__(self, item_index):
         npz_i, i = self.get_npz_index_for_item( item_index )
         if self.cache:
-            self.gator = self.cached_data[ npz_i ]
+            self.holder = self.cached_data[ npz_i ]
         elif npz_i != self.currently_loaded_npz_index:
-            self.gator = DataGator()
+            self.holder = DataHolder()
             gc.collect()
             self.currently_loaded_npz_index = npz_i
-            self.gator.load_from_file( filename=self.data_list_lines[ self.currently_loaded_npz_index ] )
-            self.indices = [ x for x in range( 0, self.gator.size() ) ]
+            self.holder.load_from_file( filename=self.data_list_lines[ self.currently_loaded_npz_index ] )
+            self.indices = [ x for x in range( 0, self.holder.size() ) ]
             if self.autoshuffle:
                 np.random.shuffle( self.indices )
 
         begin = i * self.batch_size
-        end = min( i + self.batch_size, len( self.gator.As ) )
+        end = min( i + self.batch_size, len( self.holder.As ) )
         if self.indices == None:
-            inp, out = self.gator.get_batch( begin, end )
+            inp, out = self.holder.get_batch( begin, end )
         else:
             assert end <= len(self.indices)
             inds = self.indices[begin:end]
-            inp,out = self.gator.get_indices(inds)
+            inp,out = self.holder.get_indices(inds)
             
         for i in inp:
             assert np.isfinite( i ).all()
@@ -274,6 +353,6 @@ class CachedDataHolderInputGenerator( tf.keras.utils.Sequence ):
         self.cum_sizes = np.cumsum( self.sizes )
 
         #reset
-        self.gator = None
+        self.holder = None
         self.currently_loaded_npz_index = -1        
         

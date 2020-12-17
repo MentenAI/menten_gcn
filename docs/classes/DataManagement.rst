@@ -78,7 +78,24 @@ Data Management
 
    See below for a full example
 
+.. autoclass:: menten_gcn.DataHolderInputGenerator
+
+   Example:
 	       
+   .. code-block:: python
+      
+      data_maker = make_datamaker() #Hand-wavy
+      train_poses = [ "A.pdb", "B.pdb", "C.pdb" ]
+      train_dataholder = get_data_from_poses( train_poses, data_maker )
+      val_poses = [ "D.pdb", "E.pdb" ]
+      val_dataholder = get_data_from_poses( val_poses, data_maker )
+      # See above for get_data_from_poses
+		   
+      train_generator = DataHolderInputGenerator( train_dataholder )
+      val_generator = DataHolderInputGenerator( val_dataholder )
+      model.fit( train_generator, validation_data=val_generator, epochs=100 )
+
+   
 .. autoclass:: menten_gcn.CachedDataHolderInputGenerator
 
    Example:
@@ -87,12 +104,13 @@ Data Management
 
       training_generator = CachedDataHolderInputGenerator( training_data_filenames, cache=False, batch_size=64 )
       validation_generator = CachedDataHolderInputGenerator( validation_data_filenames, cache=False, batch_size=64 )
-      model.fit( training_generator, validation_data=validation_generator, epochs=1000, shuffle=False, use_multiprocessing=False, callbacks=callbacks )
+      model.fit( training_generator, validation_data=validation_generator, epochs=1000, shuffle=False )
       # Note shuffle=False
       # CachedDataHolderInputGenerator does all shuffling internally to minimize disk access
 
    See below for a full example
-
+   
+	       
 
 Full Example
 ############
