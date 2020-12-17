@@ -1,7 +1,7 @@
 Classes
 =========
 
-.. image:: _images/MentenGCN3.png
+.. image:: ../_images/MentenGCN3.png
 
 .. toctree::
     :glob:
