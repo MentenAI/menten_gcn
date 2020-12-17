@@ -1,6 +1,6 @@
-=====
+========
 Overview
-=====
+========
 
 The goal of Menten GCN is to create GCN tensors from protein models (poses).
 We are aligning with Spektral's vocabulary style when talking about GCNs
