@@ -6,7 +6,7 @@ import random
 import gc
 
 class DataHolder:
-    def __init__( self, draft = None ):
+    def __init__( self ):
         self.Xs = []
         self.As = []        
         self.Es = []
@@ -54,11 +54,6 @@ class DataHolder:
         return [x,a,e], o
     
     
-    def memory_usage_MiB( self ):
-        #I think this is wrong
-        amount = self.Xs.__sizeof__() + self.As.__sizeof__() + self.Es.__sizeof__() + self.outs.__sizeof__()
-        return amount / (1024*1024)
-
     def save_to_file( self, fileprefix ):
         np.savez_compressed( fileprefix + '.npz', x=np.asarray( self.Xs), a=np.asarray( self.As), e=np.asarray( self.Es), o=np.asarray( self.outs ) )
 
