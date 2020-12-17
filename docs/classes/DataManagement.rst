@@ -89,6 +89,71 @@ Data Management
 Full Example
 ############
 
+Let's say we want to create a model that predicts the solvent accessible surface area of a residue, given the residue and its surroundings.
+
+We have tons of data (the entire PDB, for example) local on disk:
+
+>>> ls inputs/*
+inputs/A00001.pdb inputs/A00002.pdb ... inputs/A99999.pdb
+
+This will take a lot of memory to hold.
+We should group this into, say, batches of 100 poses each
+
+>>> ls inputs/* | shuf | split -dl 100 - list
+>>> ls ./list*
+list001 list002 ... list100
+
+We're then going to feed each list into:
+
 .. code-block:: python
 
-   TODO
+   # Let's call this make_data.py
+		
+   import pyrosetta
+   pyrosetta.init()
+
+   import menten_gcn
+   import menten_gcn.decorators as decs
+
+   import numpy as np
+
+   def run( listname: str ):
+       #listname is list001 or list002 or so on
+
+       dataholder = menten_gcn.DataHolder()
+       
+       decorators = [ decs.StandardBBGeometry(), decs.Sequence() ]
+       data_maker = menten_gcn.DataMaker( decorators=decorators, edge_distance_cutoff_A=10.0, max_residues=20 )
+       data_maker.summary()
+       
+       sasa_calc = pyrosetta.rosetta.core.simple_metrics.per_residue_metrics.PerResidueSasaMetric()
+       
+       listfile = open( listname, "r" )
+       for line in listfile:
+
+           pose = pose_from_pdb( filename.rstrip() )
+	   wrapped_pose = RosettaPoseWrapper( pose )
+	   cache = data_maker.make_data_cache( wrapped_pose )
+
+	   sasa_results = sasa_calc.calculate( pose )
+	   
+	   for resid in range( 1, pose.size() + 1 ):
+		X, A, E, meta = data_maker.generate_input_for_resid( wrapped_pose, resid, data_cache=cache )
+		out = np.asarray( [ sasa_results[ resid ] ] )
+                dataholder.append( X=X, A=A, E=E, out=out )
+
+       dataholder.save_to_file( listname ) #creates list001.npz, for example
+
+       # this is a good time for "del dataholder" and garbage collection
+
+   if __name__ == '__main__':
+       assert len( sys.argv ) == 2, "Please pass the list file name as the one and only argument"
+       listname = sys.argv[ 1 ]
+       run( listname )
+
+
+>>> ls ./list* | xargs -n1 python3 make_data.py
+>>> # ^ run xargs -n1 -P N python3 make_data.py to run this in parallel on N processors
+>>> ls ./list*.npz
+list001.npz list002.npz ... list100.npz
+
