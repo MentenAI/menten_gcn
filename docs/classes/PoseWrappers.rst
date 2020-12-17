@@ -1,4 +1,4 @@
-DataMaker
+Pose Wrappers
 ==========
 
 .. autoclass:: menten_gcn.WrappedPose

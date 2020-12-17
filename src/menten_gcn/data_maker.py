@@ -6,6 +6,8 @@ from menten_gcn.decorators.standard import *
 from menten_gcn.decorators.base import *
 from menten_gcn.wrappers import *
 
+from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
+
 #import scipy
 #from scipy import sparse as sp
 

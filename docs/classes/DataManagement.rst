@@ -157,3 +157,54 @@ We're then going to feed each list into:
 >>> ls ./list*.npz
 list001.npz list002.npz ... list100.npz
 
+Okay now we have all of our training data on disk.
+Let's train
+
+.. code-block:: python
+
+   # train.py
+
+   from spektral.layers import *
+   from tensorflow.keras.layers import *
+   from tensorflow.keras.models import Model
+   
+   import menten_gcn
+   import menten_gcn.decorators as decs
+
+   import numpy as np
+   
+   def make_model( data_maker ):
+   
+       """
+       This is just a simple model
+       Model building is not the point of this example
+       """
+       
+       X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
+       X1 = EdgeConditionedConv( 30, activation='relu' )([X_in, A_in, E_in])
+       X2 = EdgeConditionedConv( 30, activation='relu' )([X1, A_in, E_in])
+       FinalPool = GlobalSumPool()(X2)
+       output = Dense( 1, name="out" )(FinalPool)
+
+       model = Model(inputs=[X_in,A_in,E_in], outputs=output)
+       model.compile(optimizer='adam', loss='mean_squared_error' )
+       model.summary()
+
+       return model
+
+   if __name__ == '__main__':
+       assert len( sys.argv ) > 1, "Please pass the npz files as arguments"
+       npznames = sys.argv[1:]
+
+       # use 20% for validation
+       fifth = int(len(data_list_lines)/5)
+       training_data_filenames = npznames[fifth:]
+       validation_data_filenames = npznames[:fifth]
+       
+       training_generator = menten_gcn.CachedDataHolderInputGenerator( training_data_filenames, cache=False, batch_size=64 )
+       validation_generator = menten_gcn.CachedDataHolderInputGenerator( validation_data_filenames, cache=False, batch_size=64 )
+       model.fit( training_generator, validation_data=validation_generator, epochs=1000, shuffle=False, use_multiprocessing=False, callbacks=callbacks )
+
+      
+       
+>>> python3 train.py ./list*.npz
