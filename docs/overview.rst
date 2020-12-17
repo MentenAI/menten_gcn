@@ -47,7 +47,7 @@ Menten GCN will automatically select the residue positions closest in space
 to the focus residues and will use them to build neighbor nodes.
 Menten GCN will also automatically add edges between any two nodes that are close in space.
 
-.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN1.pdf
+.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
 
 Graph Tensors
 #############
@@ -72,7 +72,7 @@ have the same value going in both directions.
 Other edge tensors are asymmetric (like relative geometries) so they
 will have different values for each of the two slots in "E".
 
-.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN2.pdf
+.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
 
 Usage
 #####
@@ -80,7 +80,7 @@ Usage
 This workflow may be overwhelming but keep in mind that this is the entire training process.
 Let's walk through this slowly:
 
-.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN3.pdf
+.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
 
 #. Start by loading your pose in python using any of our supported packages.
   #. Just Rosetta and MDTraj right now. Get in touch if you want more!
