@@ -6,6 +6,6 @@ Classes
 
     DataMaker*
        
-    decorators*
+    Decorators*
 
     PoseWrappers*
