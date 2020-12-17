@@ -91,10 +91,10 @@ Full Example
 
 Let's say we want to create a model that predicts the solvent accessible surface area of a residue, given the residue and its surroundings.
 
-We have tons of data (the entire PDB, for example) local on disk:
+We have tons of data (10000 pdb files, for example) local on disk:
 
 >>> ls inputs/*
-inputs/A00001.pdb inputs/A00002.pdb ... inputs/A99999.pdb
+inputs/00001.pdb inputs/00002.pdb ... inputs/10000.pdb
 
 This will take a lot of memory to hold.
 We should group this into, say, batches of 100 poses each
@@ -102,6 +102,15 @@ We should group this into, say, batches of 100 poses each
 >>> ls inputs/* | shuf | split -dl 100 - list
 >>> ls ./list*
 list001 list002 ... list100
+>>> wc -l list001
+100
+>>> head list001
+inputs/03863.pdb
+inputs/00134.pdb
+inputs/00953.pdb
+inputs/02387.pdb
+inputs/09452.pdb
+
 
 We're then going to feed each list into:
 
