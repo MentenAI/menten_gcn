@@ -3,6 +3,14 @@ Data Management
 
 .. autoclass:: menten_gcn.DataHolder
 
+   .. automethod:: append
+
+   .. automethod:: assert_mode
+
+   .. automethod:: save_to_file
+
+   .. automethod:: load_from_file		   
+		   
    Example:
 	       
    .. code-block:: python

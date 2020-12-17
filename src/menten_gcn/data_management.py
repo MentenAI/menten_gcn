@@ -33,22 +33,53 @@ class NullDecoratorDataCache:
         self.dict_cache = None
 
 class DataHolder:
+
+    """
+    DataHolder is a wonderful class that automatically stores the direct output of the DataMaker.
+    The DataHolder can then feed your data directly into kera's model.fit() method using the generators below.
+
+    There are descriptions for each method below but perhaps the best way to grasp the DataHolder's usage is to see the example at the bottom.
+    """
+    
     def __init__( self ):
         self.Xs = []
         self.As = []        
         self.Es = []
         self.outs = []
-        #TODO store NFS
 
     def assert_mode( self, mode = spektral.layers.ops.modes.BATCH ):
+
+        """
+        For those of you using spektral, this ensures that your data is in the correct shape.
+        Unfortunately this only currently checks X and A.
+        More development is incoming
+        """
+        
         if len(self.Xs) == 0:
-            raise RuntimeError( "DataGator.assert_mode is called before any data is added" )
+            raise RuntimeError( "DataHolder.assert_mode is called before any data is added" )
         tf_As = tf.convert_to_tensor( np.asarray( self.As ) )
         tf_Xs = tf.convert_to_tensor( np.asarray( self.Xs ) )
         assert spektral.layers.ops.modes.autodetect_mode(tf_As,tf_Xs) == mode
 
         
     def append( self, X, A, E, out ):
+
+        """
+        This is the most important method in this class:
+        it gives the data to the dataholder.
+
+        Parameters
+        ----------
+        X: array-like
+            Node features, shape=(N,F)
+        A: array-like
+            Adjacency Matrix, shape=(N,N)
+        E: array-like
+            Edge features, shape=(N,N,S)
+        out: array-like
+            What is the output of your model supposed to be? You decide the shape.
+        """
+        
         #TODO assert shape
         self.Xs.append( np.asarray(X) )
         self.As.append( np.asarray(A) )
@@ -81,12 +112,41 @@ class DataHolder:
         return [x,a,e], o
     
     
-    def save_to_file( self, fileprefix ):
+    def save_to_file( self, fileprefix: str ):
+        """
+        Want to save this data for later?
+        Use this method to cache it to disk.
+
+        Users of this method may be interested in the CachedDataHolderInputGenerator below
+
+        Parameters
+        ----------
+        fileprefix: str
+            Filename prefix for cache.
+            fileprefix="foo/bar" will result in creating "./foo/bar.npz"
+        """
         np.savez_compressed( fileprefix + '.npz', x=np.asarray( self.Xs), a=np.asarray( self.As), e=np.asarray( self.Es), o=np.asarray( self.outs ) )
 
-    def load_from_file( self, fileprefix = None, filename = None ):
-        assert filename == None or fileprefix == None
-        assert filename != None or fileprefix != None        
+    def load_from_file( self, fileprefix: str = None, filename: str = None ):
+        """
+        save_to_file's partner. Use this to load in caches already saved.
+        Please provide either fileprefix or filename, but not both.
+
+        This duplicity may seem silly. The goal for fileprefix is to be consistant with save_to_file (the two "fileprefix" args will be identical strings for both) whereas the goal for filename is to simply list the name of the file verbosely.
+
+        Parameters
+        ----------
+        fileprefix: str
+            Filename prefix for cache.
+            fileprefix="foo/bar" will result in reading "./foo/bar.npz"
+        filename: str
+            Filename for cache.
+            fileprefix="foo/bar.npz" will result in reading "./foo/bar.npz"
+        """
+
+
+        assert filename == None or fileprefix == None, "Please provide either fileprefix or filename"
+        assert filename != None or fileprefix != None, "Please provide either fileprefix or filename"
 
         if filename == None:
             fn = fileprefix + '.npz'
