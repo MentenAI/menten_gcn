@@ -173,12 +173,18 @@ Let's train
 
    import numpy as np
    
-   def make_model( data_maker ):
+   def make_model():
    
        """
        This is just a simple model
        Model building is not the point of this example
        """
+
+       # Be sure to use the same data_maker configuration as before
+       # Otherwise the tensor sizes may not be the same
+       decorators = [ decs.StandardBBGeometry(), decs.Sequence() ]
+       data_maker = menten_gcn.DataMaker( decorators=decorators, edge_distance_cutoff_A=10.0, max_residues=20 )
+
        
        X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
        X1 = EdgeConditionedConv( 30, activation='relu' )([X_in, A_in, E_in])
@@ -202,9 +208,24 @@ Let's train
        validation_data_filenames = npznames[:fifth]
        
        training_generator = menten_gcn.CachedDataHolderInputGenerator( training_data_filenames, cache=False, batch_size=64 )
-       validation_generator = menten_gcn.CachedDataHolderInputGenerator( validation_data_filenames, cache=False, batch_size=64 )
-       model.fit( training_generator, validation_data=validation_generator, epochs=1000, shuffle=False, use_multiprocessing=False, callbacks=callbacks )
+       validation_generator = menten_gcn.CachedDataHolderInputGenerator( validation_data_filenames, cache=False, batch_size=64, autoshuffle=False ) #Note autoshuffle=False is recommended for validation data
+
+       model = make_model()
+       model.fit( training_generator, validation_data=validation_generator, epochs=1000, shuffle=False )
+       model.save( "my_model.h5" )
 
       
        
 >>> python3 train.py ./list*.npz
+>>> ls *.h5
+my_model.h5
+
+Okay we're done!
+So why did we deal with all that effort with caching on disk?
+
+Your mileage may vary,
+but I find that I end up with more data than can fit in my system's memory.
+It's actually reasonably fast to just keep all of the data on disk and read it in each epoch, especially for you SSD users.
+
+We were able to train this entire model with no more than two DataHolders loaded into memory at any given time. Given that we split our data into 100 DataHolders, this is a 50x decrease is memory usage!
+

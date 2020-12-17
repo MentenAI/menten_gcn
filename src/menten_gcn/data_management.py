@@ -6,7 +6,7 @@ import random
 import gc
 
 class DecoratorDataCache:
-    def __init__( self, wrapped_pose: WrappedPose ):
+    def __init__( self, wrapped_pose ):
 
         """
         DecoratorDataCache prevents re-calculating the same node/edge data many times.
