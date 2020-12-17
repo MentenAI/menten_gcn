@@ -73,7 +73,8 @@ def estimate_CB_xyz( C_xyz, N_xyz, CA_xyz ):
 class WrappedPose:
 
     """
-    TODO
+    This is the base class for all pose representations.
+    The internal Menten GCN code will use API listed here
     """
     
     def __init__( self, designable_resids = None ):
@@ -133,6 +134,15 @@ class WrappedPose:
 
     
 class RosettaPoseWrapper( WrappedPose ):
+
+    """
+    This wrapper takes a rosetta pose and requires pyrosetta to be installed
+    
+    Parameters
+    ---------
+    pose: Pose
+        Rosetta pose
+    """    
     
     def __init__( self, pose ):
         WrappedPose.__init__(self)
@@ -195,6 +205,15 @@ class RosettaPoseWrapper( WrappedPose ):
     
 
 class MDTrajPoseWrapper( WrappedPose ):
+
+    """
+    This wrapper takes a MDTraj trajectory and requires MDTraj to be installed
+    
+    Parameters
+    ---------
+    mdtraj_trajectory: Trajectory
+        Pose in MDTraj trajectory format
+    """    
     
     def __init__( self, mdtraj_trajectory ):
         WrappedPose.__init__(self)        
@@ -239,26 +258,9 @@ class MDTrajPoseWrapper( WrappedPose ):
         return 0
     
     def get_phi_psi( self, resid ):
-        top = self.trajectory.topology
-        #assuming chain.index is 0-indexed
         phi_rad = self._get_phi_or_psi_angle( resid, self.phis, self.phi_atoms )
         psi_rad = self._get_phi_or_psi_angle( resid, self.psis, self.psi_atoms )
         return [ phi_rad, psi_rad ]
-        '''
-        if self.resid_is_N_term( resid ):
-            phi_deg = 0.0
-        else:
-            n_nterm_before_resid = top.residue( resid-1 ).chain.index+1
-            phi_deg = self.phis[0,resid-1-n_nterm_before_resid]
-
-        if self.resid_is_C_term( resid ):
-            psi_deg = 0.0
-        else:
-            n_cterm_before_resid = top.residue( resid-1 ).chain.index+1
-            psi_deg = self.psis[0,resid-1-n_cterm_before_resid]
-        return [ math.radians(phi_deg), math.radians(psi_deg) ]
-        '''
-
     
     def get_chi( self, resid, chi_number ):
         #DOESN'T GIVE PROTON CHIs
@@ -275,12 +277,6 @@ class MDTrajPoseWrapper( WrappedPose ):
             elif atom.residue.index > resid-1:
                 return 0, False
         return 0, False
-        #needs to be in radians
-        #TODO UNIT??
-        #assert False #it's way more complicated than this
-        #print( self.chis[chi_number][0].shape )
-        #return self.chis[chi_number][0][ resid-1 ]
-
     
     def get_name1( self, resid ):
         return self.trajectory.topology.residue( resid-1 ).code
@@ -302,15 +298,6 @@ class MDTrajPoseWrapper( WrappedPose ):
 
     def n_residues( self ):
         return self.trajectory.topology.n_residues
-
-    '''
-    def approximate_ALA_CB( self, resid ):
-        #TODO
-        CA_xyz = self.get_atom_xyz( resid, "CA" )        
-        # for now just return CA I guess???
-        return CA_xyz
-        raise NotImplementedError
-    '''
     
     def resid_is_N_term( self, resid ):
         top = self.trajectory.topology        

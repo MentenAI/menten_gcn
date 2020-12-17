@@ -7,3 +7,5 @@ Classes
     DataMaker*
        
     decorators*
+
+    PoseWrappers*
