@@ -31,7 +31,14 @@ Example:
 
    # continue with more layers...
 
+.. automethod:: menten_gcn.util.make_node_mask
 
+.. automethod:: menten_gcn.util.apply_node_mask		
+
+.. automethod:: menten_gcn.util.make_edge_mask
+
+.. automethod:: menten_gcn.util.apply_edge_mask		
+		
 Convolutions
 ############
 

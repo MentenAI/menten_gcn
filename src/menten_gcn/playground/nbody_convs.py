@@ -127,6 +127,11 @@ def make_NENE_XE_conv( X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='
         If you already made an edge mask, feel free to pass it here to save us time.
     X_mask: layer
         If you already made a node mask, feel free to pass it here to save us time.
+
+    Returns
+    ---------
+    - keras layer which is the new X
+    - keras layer which is the new E
     """    
     
     # X: shape=(None,N,F)
@@ -192,6 +197,11 @@ def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list = [64,], Xnfeatures: int, 
         If you already made an edge mask, feel free to pass it here to save us time.
     X_mask: layer
         If you already made a node mask, feel free to pass it here to save us time.
+    
+    Returns
+    ---------
+    - keras layer which is the new X
+    - keras layer which is the new E
     """    
 
 
