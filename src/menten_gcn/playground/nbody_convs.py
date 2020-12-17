@@ -166,7 +166,7 @@ def make_NENE_XE_conv( X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='
 
     return newX, newE
 
-def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list = [64,], Xnfeatures: int, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
+def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
 
     """
     Same idea as make_NENE_XE_conv but considers all possible 3-body interactions. Warning: this will use a ton of memory if your graph is large.
