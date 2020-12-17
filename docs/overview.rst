@@ -47,7 +47,7 @@ Menten GCN will automatically select the residue positions closest in space
 to the focus residues and will use them to build neighbor nodes.
 Menten GCN will also automatically add edges between any two nodes that are close in space.
 
-.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
+.. image:: MentenGCN1.png
 
 Graph Tensors
 #############
@@ -55,12 +55,14 @@ Graph Tensors
 We are basing our format off of Spektral's batch mode.
 
 We have 3 primary parameters in this system:
+
 - "N" is maximum the number of nodes in any graph.
   This includes focus nodes and neighbor nodes
 - "F" is the number of features per node
 - "S" is the number of features per edge  
   
 These parameters are used to define 3 input tensors:
+
 - Tensor "X" holds the node features and is of shape (N,F)
 - Tensor "A" holds the adjacency matrix and is of shape (N,N)
 - Tensor "E" holds the edge features and is of shape (N,N,S)
@@ -72,7 +74,7 @@ have the same value going in both directions.
 Other edge tensors are asymmetric (like relative geometries) so they
 will have different values for each of the two slots in "E".
 
-.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
+.. image:: _images/MentenGCN2.png
 
 Usage
 #####
@@ -80,7 +82,7 @@ Usage
 This workflow may be overwhelming but keep in mind that this is the entire training process.
 Let's walk through this slowly:
 
-.. image:: https://render.githubusercontent.com/view/pdf?color_mode=light&enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4d656e74656e41492f6d656e74656e5f67636e2f666435653537613864353366363734626164306132366430623762323939386362333138323134642f646f63732f5f696d616765732f4d656e74656e47434e312e706466&path=docs%2F_images%2FMentenGCN1.pdf&repository_id=321697718
+.. image:: MentenGCN3.png
 
 #. Start by loading your pose in python using any of our supported packages.
   #. Just Rosetta and MDTraj right now. Get in touch if you want more!
