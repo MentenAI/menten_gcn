@@ -7,9 +7,9 @@ That said, here are some utilities that we found useful
 Masks
 #####
 
-.. automethod:: menten_gcn.util.make_and_apply_node_mask
+.. autofunction:: menten_gcn.util.make_and_apply_node_mask
 
-.. automethod:: menten_gcn.util.make_and_apply_edge_mask
+.. autofunction:: menten_gcn.util.make_and_apply_edge_mask
 
 Example:
 
@@ -31,17 +31,17 @@ Example:
 
    # continue with more layers...
 
-.. automethod:: menten_gcn.util.make_node_mask
+.. autofunction:: menten_gcn.util.make_node_mask
 
-.. automethod:: menten_gcn.util.apply_node_mask		
+.. autofunction:: menten_gcn.util.apply_node_mask		
 
-.. automethod:: menten_gcn.util.make_edge_mask
+.. autofunction:: menten_gcn.util.make_edge_mask
 
-.. automethod:: menten_gcn.util.apply_edge_mask		
+.. autofunction:: menten_gcn.util.apply_edge_mask		
 		
 Convolutions
 ############
 
-.. automethod:: menten_gcn.playground.make_NENE_XE_conv
+.. autofunction:: menten_gcn.playground.make_NENE_XE_conv
 
-.. automethod:: menten_gcn.playground.make_NEENEENEE_XE_conv
+.. autofunction:: menten_gcn.playground.make_NEENEENEE_XE_conv
