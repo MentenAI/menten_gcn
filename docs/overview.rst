@@ -47,7 +47,7 @@ Menten GCN will automatically select the residue positions closest in space
 to the focus residues and will use them to build neighbor nodes.
 Menten GCN will also automatically add edges between any two nodes that are close in space.
 
-.. image:: MentenGCN1.pdf
+.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN1.pdf
 
 Graph Tensors
 #############
@@ -72,7 +72,7 @@ have the same value going in both directions.
 Other edge tensors are asymmetric (like relative geometries) so they
 will have different values for each of the two slots in "E".
 
-.. image:: MentenGCN2.pdf
+.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN2.pdf
 
 Usage
 #####
@@ -80,7 +80,7 @@ Usage
 This workflow may be overwhelming but keep in mind that this is the entire training process.
 Let's walk through this slowly:
 
-.. image:: MentenGCN3.pdf
+.. image:: https://github.com/MentenAI/menten_gcn/blob/main/docs/_images/MentenGCN3.pdf
 
 #. Start by loading your pose in python using any of our supported packages.
   #. Just Rosetta and MDTraj right now. Get in touch if you want more!
