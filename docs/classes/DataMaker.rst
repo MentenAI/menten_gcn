@@ -1,7 +1,7 @@
 DataMaker
 ==========
 
-.. image:: _images/MentenGCN3.png
+.. image:: ../_images/MentenGCN3.png
 
 The DataMaker is the main character of Menten GCN.
 It has the job of applying decorators to poses and organizing them as tensors.
