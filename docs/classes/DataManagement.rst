@@ -96,14 +96,17 @@ We have tons of data (10000 pdb files, for example) local on disk:
 >>> ls inputs/*
 inputs/00001.pdb inputs/00002.pdb ... inputs/10000.pdb
 
+Keep in mind that we're storing a single data point for every residue of these poses.
+So if the average pose has 150 residues, we will end up with 10000 * 150 = 1.5 Million training points.
 This will take a lot of memory to hold.
-We should group this into, say, batches of 100 poses each
+We should group this into, say, batches of 50 poses each
 
->>> ls inputs/* | shuf | split -dl 100 - list
+>>> ls inputs/* | shuf | split -dl 50 - list
 >>> ls ./list*
-list001 list002 ... list100
+list001 list002 ... list200
+>>> # 200 makes sense right? 10000 / 50 = 200
 >>> wc -l list001
-100
+50
 >>> head list001
 inputs/03863.pdb
 inputs/00134.pdb
@@ -164,7 +167,7 @@ We're then going to feed each list into:
 >>> ls ./list* | xargs -n1 python3 make_data.py
 >>> # ^ run xargs -n1 -P N python3 make_data.py to run this in parallel on N processors
 >>> ls ./list*.npz
-list001.npz list002.npz ... list100.npz
+list001.npz list002.npz ... list200.npz
 
 Okay now we have all of our training data on disk.
 Let's train
@@ -236,5 +239,5 @@ Your mileage may vary,
 but I find that I end up with more data than can fit in my system's memory.
 It's actually reasonably fast to just keep all of the data on disk and read it in each epoch, especially for you SSD users.
 
-We were able to train this entire model with no more than two DataHolders loaded into memory at any given time. Given that we split our data into 100 DataHolders, this is a 50x decrease is memory usage!
+We were able to train this entire model with no more than two DataHolders loaded into memory at any given time. Given that we split our data into 200 DataHolders, this is a 100x decrease is memory usage!
 
