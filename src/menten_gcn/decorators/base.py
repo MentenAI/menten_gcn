@@ -5,7 +5,7 @@ from menten_gcn.wrappers import *
 import menten_gcn
 
 class DecoratorDataCache:
-    def __init__( self, wrapped_pose: menten_gcn.WrappedPose ):
+    def __init__( self, wrapped_pose: WrappedPose ):
 
         """
         DecoratorDataCache prevents re-calculating the same node/edge data many times.
