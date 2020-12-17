@@ -8,10 +8,6 @@ from menten_gcn.wrappers import *
 
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
-#import scipy
-#from scipy import sparse as sp
-
-#import spektral
 import tensorflow as tf
 from tensorflow.keras.layers import Input
         
@@ -35,9 +31,6 @@ class DataMaker:
     """
     
     def __init__( self, decorators: list, edge_distance_cutoff_A: float, max_residues: int, exclude_bbdec: bool = False, nbr_distance_cutoff_A: float=None):
-        '''
-        TODO
-        '''
 
         self.bare_bones_decorator = BareBonesDecorator()
         self.exclude_bbdec = exclude_bbdec
@@ -56,34 +49,40 @@ class DataMaker:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
 
     def get_N_F_S( self ):
-        '''
-        TODO
-        '''
+
+        """
+        Returns
+        ----------
+        N: int
+            Maximum number of nodes in the graph
+        F: int
+            Number of features for each node
+        S: int
+            Number of features for each edge
+        """
+
         N = self.max_residues
         F = self.all_decs.n_node_features()
         S = self.all_decs.n_edge_features()
         return N, F, S
 
     def get_node_details( self ):
-        '''
-        TODO
-        '''
         node_details = self.all_decs.describe_node_features()
         assert len( node_details ) == self.all_decs.n_node_features()
         return node_details
 
     def get_edge_details( self ):
-        '''
-        TODO
-        '''
         edge_details = self.all_decs.describe_edge_features()
         assert len( edge_details ) == self.all_decs.n_edge_features()
         return edge_details
         
     def summary( self ):
-        '''
-        TODO
-        '''
+        """
+        Print a summary of the graph decorations to console.
+        The goal of this summary is to describe every feature with enough detail to be able to be reproduced externally.
+        This will also print any relevant citation information for individual decorators.
+        """
+        
         node_details = self.get_node_details()
         edge_details = self.get_edge_details()
 
@@ -107,20 +106,29 @@ class DataMaker:
         if not self.exclude_bbdec:
             print( "Note that the BareBonesDecorator is included by default and does not need to be explicitly provided" )
 
-        print( "\nPlease cite: TODO\n" )
+        print( "\nPlease cite: (no one yet)\n" )
 
-    def make_data_cache( self, wrapped_pose ):
-        '''
-        TODO
-        '''
+    def make_data_cache( self, wrapped_pose: WrappedPose ):
+
+        """
+        Data caches save time by re-using tensors for nodes and edges you have aleady calculated. This usually gives me a 5-10x speedup but your mileage may vary.
+
+        Parameters
+        ----------
+        wrapped_pose: WrappedPose
+            Each pose needs a different cache. Please give us the pose that corresponds to this cache
+        
+        Returns
+        -------
+        cache: DecoratorDataCache
+            A data cache that can be passed to generate_input and generate_input_for_resid.
+        """        
+
         cache = DecoratorDataCache( wrapped_pose )
         self.all_decs.cache_data( wrapped_pose, cache.dict_cache )
         return cache
         
-    def _calc_nbrs( self, wrapped_pose, focused_resids, legal_nbrs=None ):
-        '''
-        TODO
-        '''
+    def _calc_nbrs( self, wrapped_pose: WrappedPose, focused_resids: list, legal_nbrs: list = None ):
         #includes focus in subset
 
         if legal_nbrs is None:
@@ -157,10 +165,7 @@ class DataMaker:
             final_resids.append( n[1] )
         return final_resids
 
-    def _get_edge_data_for_pair( self, wrapped_pose, resid_i, resid_j, data_cache=None ):
-        '''
-        TODO
-        '''
+    def _get_edge_data_for_pair( self, wrapped_pose: WrappedPose, resid_i: int, resid_j: int, data_cache=None ):
         if data_cache.edge_cache is not None:
             if resid_j in data_cache.edge_cache[resid_i]:
                 assert resid_i in data_cache.edge_cache[resid_j]
@@ -177,10 +182,7 @@ class DataMaker:
             data_cache.edge_cache[resid_j][resid_i] = f_ji
         return f_ij,f_ji
     
-    def _calc_adjacency_matrix_and_edge_data( self, wrapped_pose, all_resids, data_cache=None ):
-        '''
-        TODO
-        '''
+    def _calc_adjacency_matrix_and_edge_data( self, wrapped_pose: WrappedPose, all_resids: list, data_cache=None ):
         N, F, S = self.get_N_F_S()
         A_dense = np.zeros( shape=[N,N])
         E_dense = np.zeros( shape=[N,N,S])
@@ -202,10 +204,7 @@ class DataMaker:
 
         return A_dense, E_dense
     
-    def _get_node_data( self, wrapped_pose, resids, data_cache ):
-        '''
-        TODO
-        '''
+    def _get_node_data( self, wrapped_pose: WrappedPose, resids: list, data_cache ):
         N, F, S = self.get_N_F_S()
         X = np.zeros( shape=[N,F] )
         index = -1
@@ -219,8 +218,6 @@ class DataMaker:
                         new_bbdec = self.bare_bones_decorator.calc_node_features( wrapped_pose, resid )
                         assert len( new_bbdec ) == 1
                         X[ index ][ 0 ] = new_bbdec[ 0 ]
-                        #print( "REDO", index, resid, new_bbdec[ 0 ] )
-                        #print( X )
                     continue
 
             n = self.all_decs.calc_node_features( wrapped_pose, resid )
@@ -239,25 +236,58 @@ class DataMaker:
         return X
     
     def generate_XAE_input_tensors( self ):
-        '''
-        TODO
-        '''
+        """
+        This is just a safe way to create the input layers for your keras model with confidence that they are the right shape
+        
+        Returns
+        -------
+        X_in: Layer
+            Node Feature Input
+        A_in: Layer
+            Adjacency Matrix Input
+        E_in: Layer
+            Edge Feature Input
+        """        
+        
         N, F, S = self.get_N_F_S()
         X_in = Input( shape=(N,F), name='X_in')
         A_in = Input( shape=(N,N), sparse=False, name='A_in')
         E_in = Input( shape=(N,N,S), name='E_in')
         return X_in, A_in, E_in
     
-    def generate_input( self, wrapped_pose, focused_resids, data_cache=None, legal_nbrs=None ):
-        '''
-        TODO
-        '''
+    def generate_input( self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache=None, legal_nbrs: list=None ):
+
+        """
+        This is does the actual work of creating a graph and representing it as tensors
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resids: list of ints
+            Which resids are the focus residues? We use Rosetta conventions here, so the first residue is resid #1, second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details. It is very important that this cache was created from this pose
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+        
+        Returns
+        -------
+        X: ndarray
+            Node Features
+        A: ndarray
+            Adjacency Matrix
+        E: ndarray
+            Edge Feature
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """        
+
         if data_cache is None:
             data_cache = NullDecoratorDataCache()
             
         self.bare_bones_decorator.set_focused_resids( focused_resids )
         all_resids = self._calc_nbrs( wrapped_pose, focused_resids, legal_nbrs=legal_nbrs )
-        #all_resids.sort() #Why???
         n_nodes = len( all_resids )
         
         # Node Data
@@ -266,12 +296,33 @@ class DataMaker:
         # Adjacency Matrix and Edge Data
         A, E = self._calc_adjacency_matrix_and_edge_data( wrapped_pose, all_resids, data_cache=data_cache )
 
-        #TODO reorder
-        #TODO replace NAN with, what, -10?
         return X, A, E, all_resids
 
-    def generate_input_for_resid( self, wrapped_pose, resid, data_cache=None, legal_nbrs=None ):
-        '''
-        TODO
-        '''
-        return self.generate_input( wrapped_pose, focused_resids=[resid], data_cache=data_cache, legal_nbrs=legal_nbrs )
+    def generate_input_for_resid( self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache=None, legal_nbrs: list = None ):
+
+        """
+        Only have 1 focus resid? Then this is sliiiiiiightly cleaner than generate_input(). It's completely debatable if this is even worthwhile
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resid: inr
+            Which resid is the focus residue? We use Rosetta conventions here, so the first residue is resid #1, second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details. It is very important that this cache was created from this pose
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+        
+        Returns
+        -------
+        X: ndarray
+            Node Features
+        A: ndarray
+            Adjacency Matrix
+        E: ndarray
+            Edge Feature
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """        
+        return self.generate_input( wrapped_pose, focus_resids=[resid], data_cache=data_cache, legal_nbrs=legal_nbrs )
