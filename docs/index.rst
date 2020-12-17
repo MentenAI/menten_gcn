@@ -8,6 +8,7 @@ Contents
    overview
    usage
    classes/index
+   tools/index
    readme
    installation
    contributing

@@ -4,43 +4,6 @@ from tensorflow.keras.layers import *
 
 from menten_gcn.util import *
 
-#Does not support Sparse
-def make_NEN_edge_conv( X, A, E, nfeatures, activation='relu', E_mask = None ):
-    # X: shape=(None,N,F)
-    # A: shape=(None,N,N)
-    # E: shape=(None,N,N,S)
-
-    assert len( X.shape ) == 3
-    assert len( A.shape ) == 3
-    assert len( E.shape ) == 4
-
-    # Xi: shape=(None,N,1,F) -> shape=(None,N,N,F)
-    # Xj: shape=(None,1,N,F) -> shape=(None,N,N,F)
-
-    Xi_shape = [ X.shape[1], 1, X.shape[2] ]
-    Xj_shape = [ 1, X.shape[1], X.shape[2] ]
-
-    Xi = Reshape( Xi_shape, input_shape=X.shape )( X )
-    Xj = Reshape( Xj_shape, input_shape=X.shape )( X )
-
-    #Xi = Concatenate( axis=2 )( [Xi for _ in range( 0, X.shape[1] )] )
-    Xi = tf.keras.backend.repeat_elements( Xi, rep=X.shape[1], axis=2 )
-    #Xj = Concatenate( axis=1 )( [Xj for _ in range( 0, X.shape[1] )] )
-    Xj = tf.keras.backend.repeat_elements( Xj, rep=X.shape[1], axis=1 )
-
-    # C1: shape=(None,N,N,S+2F)
-    # C2: shape=(None,N,N,nfeatures)
-
-    C1 = Concatenate(axis=-1)([Xi,E,Xj])
-
-    C2 = Conv2D(filters=nfeatures, kernel_size=1, activation=activation )( C1 )
-
-    if E_mask == None:
-        E_mask = make_edge_mask( A )
-    C3 = apply_edge_mask( E=C2, E_mask=E_mask )
-
-    return C3
-
 def make_NENE( X, E ):
     assert len( X.shape ) == 3
     assert len( E.shape ) == 4
@@ -51,9 +14,7 @@ def make_NENE( X, E ):
     Xi = Reshape( Xi_shape, input_shape=X.shape )( X )
     Xj = Reshape( Xj_shape, input_shape=X.shape )( X )
 
-    #Xi = Concatenate( axis=2 )( [Xi for _ in range( 0, X.shape[1] )] )
     Xi = tf.keras.backend.repeat_elements( Xi, rep=X.shape[1], axis=2 )
-    #Xj = Concatenate( axis=1 )( [Xj for _ in range( 0, X.shape[1] )] )
     Xj = tf.keras.backend.repeat_elements( Xj, rep=X.shape[1], axis=1 )
 
     # C1: shape=(None,N,N,S+2F)
@@ -134,7 +95,40 @@ def make_NEENEENEE_mask( E_mask ):
     return Multiply()([ Ei, Ej, Ek ])
 
 
-def make_NENE_XE_conv( X, A, E, Xnfeatures, Enfeatures, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
+def make_NENE_XE_conv( X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
+
+    """
+    We find that current GCN layers undervalue the Edge tensors.
+    Not only does this layer use them as input,
+    it also updates the values of Edge tensors.
+
+    Disclaimer: this isn't actually a layer at the moment.
+    It's a method that hacks layers together and returns the result.
+
+    Parameters
+    ---------
+    X: layer
+        Node features
+    A: layer
+        Adjaceny matrix
+    E: layer
+        Edge features
+    Xnfeatures: list of 2 ints
+        How many features do you want each node to end up with?
+        At the moment this asks you to give two values because there is an intermediate layer.
+        Xnfeatures=[64,32] will end up with 32 values for each Node.
+    Enfeatures: int
+        How many features do you want each edge to end up with?
+    Xactivation:
+        Which activation function should be applied to the final X?
+    Eactivation:
+        Which activation function should be applied to the final E?
+    E_mask: layer
+        If you already made an edge mask, feel free to pass it here to save us time.
+    X_mask: layer
+        If you already made a node mask, feel free to pass it here to save us time.
+    """    
+    
     # X: shape=(None,N,F)
     # A: shape=(None,N,N)
     # E: shape=(None,N,N,S)
@@ -167,7 +161,40 @@ def make_NENE_XE_conv( X, A, E, Xnfeatures, Enfeatures, Xactivation='relu', Eact
 
     return newX, newE
 
-def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures, Xnfeatures, Enfeatures, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
+def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list = [64,], Xnfeatures: int, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask = None, X_mask = None ):
+
+    """
+    Same idea as make_NENE_XE_conv but considers all possible 3-body interactions. Warning: this will use a ton of memory if your graph is large.
+
+    Disclaimer: this isn't actually a layer at the moment.
+    It's a method that hacks layers together and returns the result.
+
+    Parameters
+    ---------
+    X: layer
+        Node features
+    A: layer
+        Adjaceny matrix
+    E: layer
+        Edge features
+    Tnfeatures: list of ints
+        This time, you get to decide the number of middle layers.
+        Make this list as long as you want
+    Xnfeatures: int
+        How many features do you want each node to end up with?
+    Enfeatures: int
+        How many features do you want each edge to end up with?
+    Xactivation:
+        Which activation function should be applied to the final X?
+    Eactivation:
+        Which activation function should be applied to the final E?
+    E_mask: layer
+        If you already made an edge mask, feel free to pass it here to save us time.
+    X_mask: layer
+        If you already made a node mask, feel free to pass it here to save us time.
+    """    
+
+
     # X: shape=(None,N,F)
     # A: shape=(None,N,N)
     # E: shape=(None,N,N,S)
