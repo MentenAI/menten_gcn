@@ -1,6 +1,7 @@
 from menten_gcn import *
 from menten_gcn.decorators import *
 from menten_gcn.playground import *
+from menten_gcn.util import *
 
 import fileinput
 import spektral
@@ -134,3 +135,86 @@ def test_NEE3():
     NEE3_test_mask( npX, npA, npE, N, F, S )
     observe_NEE3( npX, npA, npE, N, F, S )
 
+
+def test_masks():
+    max_res=3
+
+    #PREP MODEL
+    decorators = [ SimpleBBGeometry() ]
+    data_maker = DataMaker( decorators=decorators, edge_distance_cutoff_A=10.0, max_residues=max_res )
+    data_maker.summary()
+
+    N, F, S = data_maker.get_N_F_S()
+
+    X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
+
+    X_mask = make_node_mask(A_in)
+    E_mask = make_edge_mask(A_in)
+
+    out1 = make_and_apply_node_mask( X=X_in, A=A_in )
+    out2 = make_and_apply_edge_mask( E=E_in, A=A_in )
+
+    model = Model(inputs=[X_in,A_in,E_in], outputs=[X_mask,E_mask,out1,out2])
+    model.compile(optimizer='adam', loss='mean_squared_error' )
+
+    testX = [[[ 0.,         -1.21597895,  1.94387676],
+              [ 1.,          2.01919905, -0.10534814],
+              [ 2.,          4.,          6.        ]]]
+    testA = [[[0., 1., 0.],
+              [1., 0., 0.],
+              [0., 0., 0.]]]
+    testE = [[[[1.,         2.        ],
+               [3.1,         4.1],
+               [5.,         6.        ],],
+
+              [[7.1,        8.1],
+               [9.,         1.        ],
+               [9.,         2.        ],],
+
+              [[8.,         3.        ],
+               [7.,         4.        ],
+               [6.,         5.        ],],]]
+
+    testX = np.asarray( testX ).astype('float32')
+    testA = np.asarray( testA ).astype('float32')
+    testE = np.asarray( testE ).astype('float32')
+
+    expected_Xmask = [[[1.],
+                       [1.],
+                       [0.]]]
+
+    expected_Emask = [[[[0.],
+                        [1.],
+                        [0.]],
+
+                       [[1.],
+                        [0.],
+                        [0.]],
+
+                       [[0.],
+                        [0.],
+                        [0.]]]]
+
+    expected_out1 = [[[ 0.        , -1.215979  ,  1.9438767 ],
+                      [ 1.        ,  2.0191991 , -0.10534814],
+                      [ 0.        ,  0.        ,  0.        ]]]
+
+    expected_out2 = [[[[0. , 0. ],
+                       [3.1, 4.1],
+                       [0. , 0. ]],
+
+                      [[7.1, 8.1],
+                       [0. , 0. ],
+                       [0. , 0. ]],
+
+                      [[0. , 0. ],
+                       [0. , 0. ],
+                       [0. , 0. ]]]]
+    
+    test_out = model.predict([testX,testA,testE])
+    equal = np.testing.assert_almost_equal
+    equal( np.asarray(expected_Xmask), test_out[0], decimal=2 )
+    equal( np.asarray(expected_Emask), test_out[1], decimal=2 )
+    equal( np.asarray(expected_out1),  test_out[2], decimal=2 )
+    equal( np.asarray(expected_out2),  test_out[3], decimal=2 )
+    
