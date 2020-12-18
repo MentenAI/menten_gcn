@@ -6,3 +6,4 @@ Examples
 
     SASA*
        
+    BB2AA*
