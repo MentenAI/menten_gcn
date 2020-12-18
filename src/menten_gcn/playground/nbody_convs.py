@@ -76,15 +76,15 @@ def make_NEENEENEE( X, E ):
     Xk = tf.keras.backend.repeat_elements( Xk, rep=N, axis=1 )
     Xk = tf.keras.backend.repeat_elements( Xk, rep=N, axis=2 )
 
-    print( Xi.shape, Xj.shape, Xk.shape )
+    #print( Xi.shape, Xj.shape, Xk.shape )
     Ei, Ej, Ek = expand_E( E )
     Eprime = tf.transpose( E, perm=[0,2,1,3] )
     Eti, Etj, Etk = expand_E( Eprime )
     
     C = Concatenate(axis=-1)([Xi,Ei,Eti,Xj,Ej,Etj,Xk,Ek,Etk])
-    print( C.shape )
+    #print( C.shape )
     target_shape = (None,N,N,N,(3*F)+(6*S))
-    print( target_shape )
+    #print( target_shape )
     for i in range( 1, 5 ):
         assert( C.shape[i] == target_shape[i] )
     return C, Eprime
@@ -232,21 +232,21 @@ def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeatur
     Temp = Multiply()([ Temp, mask ])
     
     Xi = tf.keras.backend.sum( Temp, axis=[-4,-3], keepdims=False )
-    print( Xi.shape )
+    #print( Xi.shape )
     Xj = tf.keras.backend.sum( Temp, axis=[-4,-2], keepdims=False )
     Xk = tf.keras.backend.sum( Temp, axis=[-3,-2], keepdims=False )
     X = Concatenate(axis=-1)([X,Xi,Xj,Xk]) #Activation here?
     newX = Conv1D(filters=Xnfeatures,kernel_size=1,activation=Xactivation)(X)
 
     Ei = tf.keras.backend.sum( Temp, axis=[-4], keepdims=False )
-    print( Ei.shape )
+    #print( Ei.shape )
     Ek = tf.keras.backend.sum( Temp, axis=[-3], keepdims=False )
     Ej = tf.keras.backend.sum( Temp, axis=[-2], keepdims=False )
     Eti = tf.transpose( Ei, perm=[0,2,1,3] )
     Etj = tf.transpose( Ej, perm=[0,2,1,3] )
     Etk = tf.transpose( Ek, perm=[0,2,1,3] )
     E = Concatenate(axis=-1)([E,Et,Ei,Eti,Ej,Etj,Ek,Etk])    
-    print( E.shape )
+    #print( E.shape )
     newE = Conv2D(filters=Enfeatures, kernel_size=1, activation=Eactivation )( E )
 
     newE = apply_edge_mask( E=newE, E_mask=E_mask )
@@ -255,10 +255,10 @@ def make_NEENEENEE_XE_conv( X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeatur
 
 
 def add_n_edges_for_node( X, A ):
-    print( A.shape )
+    #print( A.shape )
     n_edges = tf.keras.backend.mean( A, axis=-1, keepdims=False )
-    print( n_edges.shape )
+    #print( n_edges.shape )
     n_edges = Reshape( (X.shape[1], 1) )( n_edges )
-    print( n_edges.shape )
+    #print( n_edges.shape )
     newX = Concatenate(axis=-1)([X,n_edges])
     return newX
