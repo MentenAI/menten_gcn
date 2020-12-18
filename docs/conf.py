@@ -37,7 +37,7 @@ copyright = '{0}, {1}'.format(year, author)
 version = release = '0.0.0'
 
 pygments_style = 'trac'
-templates_path = ['.', '_templates']
+templates_path = ['_templates']
 extlinks = {
     'issue': ('https://github.com/MentenAI/menten_gcn/issues/%s', '#'),
     'pr': ('https://github.com/MentenAI/menten_gcn/pull/%s', 'PR #'),
