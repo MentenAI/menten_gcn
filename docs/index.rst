@@ -1,3 +1,12 @@
+============
+Installation
+============
+
+At the command line::
+
+    pip install menten-gcn
+
+
 ========
 Contents
 ========
@@ -6,11 +15,9 @@ Contents
    :maxdepth: 3
 
    overview
-   usage
    classes/index
    tools/index
    readme
-   installation
    contributing
    authors
 
