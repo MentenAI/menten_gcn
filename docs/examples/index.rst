@@ -7,3 +7,5 @@ Examples
     SASA*
        
     BB2AA*
+
+    CustomDec*
