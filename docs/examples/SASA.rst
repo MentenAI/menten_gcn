@@ -2,6 +2,7 @@ SASA Example
 ============
 
 Let's say we want to create a model that predicts the solvent accessible surface area of a residue, given the residue and its surroundings.
+A single pass of the network will only predict one residue (the focus residue) and will include up to 19 neighbor nodes.
 
 We have tons of data (10000 pdb files, for example) local on disk:
 

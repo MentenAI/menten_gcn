@@ -1,7 +1,8 @@
 Backbone-to-Seq
 ===============
 
-Okay here our goal is to predict the native amino acid for a given position based solely on the backbone
+Okay here our goal is to predict the native amino acid for a given position based solely on the backbone.
+A single pass of the network will only predict one residue (the focus residue) and will include up to 29 neighbor nodes.
 
 Like the other example, let's say
 we have 10000 pdb files on disk for training
