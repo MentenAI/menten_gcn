@@ -77,7 +77,8 @@ class RosettaResidueSelectorDecorator(Decorator):
 
     def describe_node_features(self):
         return [
-            "1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: " + self.description,
+            "1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: " +
+            self.description,
         ]
 
 

@@ -97,10 +97,12 @@ class SequenceSeparation(Decorator):
     def describe_edge_features(self):
         if self.ln:
             return [
-                "Natural Log of the sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)", ]
+                "Natural Log of the sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)",
+            ]
         else:
             return [
-                "The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)", ]
+                "The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)",
+            ]
 
 
 class SameChain(Decorator):
