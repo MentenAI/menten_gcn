@@ -2,36 +2,37 @@ import numpy as np
 import math
 
 from menten_gcn.decorators.base import Decorator
-        
-class Sequence( Decorator ):
+
+
+class Sequence(Decorator):
 
     """
     One-hot encode the canonical amino acid identity on each node.
-    
+
     - 20 Node Features
     - 0 Edge Features
-    """    
-    
-    def get_version_name( self ):
+    """
+
+    def get_version_name(self):
         return "Sequence"
-    
-    def __init__( self ):
+
+    def __init__(self):
         pass
-    
-    def n_node_features( self ):
+
+    def n_node_features(self):
         return 20
 
-    def calc_node_features( self, wrapped_protein, resid, dict_cache=None ):
-        name = wrapped_protein.get_name1( resid )
+    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+        name = wrapped_protein.get_name1(resid)
         AAs = "ACDEFGHIKLMNPQRSTVWY"
-        onehot = np.zeros( 20 )
-        for i in range( 0, 20 ):
+        onehot = np.zeros(20)
+        for i in range(0, 20):
             if name == AAs[i]:
                 onehot[i] = 1.0
                 break
         return onehot
 
-    def describe_node_features( self ):
+    def describe_node_features(self):
         return [
             "1 if residue is A, 0 otherwise",
             "1 if residue is C, 0 otherwise",
@@ -52,46 +53,46 @@ class Sequence( Decorator ):
             "1 if residue is T, 0 otherwise",
             "1 if residue is V, 0 otherwise",
             "1 if residue is W, 0 otherwise",
-            "1 if residue is Y, 0 otherwise",            
-            ]
-    
-    def n_edge_features( self ):
+            "1 if residue is Y, 0 otherwise",
+        ]
+
+    def n_edge_features(self):
         return 0
 
 
-class DesignableSequence( Decorator ):
+class DesignableSequence(Decorator):
 
     """
     One-hot encode the canonical amino acid identity on each node,
     with a 21st value for residues that are not yet
     assigned an amino acid identity.
-    
+
     Note: requires you to call WrappedPose.set_designable_resids first
-    
+
     - 21 Node Features
     - 0 Edge Features
-    """    
-    
-    def get_version_name( self ):
+    """
+
+    def get_version_name(self):
         return "DesignableSequence"
-        
-    def n_node_features( self ):
+
+    def n_node_features(self):
         return 21
 
-    def calc_node_features( self, wrapped_protein, resid, dict_cache=None ):
-        onehot = np.zeros( 21 )
-        if wrapped_protein.resid_is_designable( resid ):
-            onehot[ 20 ] = 1.0
+    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+        onehot = np.zeros(21)
+        if wrapped_protein.resid_is_designable(resid):
+            onehot[20] = 1.0
         else:
-            name = wrapped_protein.get_name1( resid )
+            name = wrapped_protein.get_name1(resid)
             AAs = "ACDEFGHIKLMNPQRSTVWY"
-            for i in range( 0, 20 ):
+            for i in range(0, 20):
                 if name == AAs[i]:
                     onehot[i] = 1.0
                     break
         return onehot
 
-    def describe_node_features( self ):
+    def describe_node_features(self):
         return [
             "1 if residue is A and not designable, 0 otherwise",
             "1 if residue is C and not designable, 0 otherwise",
@@ -113,10 +114,8 @@ class DesignableSequence( Decorator ):
             "1 if residue is V and not designable, 0 otherwise",
             "1 if residue is W and not designable, 0 otherwise",
             "1 if residue is Y and not designable, 0 otherwise",
-            "1 if residue is designable, 0 otherwise",            
-            ]
-    
-    def n_edge_features( self ):
-        return 0
+            "1 if residue is designable, 0 otherwise",
+        ]
 
-    
+    def n_edge_features(self):
+        return 0
