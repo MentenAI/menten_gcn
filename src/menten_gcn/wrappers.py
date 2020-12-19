@@ -17,16 +17,15 @@ try:
 except:
     bp = None
 '''
-    
-#TODO just do this all the time for CB
+
 def estimate_CB_xyz( C_xyz, N_xyz, CA_xyz ):
-    #ICOOR_INTERNAL    CB  -122.800000   69.625412    1.521736   CA    N     C
+    # ICOOR_INTERNAL   CB  -122.800000   69.625412    1.521736   CA    N   C
     '''
     That is, CB is found 1.52 Ang from CA, at an angle of 70 degrees from the CA-N line, and a dihedral of -123 degrees for CB-CA-N-C.
     -ROCCO
     '''
 
-    #Credit to Rohit Bhattacharya from https://github.com/rbhatta8/protein-design/blob/master/nerf.py
+    # Credit to Rohit Bhattacharya from https://github.com/rbhatta8/protein-design/blob/master/nerf.py
     '''
     Nerf method of finding 4th coord (d)
     in cartesian space
@@ -39,14 +38,14 @@ def estimate_CB_xyz( C_xyz, N_xyz, CA_xyz ):
     d : tuple of (x, y, z) in cartesian space
     '''
 
-    l = 1.521736
+    length = 1.521736
     theta = 69.625412
     chi = -122.800000
 
     a = C_xyz
     b = N_xyz
     c = CA_xyz
-    
+
     # calculate unit vectors AB and BC
     ab_unit = (b-a)/np.linalg.norm(b-a)
     bc_unit = (c-b)/np.linalg.norm(c-b)
@@ -65,7 +64,7 @@ def estimate_CB_xyz( C_xyz, N_xyz, CA_xyz ):
     chi = np.pi/180 * chi
 
     # calculate coord pre rotation matrix
-    d2 = [-l*np.cos(theta), l*np.sin(theta)*np.cos(chi), l*np.sin(theta)*np.sin(chi)]
+    d2 = [-length*np.cos(theta), length*np.sin(theta)*np.cos(chi), length*np.sin(theta)*np.sin(chi)]
 
     # calculate with rotation as our final output
     return c + np.dot(M, d2)
@@ -76,7 +75,7 @@ class WrappedPose:
     This is the base class for all pose representations.
     The internal Menten GCN code will use API listed here
     """
-    
+
     def __init__( self, designable_resids = None ):
         self.CB_estimates = None
         self.legal_nbrs = None
@@ -84,18 +83,18 @@ class WrappedPose:
 
     def get_legal_nbrs( self ):
         return self.legal_nbrs
-        
+
     def get_atom_xyz( self, resid, atomname ):
         raise NotImplementedError
 
     def get_phi_psi( self, resid ):
-        #radians
+        # radians
         raise NotImplementedError
 
     def get_chi( self, resid, chi_number ):
-        #radians
+        # radians
         raise NotImplementedError
-    
+
     def get_name1( self, resid ):
         raise NotImplementedError
 
@@ -116,34 +115,35 @@ class WrappedPose:
 
     def set_designable_resids( self, resids ):
         self.designable_resids = resids
-    
+
     def resid_is_designable( self, resid ):
         assert self.designable_resids is not None
         return resid in self.designable_resids
 
     def approximate_ALA_CB( self, resid ):
         assert hasattr( self, 'CB_estimates' )
-        #if not hasattr( self, 'CB_estimates' ):
+        # if not hasattr( self, 'CB_estimates' ):
         if self.CB_estimates is None:
-            #Lazy initialization
+            # Lazy initialization
             self.CB_estimates = [ None for i in range( 0, self.n_residues() + 1 )]
         elif self.CB_estimates[ resid ] is not None:
             return self.CB_estimates[ resid ]
-        self.CB_estimates[ resid ] = estimate_CB_xyz( self.get_atom_xyz( resid, "C" ), self.get_atom_xyz( resid, "N" ), self.get_atom_xyz( resid, "CA" ) )
+        get_xyz = self.get_atom_xyz
+        self.CB_estimates[ resid ] = estimate_CB_xyz( get_xyz( resid, "C" ), get_xyz( resid, "N" ), get_xyz( resid, "CA" ) )
         return self.CB_estimates[ resid ]
 
-    
+
 class RosettaPoseWrapper( WrappedPose ):
 
     """
     This wrapper takes a rosetta pose and requires pyrosetta to be installed
-    
+
     Parameters
     ---------
     pose: Pose
         Rosetta pose
-    """    
-    
+    """
+
     def __init__( self, pose ):
         WrappedPose.__init__(self)
         if rosetta is None:
@@ -151,15 +151,15 @@ class RosettaPoseWrapper( WrappedPose ):
             raise ImportError
         assert isinstance( pose, rosetta.core.pose.Pose )
         self.pose = pose
-    
+
     def get_atom_xyz( self, resid, atomname ):
         xyz = self.pose.residue( resid ).xyz( atomname )
         return np.asarray( [ xyz.x, xyz.y, xyz.z ] )
-    
+
     def get_phi_psi( self, resid ):
         phipsi = np.asarray( [ self.pose.phi( resid ), self.pose.psi( resid ) ] )
         phipsi[0] = math.radians( phipsi[0] )
-        phipsi[1] = math.radians( phipsi[1] )        
+        phipsi[1] = math.radians( phipsi[1] )
         return phipsi
 
     def get_chi( self, resid, chi_number ):
@@ -168,7 +168,7 @@ class RosettaPoseWrapper( WrappedPose ):
         chi_deg = self.pose.chi( chi_number, resid )
         chi_rad = math.radians( chi_deg )
         return chi_rad, True
-    
+
     def get_name1( self, resid ):
         return self.pose.residue( resid ).name1()
 
@@ -183,59 +183,58 @@ class RosettaPoseWrapper( WrappedPose ):
             print( "RosettaPoseWrapper.approximate_ALA_CB is only setup for glycine right now" )
             print( self.pose.residue( resid ).name1() )
             assert False
-        mutator = rosetta.protocols.simple_moves.MutateResidue(resid,'ALA')
+        mutator = rosetta.protocols.simple_moves.MutateResidue(resid, 'ALA')
         mutator.apply( self.pose )
         xyz = self.get_atom_xyz( resid, "CB" )
-        mutator = rosetta.protocols.simple_moves.MutateResidue(resid,'GLY')
+        mutator = rosetta.protocols.simple_moves.MutateResidue(resid, 'GLY')
         mutator.apply( self.pose )
-        #print( "GLY", xyz, estimate_CB_xyz( self.get_atom_xyz( resid, "CA" ), self.get_atom_xyz( resid, "N" ), self.get_atom_xyz( resid, "C" ) ), self.get_atom_xyz( resid, "CA" ) )
-        #print( "GLY", xyz, estimate_CB_xyz( self.get_atom_xyz( resid, "C" ), self.get_atom_xyz( resid, "N" ), self.get_atom_xyz( resid, "CA" ) ) )        
         return xyz
 
     def resid_is_N_term( self, resid ):
-        #TODO
+        # TODO
         return False
 
     def resid_is_C_term( self, resid ):
-        #TODO
+        # TODO
         return False
 
     def resids_are_same_chain( self, resid1, resid2 ):
         return self.pose.chain( resid1 ) == self.pose.chain( resid2 )
-    
+
 
 class MDTrajPoseWrapper( WrappedPose ):
 
     """
     This wrapper takes a MDTraj trajectory and requires MDTraj to be installed
-    
+
     Parameters
     ---------
     mdtraj_trajectory: Trajectory
         Pose in MDTraj trajectory format
-    """    
-    
+    """
+
     def __init__( self, mdtraj_trajectory ):
-        WrappedPose.__init__(self)        
+        WrappedPose.__init__(self)
         if md is None:
             print( "MDTrajPoseWrapper requires the mdtraj library to be installed" )
             raise ImportError
 
         assert isinstance( mdtraj_trajectory, md.Trajectory )
-        #TODO assert type
         assert mdtraj_trajectory.n_frames == 1
         self.trajectory = mdtraj_trajectory
-        self.phi_atoms, self.phis = md.compute_phi( self.trajectory ) #RADIANS
-        self.psi_atoms, self.psis = md.compute_psi( self.trajectory ) #RADIANS
-        
+
+        # RADIANS:
+        self.phi_atoms, self.phis = md.compute_phi( self.trajectory )
+        self.psi_atoms, self.psis = md.compute_psi( self.trajectory )
+
         self.chis = [ None, None, None, None, None ] #Adding zero element just to make indexing easier
         self.chi_atoms = [None,None,None,None,None]
-        
+
         self.chi_atoms[1], self.chis[1] = md.compute_chi1( self.trajectory )
         self.chi_atoms[2], self.chis[2] = md.compute_chi2( self.trajectory )
         self.chi_atoms[3], self.chis[3] = md.compute_chi3( self.trajectory )
-        self.chi_atoms[4], self.chis[4] = md.compute_chi4( self.trajectory )        
-    
+        self.chi_atoms[4], self.chis[4] = md.compute_chi4( self.trajectory )
+
     def get_atom_xyz( self, resid, atomname ):
         atom = self.trajectory.topology.residue( resid-1 ).atom( atomname )
         all_xyzs = self.trajectory.xyz
@@ -245,29 +244,29 @@ class MDTrajPoseWrapper( WrappedPose ):
         assert len( value_vec[0] ) == len( atom_vec )
         # value_vec.shape: (n_frames, n_phi)
         # value_vec.shape: (n_phi, 4)
-        
-        #Okay this is pretty inefficient
+
+        # Okay this is pretty inefficient
         top = self.trajectory.topology
         for i in range( 0, len( value_vec[0] ) ):
-            atom_index = atom_vec[ i ][ 2 ] #Last-Middle atom
+            atom_index = atom_vec[ i ][ 2 ] # Last-Middle atom
             atom = top.atom( atom_index )
             if atom.residue.index == resid-1:
                 return value_vec[0][ i ]
             elif atom.residue.index > resid-1:
                 return 0
         return 0
-    
+
     def get_phi_psi( self, resid ):
         phi_rad = self._get_phi_or_psi_angle( resid, self.phis, self.phi_atoms )
         psi_rad = self._get_phi_or_psi_angle( resid, self.psis, self.psi_atoms )
         return [ phi_rad, psi_rad ]
-    
+
     def get_chi( self, resid, chi_number ):
-        #DOESN'T GIVE PROTON CHIs
+        # DOESN'T GIVE PROTON CHIs
         assert chi_number > 0
         assert chi_number <= 4
-        
-        #Okay this is pretty inefficient
+
+        # Okay this is pretty inefficient
         top = self.trajectory.topology
         for i in range( 0, len( self.chi_atoms[ chi_number ] ) ):
             atom_index = self.chi_atoms[ chi_number ][ i ][ 3 ] #Last atom
@@ -277,7 +276,7 @@ class MDTrajPoseWrapper( WrappedPose ):
             elif atom.residue.index > resid-1:
                 return 0, False
         return 0, False
-    
+
     def get_name1( self, resid ):
         return self.trajectory.topology.residue( resid-1 ).code
 
@@ -298,15 +297,15 @@ class MDTrajPoseWrapper( WrappedPose ):
 
     def n_residues( self ):
         return self.trajectory.topology.n_residues
-    
+
     def resid_is_N_term( self, resid ):
-        top = self.trajectory.topology        
+        top = self.trajectory.topology
         chain = top.residue( resid-1 ).chain
         N_term_resid = chain.residue( 0 )
         return N_term_resid == resid-1
 
     def resid_is_C_term( self, resid ):
-        top = self.trajectory.topology        
+        top = self.trajectory.topology
         chain = top.residue( resid-1 ).chain
         C_term_resid = chain.residue( chain.n_residues-1 )
         return C_term_resid == resid-1
@@ -314,5 +313,3 @@ class MDTrajPoseWrapper( WrappedPose ):
     def resids_are_same_chain( self, resid1, resid2 ):
         top = self.trajectory.topology
         return top.residue( resid1-1 ).chain.index == top.residue( resid2-1 ).chain.index
-
-    
