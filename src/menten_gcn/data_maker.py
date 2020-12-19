@@ -111,7 +111,8 @@ class DataMaker:
 
     def make_data_cache(self, wrapped_pose: WrappedPose):
         """
-        Data caches save time by re-using tensors for nodes and edges you have aleady calculated. This usually gives me a 5-10x speedup but your mileage may vary.
+        Data caches save time by re-using tensors for nodes and edges you have aleady calculated.
+        This usually gives me a 5-10x speedup but your mileage may vary.
 
         Parameters
         ----------

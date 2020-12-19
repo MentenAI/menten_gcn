@@ -22,7 +22,7 @@ class DecoratorDataCache:
     """
 
     def __init__(self, wrapped_pose):
-        #lookup is edge_cache[i][j]
+        # lookup is edge_cache[i][j]
         self.edge_cache = [dict() for x in range(wrapped_pose.n_residues() + 1)]
         self.node_cache = [None for x in range(wrapped_pose.n_residues() + 1)]
         self.dict_cache = dict()
@@ -41,7 +41,8 @@ class DataHolder:
     DataHolder is a wonderful class that automatically stores the direct output of the DataMaker.
     The DataHolder can then feed your data directly into kera's model.fit() method using the generators below.
 
-    There are descriptions for each method below but perhaps the best way to grasp the DataHolder's usage is to see the example at the bottom.
+    There are descriptions for each method below but perhaps the best way to grasp
+    the DataHolder's usage is to see the example at the bottom.
     """
 
     def __init__(self):
@@ -140,7 +141,9 @@ class DataHolder:
         save_to_file's partner. Use this to load in caches already saved.
         Please provide either fileprefix or filename, but not both.
 
-        This duplicity may seem silly. The goal for fileprefix is to be consistant with save_to_file (the two "fileprefix" args will be identical strings for both) whereas the goal for filename is to simply list the name of the file verbosely.
+        This duplicity may seem silly. The goal for fileprefix is to be consistant with save_to_file
+        (the two "fileprefix" args will be identical strings for both)
+        whereas the goal for filename is to simply list the name of the file verbosely.
 
         Parameters
         ----------
@@ -199,7 +202,7 @@ class DataHolderInputGenerator(tf.keras.utils.Sequence):
 
     def __getitem__(self, item_index):
         begin = item_index * self.batch_size
-        end = min(i + self.batch_size, len(self.indices))
+        end = min(item_index + self.batch_size, len(self.indices))
 
         inds = self.indices[begin:end]
         inp, out = self.holder.get_indices(inds)
