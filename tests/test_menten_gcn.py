@@ -101,11 +101,11 @@ def observe_NEE3(Xval, Aval, Eval, N, F, S):
 
 def test_NEE3():
     '''
-         2       .
-        / \      .
-       1 - 3     .
-        \ /      .
-         0       .
+         2
+        / \
+       1 - 3
+        \ /
+         0
     '''
 
     N = 5  # one is missing

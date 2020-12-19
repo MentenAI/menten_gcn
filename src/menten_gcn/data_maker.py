@@ -1,11 +1,7 @@
 import numpy as np
-import math
 
-import menten_gcn as mg
-from menten_gcn.decorators.standard import *
-from menten_gcn.decorators.base import *
-from menten_gcn.wrappers import *
-
+from menten_gcn.decorators import *
+from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
 import tensorflow as tf
@@ -22,13 +18,18 @@ class DataMaker:
     decorators: list
         List of decorators that you want to include
     edge_distance_cutoff_A: float
-        An edge will be created between any two pairs of residues if their C-alpha atoms are within this distance (measured in Angstroms)
+        An edge will be created between any two pairs of residues if their
+        C-alpha atoms are within this distance (measured in Angstroms)
     max_residues: int
-        What is the maximum number of nodes a graph can have? This includes focus and neighbor nodes. If the number of focus+neighbors exceeds this number, we will leave out the neighbors that are farthest away in 3D space.
+        What is the maximum number of nodes a graph can have?
+        This includes focus and neighbor nodes.
+        If the number of focus+neighbors exceeds this number, we will leave out the neighbors that are farthest away in 3D space.
     exclude_bbdec: bool
-        Every DataMaker has a standard "bare bones" decorator that is prepended to the list of decorators you provide. Set this to false to remove it entirely.
+        Every DataMaker has a standard "bare bones" decorator that is prepended to the list of decorators you provide.
+        Set this to false to remove it entirely.
     nbr_distance_cutoff_A: float
-        A node will be included in the graph if it is within this distance (Angstroms) of any focus node. A value of None will set this equal to edge_distance_cutoff_A
+        A node will be included in the graph if it is within this distance (Angstroms) of any focus node.
+        A value of None will set this equal to edge_distance_cutoff_A
     """
 
     def __init__(self, decorators: list, edge_distance_cutoff_A: float, max_residues: int,
@@ -265,9 +266,12 @@ class DataMaker:
         wrapped_pose: WrappedPose
             Pose to generate data from
         focus_resids: list of ints
-            Which resids are the focus residues? We use Rosetta conventions here, so the first residue is resid #1, second is #2, and so one. No skips.
+            Which resids are the focus residues?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
         data_cache: DecoratorDataCache
-            See make_data_cache for details. It is very important that this cache was created from this pose
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
         legal_nbrs: list of ints
             Which resids are allowed to be neighbors? All resids are legal if this is None
 
@@ -288,7 +292,7 @@ class DataMaker:
 
         self.bare_bones_decorator.set_focused_resids(focused_resids)
         all_resids = self._calc_nbrs(wrapped_pose, focused_resids, legal_nbrs=legal_nbrs)
-        n_nodes = len(all_resids)
+        # n_nodes = len(all_resids)
 
         # Node Data
         X = self._get_node_data(wrapped_pose, all_resids, data_cache)
@@ -301,16 +305,21 @@ class DataMaker:
     def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int,
                                  data_cache: DecoratorDataCache = None, legal_nbrs: list = None):
         """
-        Only have 1 focus resid? Then this is sliiiiiiightly cleaner than generate_input(). It's completely debatable if this is even worthwhile
+        Only have 1 focus resid?
+        Then this is sliiiiiiightly cleaner than generate_input().
+        It's completely debatable if this is even worthwhile
 
         Parameters
         -------
         wrapped_pose: WrappedPose
             Pose to generate data from
         focus_resid: inr
-            Which resid is the focus residue? We use Rosetta conventions here, so the first residue is resid #1, second is #2, and so one. No skips.
+            Which resid is the focus residue?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
         data_cache: DecoratorDataCache
-            See make_data_cache for details. It is very important that this cache was created from this pose
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
         legal_nbrs: list of ints
             Which resids are allowed to be neighbors? All resids are legal if this is None
 
