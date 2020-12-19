@@ -75,7 +75,7 @@ setup(
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
-        'numpy>=1.16.6', 'tensorflow>=2.3.1', 'spektral>=0.6.2'
+        'numpy>=1.16.6', 'tensorflow>=2.1.0', 'spektral>=0.6.2'
     ],
     extras_require={
         # eg:
