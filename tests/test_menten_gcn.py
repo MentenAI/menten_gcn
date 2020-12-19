@@ -22,7 +22,7 @@ def test_main():
 def NEE3_test_mask(Xval, Aval, Eval, N, F, S):
     X_in = Input(shape=(N, F), name='X_in')
     A_in = Input(shape=(N, N), sparse=False, name='A_in')
-    E_in = Input(shape=(N, N, S), name='E_in')
+    # E_in = Input(shape=(N, N, S), name='E_in')
 
     E_mask = make_edge_mask(A_in)
 

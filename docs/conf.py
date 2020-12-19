@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-#Good resources:
+# Good resources:
 # https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html#theme-options
 # https://docs.readthedocs.io/en/latest/guides/adding-custom-css.html
 
@@ -15,8 +15,8 @@ sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../..'))
 sys.path.append(os.path.abspath('../../..'))
 for x in os.walk('../../src'):
-  sys.path.insert(0, x[0])
-  
+    sys.path.insert(0, x[0])
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -51,16 +51,16 @@ if not on_rtd:  # only set the theme if we're building docs locally
 html_static_path = ['_static']
 html_logo = "_static/white_logo.png"
 html_theme_options = {
-  'logo_only': True,
-  'display_version': False,
-  'logo_url': "https://menten.ai/"
+    'logo_only': True,
+    'display_version': False,
+    'logo_url': "https://menten.ai/"
 }
 
 html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
 html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
+    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
 }
 html_short_title = '%s-%s' % (project, version)
 
