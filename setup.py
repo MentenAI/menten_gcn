@@ -28,8 +28,8 @@ setup(
     version='0.0.1',
     license='MIT',
     description='This package decorates graph tensors with data from protein models',
-    long_description='%s\n%s' % (
-        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
+    long_description='%s' % (
+        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst'))
         #re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
     ),
     author='Menten AI, Inc.',
