@@ -33,7 +33,7 @@ setup(
         re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
     ),
     author='Menten AI, Inc.',
-    author_email='jack.maguire@menten.ai',
+    #author_email='jack.maguire@menten.ai',
     url='https://github.com/MentenAI/menten_gcn',
     packages=find_packages('src'),
     package_dir={'': 'src'},
@@ -42,8 +42,9 @@ setup(
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
+        #'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Operating System :: Unix',
         'Operating System :: POSIX',
@@ -60,7 +61,7 @@ setup(
         # 'Programming Language :: Python :: Implementation :: IronPython',
         # 'Programming Language :: Python :: Implementation :: Jython',
         # 'Programming Language :: Python :: Implementation :: Stackless',
-        'Topic :: Utilities',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],
     project_urls={
         'Documentation': 'https://menten_gcn.readthedocs.io/',
