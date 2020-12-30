@@ -30,7 +30,7 @@ setup(
     description='This package decorates graph tensors with data from protein models',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
-        re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
+        #re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
     ),
     author='Menten AI, Inc.',
     #author_email='jack.maguire@menten.ai',
