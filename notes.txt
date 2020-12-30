@@ -7,3 +7,9 @@ To update PyPi:
 
 python3 setup.py sdist bdist_wheel
 twine upload dist/menten*0.0.1*
+
+
+
+Misc:
+
+autopep8 --in-place --aggressive  --aggressive docs/conf.py
