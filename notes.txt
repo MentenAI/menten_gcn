@@ -1,0 +1,9 @@
+To update Version:
+
+bump2version --new-version 0.0.1 part
+
+
+To update PyPi:
+
+python3 setup.py sdist bdist_wheel
+twine upload dist/menten*0.0.1*
