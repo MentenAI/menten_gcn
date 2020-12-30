@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='menten-gcn',
-    version='0.0.0',
+    version='0.0.1',
     license='MIT',
     description='This package decorates graph tensors with data from protein models',
     long_description='%s\n%s' % (
