@@ -33,7 +33,7 @@ setup(
         #re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
     ),
     author='Menten AI, Inc.',
-    #author_email='jack.maguire@menten.ai',
+    author_email='info@menten.ai',
     url='https://github.com/MentenAI/menten_gcn',
     packages=find_packages('src'),
     package_dir={'': 'src'},
