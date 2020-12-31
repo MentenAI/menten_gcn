@@ -1,5 +1,5 @@
 from tensorflow.keras.layers import *
-from menten_gcn import WrappedPose
+from menten_gcn.wrappers import WrappedPose
 import numpy as np
 
 ##############
