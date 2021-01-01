@@ -18,7 +18,7 @@ Technical Overview
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.org/MentenAI/menten_gcn.svg?branch=master
+.. |travis| image:: https://api.travis-ci.org/MentenAI/menten_gcn.svg?branch=main
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/MentenAI/menten_gcn
 
