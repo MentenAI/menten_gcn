@@ -47,7 +47,7 @@ class Decorator:
         return 0
 
     def calc_node_features(self, wrapped_pose: WrappedPose,
-                           resid: int, dict_cache: dict = None) -> list:
+                           resid: int, dict_cache: dict = None) -> list[ float ]:
         """
         This does all of the business logic of calculating
         the values to be added for each node.
@@ -73,8 +73,19 @@ class Decorator:
         features = []
         return features
 
-    def describe_node_features(self) -> list:
-        # Describe in reproducible detail how these numbers are calculated
+    def describe_node_features(self) -> list[ str ]:
+        """
+        Returns descriptions of how each value is computed.
+        Our goal is for these descriptions to be relatively concise but
+        also have enough detail to fully reproduce these calculations.
+
+        Returns
+        ---------
+        features: list
+            The length of this list will be the same value as self.n_node_features().
+            These are descriptions of the values to represent this decorator's
+            contribution to X for any arbitrary resid.
+        """              
         return []
 
     #########
@@ -87,8 +98,8 @@ class Decorator:
         """        
         return 0
 
-    def calc_edge_features(self, wrapped_pose: WrappedPose,
-                           resid1: int, resid2: int, dict_cache: dict = None) -> list, list:
+    def calc_edge_features(self, wrapped_pose: WrappedPose, resid1: int, resid2: int,
+                           dict_cache: dict = None) -> Tuple[list[float],list[float]]:
         """
         This does all of the business logic of calculating
         the values to be added for each edge.
@@ -126,8 +137,19 @@ class Decorator:
         inv_features = []  # 2 -> 1
         return features, inv_features
 
-    def describe_edge_features(self) -> list:
-        # Describe in reproducible detail how these numbers are calculated
+    def describe_edge_features(self) -> list[str]:
+        """
+        Returns descriptions of how each value is computed.
+        Our goal is for these descriptions to be relatively concise but
+        also have enough detail to fully reproduce these calculations.
+
+        Returns
+        ---------
+        features: list
+            The length of this list will be the same value as self.n_edge_features().
+            These are descriptions of the values to represent this decorator's
+            contribution to E for any arbitrary resid pair.
+        """              
         return []
 
 
