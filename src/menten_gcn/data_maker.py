@@ -7,6 +7,7 @@ from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCach
 #import tensorflow as tf
 from tensorflow.keras.layers import Input, Layer
 
+from typing import List
 
 class DataMaker:
 
@@ -32,7 +33,7 @@ class DataMaker:
         A value of None will set this equal to edge_distance_cutoff_A
     """
 
-    def __init__(self, decorators: list[Decorator], edge_distance_cutoff_A: float, max_residues: int,
+    def __init__(self, decorators: List[Decorator], edge_distance_cutoff_A: float, max_residues: int,
                  exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None):
 
         self.bare_bones_decorator = BareBonesDecorator()
@@ -68,12 +69,12 @@ class DataMaker:
         S = self.all_decs.n_edge_features()
         return N, F, S
 
-    def get_node_details(self) -> list[str]:
+    def get_node_details(self) -> List[str]:
         node_details = self.all_decs.describe_node_features()
         assert len(node_details) == self.all_decs.n_node_features()
         return node_details
 
-    def get_edge_details(self) -> list[str]:
+    def get_edge_details(self) -> List[str]:
         edge_details = self.all_decs.describe_edge_features()
         assert len(edge_details) == self.all_decs.n_edge_features()
         return edge_details
@@ -130,7 +131,7 @@ class DataMaker:
         self.all_decs.cache_data(wrapped_pose, cache.dict_cache)
         return cache
 
-    def _calc_nbrs(self, wrapped_pose: WrappedPose, focused_resids: list[int], legal_nbrs: list[int] = None) -> list[int]:
+    def _calc_nbrs(self, wrapped_pose: WrappedPose, focused_resids: List[int], legal_nbrs: List[int] = None) -> List[int]:
         # includes focus in subset
 
         if legal_nbrs is None:
@@ -258,7 +259,7 @@ class DataMaker:
         return X_in, A_in, E_in
 
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache = None,
-                       legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
+                       legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
         This is does the actual work of creating a graph and representing it as tensors
 
@@ -304,7 +305,7 @@ class DataMaker:
         return X, A, E, all_resids
 
     def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache = None,
-                                 legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
+                                 legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
         Only have 1 focus resid?
         Then this is sliiiiiiightly cleaner than generate_input().
