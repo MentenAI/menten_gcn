@@ -51,7 +51,7 @@ class DataMaker:
         else:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
 
-    def get_N_F_S(self) -> Tuple[int,int,int]:
+    def get_N_F_S(self) -> Tuple[int, int, int]:
         """
         Returns
         ----------
@@ -237,7 +237,7 @@ class DataMaker:
             assert X[0][0] == 1
         return X
 
-    def generate_XAE_input_tensors(self) -> Tuple[ Layer, Layer, Layer ]:
+    def generate_XAE_input_tensors(self) -> Tuple[Layer, Layer, Layer]:
         """
         This is just a safe way to create the input layers for your keras model with confidence that they are the right shape
 
@@ -258,7 +258,7 @@ class DataMaker:
         return X_in, A_in, E_in
 
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache = None,
-                       legal_nbrs: list = None) -> Tuple[ np.ndarray, np.ndarray, np.ndarray, list[int]]:
+                       legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
         """
         This is does the actual work of creating a graph and representing it as tensors
 
@@ -304,7 +304,7 @@ class DataMaker:
         return X, A, E, all_resids
 
     def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache = None,
-                                 legal_nbrs: list = None) -> Tuple[ np.ndarray, np.ndarray, np.ndarray, list[int]]:
+                                 legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
         """
         Only have 1 focus resid?
         Then this is sliiiiiiightly cleaner than generate_input().
