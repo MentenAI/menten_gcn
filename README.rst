@@ -18,13 +18,13 @@ Technical Overview
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
 
-.. |travis| image:: https://api.travis-ci.org/MentenAI/menten_gcn.svg?branch=master
+.. |travis| image:: https://api.travis-ci.org/MentenAI/menten_gcn.svg?branch=main
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/MentenAI/menten_gcn
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/MentenAI/menten_gcn/v0.0.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/MentenAI/menten_gcn/v0.0.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/MentenAI/menten_gcn/compare/v0.0.0...main
+    :target: https://github.com/MentenAI/menten_gcn/compare/v0.0.1...main
 
 
 
