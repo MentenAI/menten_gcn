@@ -1,10 +1,8 @@
-import numpy as np
 import math
 
-import menten_gcn as mg
 from menten_gcn.decorators.base import Decorator
-from menten_gcn.decorators.geometry import *
-from menten_gcn.decorators.sequence import *
+# from menten_gcn.decorators.geometry import *
+# from menten_gcn.decorators.sequence import *
 
 
 class BareBonesDecorator(Decorator):
@@ -62,7 +60,9 @@ class BareBonesDecorator(Decorator):
 class SequenceSeparation(Decorator):
 
     """
-    The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains.
+    The sequence distance between the two residues
+    (i.e., number of residues between these two residues in sequence space, plus one).
+    -1.0 if the two residues belong to different chains.
 
     - 0 Node Features
     - 1 Edge Feature
@@ -97,11 +97,15 @@ class SequenceSeparation(Decorator):
     def describe_edge_features(self):
         if self.ln:
             return [
-                "Natural Log of the sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)",
+                "Natural Log of the sequence distance between the two residues " + \
+                "(i.e., number of residues between these two residues in sequence space, plus one). " + \
+                "-1.0 if the two residues belong to different chains. (symmetric)",
             ]
         else:
             return [
-                "The sequence distance between the two residues (i.e., number of residues between these two residues in sequence space, plus one). -1.0 if the two residues belong to different chains. (symmetric)",
+                "The sequence distance between the two residues " + \
+                "(i.e., number of residues between these two residues in sequence space, plus one). " + \
+                "-1.0 if the two residues belong to different chains. (symmetric)",
             ]
 
 
