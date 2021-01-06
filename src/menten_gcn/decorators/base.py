@@ -1,8 +1,8 @@
 #import numpy as np
 #import math
 
-from menten_gcn.wrappers import *
-from menten_gcn.data_management import *
+from menten_gcn.wrappers import WrappedPose
+from menten_gcn.data_management import DecoratorDataCache
 
 
 class Decorator:
@@ -17,7 +17,7 @@ class Decorator:
     def get_version_name(self):
         raise NotImplementedError
 
-    def cache_data(self, wrapped_pose, dict_cache):
+    def cache_data(self, wrapped_pose: WrappedPose, dict_cache: DecoratorDataCache):
         pass
 
     #########
@@ -27,7 +27,7 @@ class Decorator:
     def n_node_features(self):
         return 0
 
-    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache=None):
         features = []
         return features
 
@@ -42,7 +42,7 @@ class Decorator:
     def n_edge_features(self):
         return 0
 
-    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
+    def calc_edge_features(self, wrapped_pose: WrappedPose, resid1: int, resid2: int, dict_cache: DecoratorDataCache=None):
         features = []  # 1 -> 2
         inv_features = []  # 2 -> 1
         return features, inv_features
@@ -58,7 +58,7 @@ class CombinedDecorator(Decorator):
     # BASIC #
     #########
 
-    def __init__(self, decorators=[]):
+    def __init__(self, decorators: list = [] ):
         self.decorators = decorators
 
     def get_version_name(self):
@@ -68,7 +68,7 @@ class CombinedDecorator(Decorator):
         name += ")"
         return name
 
-    def cache_data(self, wrapped_pose, dict_cache):
+    def cache_data(self, wrapped_pose: WrappedPose, dict_cache: DecoratorDataCache):
         for d in self.decorators:
             d.cache_data(wrapped_pose, dict_cache)
 
@@ -79,10 +79,10 @@ class CombinedDecorator(Decorator):
     def n_node_features(self):
         return sum(d.n_node_features() for d in self.decorators)
 
-    def calc_node_features(self, pose, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache=None):
         features = []
         for d in self.decorators:
-            features.extend(d.calc_node_features(pose, resid=resid, dict_cache=dict_cache))
+            features.extend(d.calc_node_features(wrapped_pose, resid=resid, dict_cache=dict_cache))
         '''
         for d in self.decorators:
             print( d.get_version_name(), d.n_node_features(), len( d.calc_node_features( pose, resid=resid, dict_cache=dict_cache ) ) )
@@ -104,11 +104,13 @@ class CombinedDecorator(Decorator):
     def n_edge_features(self):
         return sum(d.n_edge_features() for d in self.decorators)
 
-    def calc_edge_features(self, pose, resid1, resid2, dict_cache=None):
+    def calc_edge_features(self, wrapped_pose: WrappedPose,
+            resid1: int, resid2: int, dict_cache: DecoratorDataCache=None):
         features = []  # 1 -> 2
         inv_features = []  # 2 -> 1
         for d in self.decorators:
-            f12, f21 = d.calc_edge_features(pose, resid1=resid1, resid2=resid2, dict_cache=dict_cache)
+            f12, f21 = d.calc_edge_features(wrapped_pose,
+                        resid1=resid1, resid2=resid2, dict_cache=dict_cache)
             features.extend(f12)
             inv_features.extend(f21)
         assert(len(features) == self.n_edge_features())
