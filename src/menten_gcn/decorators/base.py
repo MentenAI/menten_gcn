@@ -27,7 +27,7 @@ class Decorator:
     def n_node_features(self):
         return 0
 
-    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache=None):
+    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache = None):
         features = []
         return features
 
@@ -42,7 +42,7 @@ class Decorator:
     def n_edge_features(self):
         return 0
 
-    def calc_edge_features(self, wrapped_pose: WrappedPose, resid1: int, resid2: int, dict_cache: DecoratorDataCache=None):
+    def calc_edge_features(self, wrapped_pose: WrappedPose, resid1: int, resid2: int, dict_cache: DecoratorDataCache = None):
         features = []  # 1 -> 2
         inv_features = []  # 2 -> 1
         return features, inv_features
@@ -58,7 +58,7 @@ class CombinedDecorator(Decorator):
     # BASIC #
     #########
 
-    def __init__(self, decorators: list = [] ):
+    def __init__(self, decorators: list = []):
         self.decorators = decorators
 
     def get_version_name(self):
@@ -79,7 +79,7 @@ class CombinedDecorator(Decorator):
     def n_node_features(self):
         return sum(d.n_node_features() for d in self.decorators)
 
-    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache=None):
+    def calc_node_features(self, wrapped_pose: WrappedPose, resid: int, dict_cache: DecoratorDataCache = None):
         features = []
         for d in self.decorators:
             features.extend(d.calc_node_features(wrapped_pose, resid=resid, dict_cache=dict_cache))
@@ -105,12 +105,12 @@ class CombinedDecorator(Decorator):
         return sum(d.n_edge_features() for d in self.decorators)
 
     def calc_edge_features(self, wrapped_pose: WrappedPose,
-            resid1: int, resid2: int, dict_cache: DecoratorDataCache=None):
+                           resid1: int, resid2: int, dict_cache: DecoratorDataCache = None):
         features = []  # 1 -> 2
         inv_features = []  # 2 -> 1
         for d in self.decorators:
             f12, f21 = d.calc_edge_features(wrapped_pose,
-                        resid1=resid1, resid2=resid2, dict_cache=dict_cache)
+                                            resid1=resid1, resid2=resid2, dict_cache=dict_cache)
             features.extend(f12)
             inv_features.extend(f21)
         assert(len(features) == self.n_edge_features())
