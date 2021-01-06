@@ -3,15 +3,11 @@ from menten_gcn.decorators import *
 from menten_gcn.playground import *
 from menten_gcn.util import *
 
-import fileinput
-import spektral
-import tensorflow as tf
-import argparse
+# import spektral
+# import tensorflow as tf
 
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.regularizers import l2
 
 import numpy as np
 
@@ -20,7 +16,7 @@ def test_main():
 
 
 def NEE3_test_mask(Xval, Aval, Eval, N, F, S):
-    X_in = Input(shape=(N, F), name='X_in')
+    # X_in = Input(shape=(N, F), name='X_in')
     A_in = Input(shape=(N, N), sparse=False, name='A_in')
     # E_in = Input(shape=(N, N, S), name='E_in')
 
@@ -29,13 +25,10 @@ def NEE3_test_mask(Xval, Aval, Eval, N, F, S):
     NEE3_mask = make_NEENEENEE_mask(E_mask)
 
     model = Model(inputs=[A_in], outputs=NEE3_mask)
-    #model = Model(inputs=[A_in], outputs=E_mask)
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.summary()
     A = np.asarray(Aval).reshape(1, N, N)
-    #A = A.reshape( 1, N, N )
     out = model.predict(A)
-    # print( out )
     print(np.sum(out))
     assert(np.sum(out) == 12)
 
@@ -80,10 +73,10 @@ def observe_NEE3(Xval, Aval, Eval, N, F, S):
     for i in out:
         for j in i:
             for k in j:
-                for l in k:
-                    if np.sum(l) > 0:
-                        print(l)
-                        all_outs.append(l)
+                for lvec in k:
+                    if np.sum(lvec) > 0:
+                        print(lvec)
+                        all_outs.append(lvec)
     foo = np.testing.assert_array_equal
     foo(all_outs[0], [0., 13., -13., 100., 3., -3., 300., 1., -1., ])
     foo(all_outs[1], [0., -13., 13., 300., 1., -1., 100., 3., -3., ])
