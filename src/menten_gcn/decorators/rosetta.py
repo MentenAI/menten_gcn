@@ -313,7 +313,7 @@ class RosettaJumpDecorator(Decorator):
         "quat", "rotvec", and "rotvec_sincos".
     """
 
-    def __init__(self, use_nm=False, rottype="euler"):
+    def __init__(self, use_nm:bool=False, rottype:str="euler"):
         assert(rottype in ["euler", "euler_sincos", "matrix", "quat", "rotvec", "rotvec_sincos"])
         self.rottype = rottype
         self.use_nm = use_nm
