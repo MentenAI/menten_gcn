@@ -5,7 +5,7 @@ from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
 #import tensorflow as tf
-from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Input, Layer
 
 
 class DataMaker:
@@ -32,7 +32,7 @@ class DataMaker:
         A value of None will set this equal to edge_distance_cutoff_A
     """
 
-    def __init__(self, decorators: list, edge_distance_cutoff_A: float, max_residues: int,
+    def __init__(self, decorators: list[Decorator], edge_distance_cutoff_A: float, max_residues: int,
                  exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None):
 
         self.bare_bones_decorator = BareBonesDecorator()
@@ -51,7 +51,7 @@ class DataMaker:
         else:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
 
-    def get_N_F_S(self):
+    def get_N_F_S(self) -> Tuple[int,int,int]:
         """
         Returns
         ----------
@@ -68,12 +68,12 @@ class DataMaker:
         S = self.all_decs.n_edge_features()
         return N, F, S
 
-    def get_node_details(self):
+    def get_node_details(self) -> list[str]:
         node_details = self.all_decs.describe_node_features()
         assert len(node_details) == self.all_decs.n_node_features()
         return node_details
 
-    def get_edge_details(self):
+    def get_edge_details(self) -> list[str]:
         edge_details = self.all_decs.describe_edge_features()
         assert len(edge_details) == self.all_decs.n_edge_features()
         return edge_details
@@ -110,7 +110,7 @@ class DataMaker:
 
         print("\nPlease cite: (no one yet)\n")
 
-    def make_data_cache(self, wrapped_pose: WrappedPose):
+    def make_data_cache(self, wrapped_pose: WrappedPose) -> DecoratorDataCache:
         """
         Data caches save time by re-using tensors for nodes and edges you have aleady calculated.
         This usually gives me a 5-10x speedup but your mileage may vary.
@@ -130,7 +130,7 @@ class DataMaker:
         self.all_decs.cache_data(wrapped_pose, cache.dict_cache)
         return cache
 
-    def _calc_nbrs(self, wrapped_pose: WrappedPose, focused_resids: list, legal_nbrs: list = None):
+    def _calc_nbrs(self, wrapped_pose: WrappedPose, focused_resids: list[int], legal_nbrs: list[int] = None) -> list[int]:
         # includes focus in subset
 
         if legal_nbrs is None:
@@ -167,7 +167,7 @@ class DataMaker:
             final_resids.append(n[1])
         return final_resids
 
-    def _get_edge_data_for_pair(self, wrapped_pose: WrappedPose, resid_i: int, resid_j: int, data_cache=None):
+    def _get_edge_data_for_pair(self, wrapped_pose: WrappedPose, resid_i: int, resid_j: int, data_cache):
         if data_cache.edge_cache is not None:
             if resid_j in data_cache.edge_cache[resid_i]:
                 assert resid_i in data_cache.edge_cache[resid_j]
@@ -184,7 +184,7 @@ class DataMaker:
             data_cache.edge_cache[resid_j][resid_i] = f_ji
         return f_ij, f_ji
 
-    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: list, data_cache=None):
+    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: list, data_cache):
         N, F, S = self.get_N_F_S()
         A_dense = np.zeros(shape=[N, N])
         E_dense = np.zeros(shape=[N, N, S])
@@ -237,7 +237,7 @@ class DataMaker:
             assert X[0][0] == 1
         return X
 
-    def generate_XAE_input_tensors(self):
+    def generate_XAE_input_tensors(self) -> Tuple[ Layer, Layer, Layer ]:
         """
         This is just a safe way to create the input layers for your keras model with confidence that they are the right shape
 
@@ -257,7 +257,8 @@ class DataMaker:
         E_in = Input(shape=(N, N, S), name='E_in')
         return X_in, A_in, E_in
 
-    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache = None, legal_nbrs: list = None):
+    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache = None,
+                       legal_nbrs: list = None) -> Tuple[ np.ndarray, np.ndarray, np.ndarray, list[int]]:
         """
         This is does the actual work of creating a graph and representing it as tensors
 
@@ -302,8 +303,8 @@ class DataMaker:
 
         return X, A, E, all_resids
 
-    def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int,
-                                 data_cache: DecoratorDataCache = None, legal_nbrs: list = None):
+    def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache = None,
+                                 legal_nbrs: list = None) -> Tuple[ np.ndarray, np.ndarray, np.ndarray, list[int]]:
         """
         Only have 1 focus resid?
         Then this is sliiiiiiightly cleaner than generate_input().
