@@ -185,7 +185,7 @@ class DataMaker:
             data_cache.edge_cache[resid_j][resid_i] = f_ji
         return f_ij, f_ji
 
-    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: list, data_cache):
+    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: List[ int ], data_cache):
         N, F, S = self.get_N_F_S()
         A_dense = np.zeros(shape=[N, N])
         E_dense = np.zeros(shape=[N, N, S])
@@ -207,7 +207,7 @@ class DataMaker:
 
         return A_dense, E_dense
 
-    def _get_node_data(self, wrapped_pose: WrappedPose, resids: list, data_cache):
+    def _get_node_data(self, wrapped_pose: WrappedPose, resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
         X = np.zeros(shape=[N, F])
         index = -1
@@ -258,8 +258,8 @@ class DataMaker:
         E_in = Input(shape=(N, N, S), name='E_in')
         return X_in, A_in, E_in
 
-    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: list, data_cache: DecoratorDataCache = None,
-                       legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
+    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
+                       legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
         This is does the actual work of creating a graph and representing it as tensors
 
@@ -305,7 +305,7 @@ class DataMaker:
         return X, A, E, all_resids
 
     def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache = None,
-                                 legal_nbrs: list = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
+                                 legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
         Only have 1 focus resid?
         Then this is sliiiiiiightly cleaner than generate_input().
