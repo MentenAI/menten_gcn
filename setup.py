@@ -30,7 +30,7 @@ setup(
     description='This package decorates graph tensors with data from protein models',
     long_description='%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst'))
-        #re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
+        # re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
     ),
     author='Menten AI, Inc.',
     author_email='info@menten.ai',
@@ -42,7 +42,7 @@ setup(
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        #'Development Status :: 5 - Production/Stable',
+        # 'Development Status :: 5 - Production/Stable',
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
