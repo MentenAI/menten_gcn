@@ -69,5 +69,20 @@ All do need to do is inherit a these seven methods from the base class.
    4 : 1 if the two residues have the same amino acid, 0 otherwise
 
 .. autoclass:: menten_gcn.decorators.Decorator
-   :members:
+
+   .. automethod:: n_node_features
+
+   .. automethod:: describe_node_features
+
+   .. automethod:: calc_node_features
+		   
+   .. automethod:: n_edge_features
+
+   .. automethod:: describe_edge_features
+
+   .. automethod:: calc_edge_features
+
+   .. automethod:: get_version_name
+
+   .. automethod:: cache_data
 	       
