@@ -80,7 +80,7 @@ class CACA_dist(Decorator):
         else:
             d_units = "Angstroms"
         return [
-            "Euclidean distance between the two CA atoms of each residue, measured in " + d_units,
+            "Euclidean distance between the CA atoms of each residue, measured in " + d_units,
         ]
 
 
@@ -125,8 +125,8 @@ class CBCB_dist(Decorator):
         else:
             d_units = "Angstroms"
         return [
-            "Euclidean distance between the two CB atoms of each residue, measured in "
-            + d_units + ". In the case of GLY, use an estimate of ALA's CB position",
+            "Euclidean distance between the CB atoms of each residue, measured in " +
+            d_units + ". In the case of GLY, use an estimate of ALA's CB position",
         ]
 
 
@@ -366,8 +366,8 @@ class ChiAngleDecorator(Decorator):
             self.chis.append(4)
         self.sincos = sincos
 
-        print("ChiAngleDecorator: Warning, different protein representations (i.e., Rosetta vs MDTraj)"
-              + " represent proton chis differently if the hydrogen atoms are missing from the input file.")
+        print( ("ChiAngleDecorator: Warning, different protein representations (i.e., Rosetta vs MDTraj)"
+                " represent proton chis differently if the hydrogen atoms are missing from the input file.") )
 
     def get_version_name(self):
         return "ChiAngleDecorator"
@@ -405,17 +405,17 @@ class ChiAngleDecorator(Decorator):
         for chi in self.chis:
             if self.sincos:
                 desc.append(
-                    "Sine of chi angle number " + \
-                    str(chi) + \
+                    "Sine of chi angle number " +
+                    str(chi) +
                     " of each residue. Spans from -1 to 1, 0 if chi angle is not valid for this residue")
                 desc.append(
-                    "Cosine of chi angle number " + \
-                    str(chi) + \
+                    "Cosine of chi angle number " +
+                    str(chi) +
                     " of each residue. Spans from -1 to 1, 0 if chi angle is not valid for this residue")
             else:
                 desc.append(
-                    "Chi angle number " + \
-                    str(chi) + \
+                    "Chi angle number " +
+                    str(chi) +
                     " of each residue measured in radians. Spans from -pi to pi, -5 if chi angle is not valid for this residue")
         return desc
 
