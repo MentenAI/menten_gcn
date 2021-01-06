@@ -4,7 +4,7 @@ from menten_gcn.decorators import *
 from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
-import tensorflow as tf
+#import tensorflow as tf
 from tensorflow.keras.layers import Input
 
 
@@ -157,7 +157,7 @@ class DataMaker:
             nbrs.append((min_dist, resid))
 
         if len(nbrs) > self.max_residues:
-            #print( "AAA", len( nbrs ), self.max_residues )
+            # print( "AAA", len( nbrs ), self.max_residues )
             nbrs = sorted(nbrs, key=lambda tup: tup[0])
             nbrs = nbrs[0:self.max_residues]
             assert len(nbrs) == self.max_residues
