@@ -7,7 +7,7 @@ from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCach
 #import tensorflow as tf
 from tensorflow.keras.layers import Input, Layer
 
-from typing import List
+from typing import List, Tuple
 
 
 class DataMaker:

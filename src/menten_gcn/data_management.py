@@ -5,6 +5,8 @@ import math
 import random
 import gc
 
+from typing import List
+from menten_gcn.wrappers import WrappedPose
 
 class DecoratorDataCache:
 
@@ -21,7 +23,7 @@ class DecoratorDataCache:
         Please pass the pose that we should make a cache for
     """
 
-    def __init__(self, wrapped_pose):
+    def __init__(self, wrapped_pose: WrappedPose):
         # lookup is edge_cache[i][j]
         self.edge_cache = [dict() for x in range(wrapped_pose.n_residues() + 1)]
         self.node_cache = [None for x in range(wrapped_pose.n_residues() + 1)]
@@ -64,7 +66,7 @@ class DataHolder:
         tf_Xs = tf.convert_to_tensor(np.asarray(self.Xs))
         assert spektral.layers.ops.modes.autodetect_mode(tf_As, tf_Xs) == mode
 
-    def append(self, X, A, E, out):
+    def append(self, X: np.adarray, A: np.adarray, E: np.adarray, out: np.adarray):
         """
         This is the most important method in this class:
         it gives the data to the dataholder.
@@ -87,10 +89,10 @@ class DataHolder:
         self.Es.append(np.asarray(E))
         self.outs.append(np.asarray(out))
 
-    def size(self):
+    def size(self) -> int:
         return len(self.Xs)
 
-    def get_batch(self, begin, end):
+    def get_batch(self, begin: int, end: int):
         assert begin >= 0
         assert end <= self.size()
         x = np.asarray(self.Xs[begin:end])
@@ -194,7 +196,7 @@ class DataHolderInputGenerator(tf.keras.utils.Sequence):
         self.batch_size = batch_size
         self.indices = [i for i in range(0, data_holder.size())]
 
-    def n_elem(self):
+    def n_elem(self) -> int:
         return self.holder.size()
 
     def __len__(self):
@@ -255,7 +257,7 @@ class CachedDataHolderInputGenerator(tf.keras.utils.Sequence):
         Maybe this will be cleaner in the future.
     """
 
-    def __init__(self, data_list_lines: list, cache: bool = False, batch_size: int = 32, autoshuffle: bool = None):
+    def __init__(self, data_list_lines: List[str], cache: bool = False, batch_size: int = 32, autoshuffle: bool = None):
         print("Generating from", str(len(data_list_lines)), "files")
         self.data_list_lines = data_list_lines
 
