@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Input, Layer
 
 from typing import List
 
+
 class DataMaker:
 
     """
@@ -185,7 +186,7 @@ class DataMaker:
             data_cache.edge_cache[resid_j][resid_i] = f_ji
         return f_ij, f_ji
 
-    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: List[ int ], data_cache):
+    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
         A_dense = np.zeros(shape=[N, N])
         E_dense = np.zeros(shape=[N, N, S])
