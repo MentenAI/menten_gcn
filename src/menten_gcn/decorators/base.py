@@ -27,7 +27,7 @@ class Decorator:
     def n_node_features(self):
         return 0
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
         features = []
         return features
 
@@ -42,7 +42,7 @@ class Decorator:
     def n_edge_features(self):
         return 0
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
         features = []  # 1 -> 2
         inv_features = []  # 2 -> 1
         return features, inv_features

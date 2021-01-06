@@ -29,7 +29,7 @@ class BareBonesDecorator(Decorator):
         # 0: is focus residue
         return 1
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
         if resid in self.focused_resids:
             return [1.0]
         else:
@@ -44,9 +44,9 @@ class BareBonesDecorator(Decorator):
         # 0: polymer bond
         return 1
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
         result1 = 0.0
-        if wrapped_protein.residues_are_polymer_bonded(resid1, resid2):
+        if wrapped_pose.residues_are_polymer_bonded(resid1, resid2):
             result1 = 1.0
         f = [result1]
         return f, f
@@ -85,8 +85,8 @@ class SequenceSeparation(Decorator):
     def n_edge_features(self):
         return 1
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
-        if not wrapped_protein.resids_are_same_chain(resid1, resid2):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
+        if not wrapped_pose.resids_are_same_chain(resid1, resid2):
             return [-1.0, ], [-1.0]
         distance = abs(resid1 - resid2)
         assert distance >= 0
@@ -127,8 +127,8 @@ class SameChain(Decorator):
     def n_edge_features(self):
         return 1
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
-        if wrapped_protein.resids_are_same_chain(resid1, resid2):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
+        if wrapped_pose.resids_are_same_chain(resid1, resid2):
             return [1.0, ], [1.0]
         else:
             return [0.0, ], [0.0, ]

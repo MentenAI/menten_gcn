@@ -136,7 +136,7 @@ class RosettaHBondDecorator_v0(Decorator):
         else:
             return 5
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache):
         if dict_cache is None:
             assert isinstance(wrapped_pose, RosettaPoseWrapper)
             pose = wrapped_pose.pose
@@ -370,9 +370,9 @@ class RosettaJumpDecorator(Decorator):
 
         return vec
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
-        assert isinstance(wrapped_protein, RosettaPoseWrapper)
-        pose = wrapped_protein.pose
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
+        assert isinstance(wrapped_pose, RosettaPoseWrapper)
+        pose = wrapped_pose.pose
         stub1 = rosetta.protocols.hotspot_hashing.StubGenerator.residueStubOrientFrame(pose.residue(resid1))
         stub2 = rosetta.protocols.hotspot_hashing.StubGenerator.residueStubOrientFrame(pose.residue(resid2))
         jump_ij = rosetta.core.kinematics.Jump(stub1, stub2)

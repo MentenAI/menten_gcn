@@ -64,9 +64,9 @@ class CACA_dist(Decorator):
     def n_edge_features(self):
         return 1
 
-    def calc_edge_features(self, wrapped_protein, resid1: int, resid2: int, dict_cache=None):
-        xyz1 = wrapped_protein.get_atom_xyz(resid1, "CA")
-        xyz2 = wrapped_protein.get_atom_xyz(resid2, "CA")
+    def calc_edge_features(self, wrapped_pose, resid1: int, resid2: int, dict_cache=None):
+        xyz1 = wrapped_pose.get_atom_xyz(resid1, "CA")
+        xyz2 = wrapped_pose.get_atom_xyz(resid2, "CA")
         distance = [np.linalg.norm(xyz1 - xyz2)]
         if self.use_nm:
             distance[0] = distance[0] / 10.0
@@ -110,9 +110,9 @@ class CBCB_dist(Decorator):
     def n_edge_features(self):
         return 1
 
-    def calc_edge_features(self, wrapped_protein, resid1: int, resid2: int, dict_cache=None):
-        CB1_xyz = wrapped_protein.approximate_ALA_CB(resid1)
-        CB2_xyz = wrapped_protein.approximate_ALA_CB(resid2)
+    def calc_edge_features(self, wrapped_pose, resid1: int, resid2: int, dict_cache=None):
+        CB1_xyz = wrapped_pose.approximate_ALA_CB(resid1)
+        CB2_xyz = wrapped_pose.approximate_ALA_CB(resid2)
         distance = [np.linalg.norm(CB1_xyz - CB2_xyz)]
         if self.use_nm:
             distance[0] = distance[0] / 10.0
@@ -156,19 +156,19 @@ class PhiPsiRadians(Decorator):
         else:
             return 2
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
         if self.sincos:
-            phi_rad, psi_rad = wrapped_protein.get_phi_psi(resid)
+            phi_rad, psi_rad = wrapped_pose.get_phi_psi(resid)
             vec = np.zeros(shape=(4))
-            if not wrapped_protein.resid_is_N_term(resid):
+            if not wrapped_pose.resid_is_N_term(resid):
                 vec[0] = math.sin(phi_rad)
                 vec[1] = math.cos(phi_rad)
-            if not wrapped_protein.resid_is_C_term(resid):
+            if not wrapped_pose.resid_is_C_term(resid):
                 vec[2] = math.sin(psi_rad)
                 vec[3] = math.cos(psi_rad)
             return vec
         else:
-            return wrapped_protein.get_phi_psi(resid)
+            return wrapped_pose.get_phi_psi(resid)
 
     def describe_node_features(self):
         if self.sincos:
@@ -222,15 +222,15 @@ class trRosettaEdges(Decorator):
         else:
             return 4
 
-    def calc_edge_features(self, wrapped_protein, resid1, resid2, dict_cache=None):
+    def calc_edge_features(self, wrapped_pose, resid1, resid2, dict_cache=None):
         # See Fig1 of https://www.biorxiv.org/content/10.1101/846279v1.full.pdf
-        CA1_xyz = wrapped_protein.get_atom_xyz(resid1, "CA")
-        N1_xyz = wrapped_protein.get_atom_xyz(resid1, "N")
-        CB1_xyz = wrapped_protein.approximate_ALA_CB(resid1)
+        CA1_xyz = wrapped_pose.get_atom_xyz(resid1, "CA")
+        N1_xyz = wrapped_pose.get_atom_xyz(resid1, "N")
+        CB1_xyz = wrapped_pose.approximate_ALA_CB(resid1)
 
-        CA2_xyz = wrapped_protein.get_atom_xyz(resid2, "CA")
-        N2_xyz = wrapped_protein.get_atom_xyz(resid2, "N")
-        CB2_xyz = wrapped_protein.approximate_ALA_CB(resid2)
+        CA2_xyz = wrapped_pose.get_atom_xyz(resid2, "CA")
+        N2_xyz = wrapped_pose.get_atom_xyz(resid2, "N")
+        CB2_xyz = wrapped_pose.approximate_ALA_CB(resid2)
 
         CB_distance = np.linalg.norm(CB1_xyz - CB2_xyz)
         if self.use_nm:
@@ -381,10 +381,10 @@ class ChiAngleDecorator(Decorator):
         else:
             return len(self.chis)
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
         f = []
         for chi in self.chis:
-            chi_rad, is_valid = wrapped_protein.get_chi(resid, chi)
+            chi_rad, is_valid = wrapped_pose.get_chi(resid, chi)
             #print( chi_rad )
             if self.sincos:
                 if is_valid:

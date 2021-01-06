@@ -21,8 +21,8 @@ class Sequence(Decorator):
     def n_node_features(self):
         return 20
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
-        name = wrapped_protein.get_name1(resid)
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
+        name = wrapped_pose.get_name1(resid)
         AAs = "ACDEFGHIKLMNPQRSTVWY"
         onehot = np.zeros(20)
         for i in range(0, 20):
@@ -78,12 +78,12 @@ class DesignableSequence(Decorator):
     def n_node_features(self):
         return 21
 
-    def calc_node_features(self, wrapped_protein, resid, dict_cache=None):
+    def calc_node_features(self, wrapped_pose, resid, dict_cache=None):
         onehot = np.zeros(21)
-        if wrapped_protein.resid_is_designable(resid):
+        if wrapped_pose.resid_is_designable(resid):
             onehot[20] = 1.0
         else:
-            name = wrapped_protein.get_name1(resid)
+            name = wrapped_pose.get_name1(resid)
             AAs = "ACDEFGHIKLMNPQRSTVWY"
             for i in range(0, 20):
                 if name == AAs[i]:
