@@ -313,7 +313,7 @@ class RosettaJumpDecorator(Decorator):
         "quat", "rotvec", and "rotvec_sincos".
     """
 
-    def __init__(self, use_nm:bool=False, rottype:str="euler"):
+    def __init__(self, use_nm: bool = False, rottype: str = "euler"):
         assert(rottype in ["euler", "euler_sincos", "matrix", "quat", "rotvec", "rotvec_sincos"])
         self.rottype = rottype
         self.use_nm = use_nm
@@ -389,7 +389,7 @@ class RosettaJumpDecorator(Decorator):
         else:
             d_units = "Angstroms"
 
-        return ["Value #{} for the Rosetta jump. Distances are measured in {}".format( i, d_units ) \
+        return ["Value #{} for the Rosetta jump. Distances are measured in {}".format(i, d_units)
                 for i in range(0, self.n_edge_features())]
 
 

@@ -354,7 +354,7 @@ class ChiAngleDecorator(Decorator):
         Return the sine and cosine of chi instead of just the raw values
     """
 
-    def __init__(self, chi1:bool=True, chi2:bool=True, chi3:bool=True, chi4:bool=True, sincos:bool=True):
+    def __init__(self, chi1: bool = True, chi2: bool = True, chi3: bool = True, chi4: bool = True, sincos: bool = True):
         self.chis = []
         if chi1:
             self.chis.append(1)
@@ -366,8 +366,8 @@ class ChiAngleDecorator(Decorator):
             self.chis.append(4)
         self.sincos = sincos
 
-        print( ("ChiAngleDecorator: Warning, different protein representations (i.e., Rosetta vs MDTraj)"
-                " represent proton chis differently if the hydrogen atoms are missing from the input file.") )
+        print(("ChiAngleDecorator: Warning, different protein representations (i.e., Rosetta vs MDTraj)"
+               " represent proton chis differently if the hydrogen atoms are missing from the input file."))
 
     def get_version_name(self):
         return "ChiAngleDecorator"
