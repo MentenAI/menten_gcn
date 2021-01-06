@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import *
+from tensorflow.keras.layers import MaxPooling1D,Reshape,Multiply,Layer
 from menten_gcn.wrappers import WrappedPose
 import numpy as np
 
@@ -7,7 +7,7 @@ import numpy as np
 ##############
 
 
-def make_node_mask(A):
+def make_node_mask(A: Layer) -> Layer:
     """
     Create a node mask here, then re-use it many times in the future
 
@@ -27,7 +27,7 @@ def make_node_mask(A):
     return X_mask
 
 
-def apply_node_mask(X, X_mask):
+def apply_node_mask(X: Layer, X_mask: Layer) -> Layer:
     """
     Apply a mask that you've already made
 
@@ -45,9 +45,10 @@ def apply_node_mask(X, X_mask):
     return Multiply()([X, X_mask])
 
 
-def make_and_apply_node_mask(X, A):
+def make_and_apply_node_mask(X: Layer, A: Layer) -> Layer:
     """
-    Sometimes you want to zero-out rows of your X layer that are not currently populated with a node. This method applies a mask from the Adjaceny matrix to do that.
+    Sometimes you want to zero-out rows of your X layer that are not currently populated with a node.
+    This method applies a mask from the Adjaceny matrix to do that.
 
     Parameters
     ---------
@@ -67,7 +68,7 @@ def make_and_apply_node_mask(X, A):
 ##############
 
 
-def make_edge_mask(A):
+def make_edge_mask(A: Layer) -> Layer:
     """
     Create an edge mask here, then re-use it many times in the future
 
@@ -85,7 +86,7 @@ def make_edge_mask(A):
     return Reshape(E_mask_shape, input_shape=A.shape)(A)
 
 
-def apply_edge_mask(E, E_mask):
+def apply_edge_mask(E: Layer, E_mask: Layer) -> Layer:
     """
     Apply a mask that you've already made
 
@@ -103,9 +104,10 @@ def apply_edge_mask(E, E_mask):
     return Multiply()([E, E_mask])
 
 
-def make_and_apply_edge_mask(E, A):
+def make_and_apply_edge_mask(E: Layer, A: Layer) -> Layer:
     """
-    Sometimes you want to zero-out elements of your E layer that are not currently populated with an edge. This method applies a mask from the Adjaceny matrix to do that.
+    Sometimes you want to zero-out elements of your E layer that are not currently populated with an edge.
+    This method applies a mask from the Adjaceny matrix to do that.
 
     Parameters
     ---------
@@ -136,7 +138,7 @@ max_dist_A=10.0 seems to result in a max of 10 residues being selected
 '''
 
 
-def make_adjacency_matrix_for_clustering(wrapped_pose, focus_resids, max_dist_A, CB=False):
+def make_adjacency_matrix_for_clustering(wrapped_pose: WrappedPose, focus_resids: list, max_dist_A: float, CB: bool = False):
     n_foc = len(focus_resids)
     assert n_foc > 0
     A = np.zeros(shape=(n_foc, n_foc))
@@ -159,7 +161,7 @@ def make_adjacency_matrix_for_clustering(wrapped_pose, focus_resids, max_dist_A,
     return A
 
 
-def cluster(wrapped_pose, focus_resids, max_dist_A=20.0, CB=False):
+def cluster(wrapped_pose: WrappedPose, focus_resids: list, max_dist_A: float = 20.0, CB: bool = False) -> list:
     A = make_adjacency_matrix_for_clustering(wrapped_pose, focus_resids, max_dist_A, CB=CB)
     clusters = []
     n_foc = len(focus_resids)
@@ -197,5 +199,5 @@ def cluster(wrapped_pose, focus_resids, max_dist_A=20.0, CB=False):
     return clusters
 
 
-def cluster_all_resids(wrapped_pose, max_dist_A=20.0, CB=False):
+def cluster_all_resids( wrapped_pose: WrappedPose, max_dist_A: float = 20.0, CB: bool = False ) -> list:
     return cluster(wrapped_pose, focus_resids=[i for i in range(1, wrapped_pose.n_residues() + 1)], max_dist_A=max_dist_A, CB=CB)
