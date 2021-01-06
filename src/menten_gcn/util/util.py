@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import MaxPooling1D,Reshape,Multiply,Layer
+from tensorflow.keras.layers import MaxPooling1D, Reshape, Multiply, Layer
 from menten_gcn.wrappers import WrappedPose
 import numpy as np
 
@@ -199,5 +199,5 @@ def cluster(wrapped_pose: WrappedPose, focus_resids: list, max_dist_A: float = 2
     return clusters
 
 
-def cluster_all_resids( wrapped_pose: WrappedPose, max_dist_A: float = 20.0, CB: bool = False ) -> list:
+def cluster_all_resids(wrapped_pose: WrappedPose, max_dist_A: float = 20.0, CB: bool = False) -> list:
     return cluster(wrapped_pose, focus_resids=[i for i in range(1, wrapped_pose.n_residues() + 1)], max_dist_A=max_dist_A, CB=CB)
