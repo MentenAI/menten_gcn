@@ -66,7 +66,7 @@ class DataHolder:
         tf_Xs = tf.convert_to_tensor(np.asarray(self.Xs))
         assert spektral.layers.ops.modes.autodetect_mode(tf_As, tf_Xs) == mode
 
-    def append(self, X: np.adarray, A: np.adarray, E: np.adarray, out: np.adarray):
+    def append(self, X: np.ndarray, A: np.ndarray, E: np.ndarray, out: np.ndarray):
         """
         This is the most important method in this class:
         it gives the data to the dataholder.
