@@ -1,9 +1,7 @@
-import numpy as np
 import math
 
 from menten_gcn.decorators.base import *
 from menten_gcn.wrappers import RosettaPoseWrapper
-
 
 try:
     from pyrosetta import rosetta
@@ -13,7 +11,7 @@ except BaseException:
 #from pyrosetta import rosetta
 # Caller needs to call init()
 
-import scipy  # Jump
+# import scipy  # Jump
 from scipy.spatial.transform import Rotation as R
 
 # Convention: All decorators must start with "Rosetta". This allows us to
@@ -77,8 +75,9 @@ class RosettaResidueSelectorDecorator(Decorator):
 
     def describe_node_features(self):
         return [
-            "1.0 if the residue is selected by the residue selector, 0.0 otherwise. User defined definition of the residue selector and how to reproduce it: " +
-            self.description,
+            "1.0 if the residue is selected by the residue selector, 0.0 otherwise. "
+            + "User defined definition of the residue selector and how to reproduce it: "
+            + self.description,
         ]
 
 
@@ -296,7 +295,9 @@ class _RosettaTwobodyEnergies_v0(Decorator):
 class RosettaJumpDecorator(Decorator):
 
     """
-    Measures the translational and rotational relationships between all residue pairs. This uses internal coordinate frames so it is agnostic to the global coordinate system. You can move/rotate your protein around and these will stay the same.
+    Measures the translational and rotational relationships between all residue pairs.
+    This uses internal coordinate frames so it is agnostic to the global coordinate system.
+    You can move/rotate your protein around and these will stay the same.
 
     - 0 Node Features
     - 6-12 Edge Features
@@ -307,7 +308,9 @@ class RosettaJumpDecorator(Decorator):
         If true (default), measure distance in Angstroms.
         Otherwise use nanometers.
     rottype: str
-        How do you want to represent the rotational degrees of freedom? Options are "euler" (default), "euler_sincos", "matrix", "quat", "rotvec", and "rotvec_sincos".
+        How do you want to represent the rotational degrees of freedom?
+        Options are "euler" (default), "euler_sincos", "matrix",
+        "quat", "rotvec", and "rotvec_sincos".
     """
 
     def __init__(self, use_nm=False, rottype="euler"):
@@ -386,10 +389,8 @@ class RosettaJumpDecorator(Decorator):
         else:
             d_units = "Angstroms"
 
-        # TODO
-        return ["Some Feature" for i in range(0, self.n_edge_features())]
-
-### META ###
+        return ["Value #{} for the Rosetta jump. Distances are measured in {}".format( i, d_units ) \
+                for i in range(0, self.n_edge_features())]
 
 
 class RosettaHBondDecorator(RosettaHBondDecorator_v0):
