@@ -311,8 +311,10 @@ class CachedDataHolderInputGenerator(tf.keras.utils.Sequence):
 
         self.currently_loaded_npz_index = -1
 
+    """
     def n_elem(self):
         return len(self.data_list_lines)
+    """
 
     def __len__(self):
         """It is mandatory to implement it on Keras Sequence"""
