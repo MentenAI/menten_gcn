@@ -218,28 +218,38 @@ def test_masks():
 def test_data_generator_1():
     d = DataHolder()
     for x in range( 0, 10 ):
-        t = [ x, ]
+        t = [x,]
         d.append( t, t, t, t )
     assert len( d.Xs ) == 10
+    assert d.size() == 10
 
     generator = DataHolderInputGenerator( d, 3 )
     assert len(generator) == 4
-    assert len(generator[0]) == 3
-    assert len(generator[1]) == 3
-    assert len(generator[2]) == 3
-    assert len(generator[3]) == 1
+    assert generator.n_elem() == 10
 
-    assert generator[0][0] == 0
-    assert generator[0][1] == 1
-    assert generator[0][2] == 2
+    def Xlen( generator, i ):
+        inp, out = generator[ i ]
+        print( "    length: ", len( inp[ 0 ] ) )
+        return len( inp[ 0 ] )
 
-    assert generator[1][0] == 3
-    assert generator[1][1] == 4
-    assert generator[1][2] == 5
+    def Xval( generator, i, j ):
+        inp, out = generator[ i ]
+        print( "    value: ", inp[ 0 ][ j ] )
+        return inp[ 0 ][ j ]
+    
+    assert Xlen( generator, 0 ) == 3
+    assert Xlen( generator, 1 ) == 3
+    assert Xlen( generator, 2 ) == 3
+    assert Xlen( generator, 3 ) == 1
 
-    assert generator[2][0] == 6
-    assert generator[2][1] == 7
-    assert generator[2][2] == 8
-
-    assert generator[3][0] == 9
+    assert Xval( generator, 0, 0 ) == 0
+    assert Xval( generator, 0, 1 ) == 1
+    assert Xval( generator, 0, 2 ) == 2
+    assert Xval( generator, 1, 0 ) == 3
+    assert Xval( generator, 1, 1 ) == 4
+    assert Xval( generator, 1, 2 ) == 5
+    assert Xval( generator, 2, 0 ) == 6
+    assert Xval( generator, 2, 1 ) == 7
+    assert Xval( generator, 2, 2 ) == 8
+    assert Xval( generator, 3, 0 ) == 9
         

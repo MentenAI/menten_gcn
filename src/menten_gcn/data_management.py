@@ -105,10 +105,19 @@ class DataHolder:
         return [x, a, e], o
 
     def get_indices(self, inds):
+        """
+        this stopped working at some point
         x = np.asarray(self.Xs[inds])
         a = np.asarray(self.As[inds])
         e = np.asarray(self.Es[inds])
         o = np.asarray(self.outs[inds])
+        """
+
+        x = np.asarray([ self.Xs[i] for i in inds ])
+        a = np.asarray([ self.As[i] for i in inds ])
+        e = np.asarray([ self.Es[i] for i in inds ])
+        o = np.asarray([ self.outs[i] for i in inds ])
+        
         # TODO debug mode
         # for xi in x:
         #    assert xi.flatten()[ 0 ] == 1
@@ -204,8 +213,8 @@ class DataHolderInputGenerator(tf.keras.utils.Sequence):
 
     def __getitem__(self, item_index):
         begin = item_index * self.batch_size
-        end = min(item_index + self.batch_size, len(self.indices))
-
+        end = min(begin + self.batch_size, len(self.indices))
+        
         inds = self.indices[begin:end]
         inp, out = self.holder.get_indices(inds)
 
@@ -333,7 +342,7 @@ class CachedDataHolderInputGenerator(tf.keras.utils.Sequence):
                 np.random.shuffle(self.indices)
 
         begin = i * self.batch_size
-        end = min(i + self.batch_size, len(self.holder.As))
+        end = min(begin + self.batch_size, len(self.holder.As))
         if self.indices is None:
             inp, out = self.holder.get_batch(begin, end)
         else:
