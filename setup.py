@@ -87,5 +87,5 @@ setup(
     test_requires=[
         'md_traj',
     ],
-    
+
 )
