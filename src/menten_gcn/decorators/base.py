@@ -1,6 +1,7 @@
 from menten_gcn.wrappers import WrappedPose
 from typing import List, Tuple
 
+
 class Decorator:
 
     #########

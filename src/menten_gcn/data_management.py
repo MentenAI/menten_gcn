@@ -8,6 +8,7 @@ import gc
 from typing import List
 from menten_gcn.wrappers import WrappedPose
 
+
 class DecoratorDataCache:
 
     """
@@ -113,11 +114,11 @@ class DataHolder:
         o = np.asarray(self.outs[inds])
         """
 
-        x = np.asarray([ self.Xs[i] for i in inds ])
-        a = np.asarray([ self.As[i] for i in inds ])
-        e = np.asarray([ self.Es[i] for i in inds ])
-        o = np.asarray([ self.outs[i] for i in inds ])
-        
+        x = np.asarray([self.Xs[i] for i in inds])
+        a = np.asarray([self.As[i] for i in inds])
+        e = np.asarray([self.Es[i] for i in inds])
+        o = np.asarray([self.outs[i] for i in inds])
+
         # TODO debug mode
         # for xi in x:
         #    assert xi.flatten()[ 0 ] == 1
@@ -214,7 +215,7 @@ class DataHolderInputGenerator(tf.keras.utils.Sequence):
     def __getitem__(self, item_index):
         begin = item_index * self.batch_size
         end = min(begin + self.batch_size, len(self.indices))
-        
+
         inds = self.indices[begin:end]
         inp, out = self.holder.get_indices(inds)
 

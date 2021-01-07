@@ -215,176 +215,180 @@ def test_masks():
     equal(np.asarray(expected_out1), test_out[2], decimal=2)
     equal(np.asarray(expected_out2), test_out[3], decimal=2)
 
+
 def test_data_generator_1():
     d = DataHolder()
-    for x in range( 0, 10 ):
-        t = [x,]
-        d.append( t, t, t, t )
-    assert len( d.Xs ) == 10
+    for x in range(0, 10):
+        t = [x, ]
+        d.append(t, t, t, t)
+    assert len(d.Xs) == 10
     assert d.size() == 10
 
-    generator = DataHolderInputGenerator( d, 3 )
+    generator = DataHolderInputGenerator(d, 3)
     assert len(generator) == 4
     assert generator.n_elem() == 10
 
-    def Xlen( generator, i ):
-        inp, out = generator[ i ]
-        print( "    length: ", len( inp[ 0 ] ) )
-        return len( inp[ 0 ] )
+    def Xlen(generator, i):
+        inp, out = generator[i]
+        print("    length: ", len(inp[0]))
+        return len(inp[0])
 
-    def Xval( generator, i, j ):
-        inp, out = generator[ i ]
-        print( "    value: ", inp[ 0 ][ j ] )
-        return inp[ 0 ][ j ]
-    
-    assert Xlen( generator, 0 ) == 3
-    assert Xlen( generator, 1 ) == 3
-    assert Xlen( generator, 2 ) == 3
-    assert Xlen( generator, 3 ) == 1
+    def Xval(generator, i, j):
+        inp, out = generator[i]
+        print("    value: ", inp[0][j])
+        return inp[0][j]
 
-    assert Xval( generator, 0, 0 ) == 0
-    assert Xval( generator, 0, 1 ) == 1
-    assert Xval( generator, 0, 2 ) == 2
-    assert Xval( generator, 1, 0 ) == 3
-    assert Xval( generator, 1, 1 ) == 4
-    assert Xval( generator, 1, 2 ) == 5
-    assert Xval( generator, 2, 0 ) == 6
-    assert Xval( generator, 2, 1 ) == 7
-    assert Xval( generator, 2, 2 ) == 8
-    assert Xval( generator, 3, 0 ) == 9
-        
+    assert Xlen(generator, 0) == 3
+    assert Xlen(generator, 1) == 3
+    assert Xlen(generator, 2) == 3
+    assert Xlen(generator, 3) == 1
+
+    assert Xval(generator, 0, 0) == 0
+    assert Xval(generator, 0, 1) == 1
+    assert Xval(generator, 0, 2) == 2
+    assert Xval(generator, 1, 0) == 3
+    assert Xval(generator, 1, 1) == 4
+    assert Xval(generator, 1, 2) == 5
+    assert Xval(generator, 2, 0) == 6
+    assert Xval(generator, 2, 1) == 7
+    assert Xval(generator, 2, 2) == 8
+    assert Xval(generator, 3, 0) == 9
+
+
 def test_data_generator_2():
     d = DataHolder()
-    for x in range( 0, 10 ):
-        t = [x,]
-        d.append( t, t, t, t )
-    assert len( d.Xs ) == 10
+    for x in range(0, 10):
+        t = [x, ]
+        d.append(t, t, t, t)
+    assert len(d.Xs) == 10
     assert d.size() == 10
-    d.save_to_file( "test1" )
+    d.save_to_file("test1")
 
-    def run_on_gen( generator ):
-    
+    def run_on_gen(generator):
+
         assert len(generator) == 3
 
-        def Xlen( generator, i ):
-            inp, out = generator[ i ]
-            print( "    length: ", len( inp[ 0 ] ) )
-            return len( inp[ 0 ] )
+        def Xlen(generator, i):
+            inp, out = generator[i]
+            print("    length: ", len(inp[0]))
+            return len(inp[0])
 
-        def Xval( generator, i, j ):
-            inp, out = generator[ i ]
-            print( "    value: ", inp[ 0 ][ j ] )
-            return inp[ 0 ][ j ]
+        def Xval(generator, i, j):
+            inp, out = generator[i]
+            print("    value: ", inp[0][j])
+            return inp[0][j]
 
-        assert Xlen( generator, 0 ) == 3
-        assert Xlen( generator, 1 ) == 3
-        assert Xlen( generator, 2 ) == 3
+        assert Xlen(generator, 0) == 3
+        assert Xlen(generator, 1) == 3
+        assert Xlen(generator, 2) == 3
 
-        assert Xval( generator, 0, 0 ) == 0
-        assert Xval( generator, 0, 1 ) == 1
-        assert Xval( generator, 0, 2 ) == 2
-        assert Xval( generator, 1, 0 ) == 3
-        assert Xval( generator, 1, 1 ) == 4
-        assert Xval( generator, 1, 2 ) == 5
-        assert Xval( generator, 2, 0 ) == 6
-        assert Xval( generator, 2, 1 ) == 7
-        assert Xval( generator, 2, 2 ) == 8
-    
-    gen1 = CachedDataHolderInputGenerator( ["test1.npz"], cache=True, batch_size=3, autoshuffle = False )
-    gen2 = CachedDataHolderInputGenerator( ["test1.npz"], cache=False, batch_size=3, autoshuffle = False )
-    run_on_gen( gen1 )
-    run_on_gen( gen2 )
+        assert Xval(generator, 0, 0) == 0
+        assert Xval(generator, 0, 1) == 1
+        assert Xval(generator, 0, 2) == 2
+        assert Xval(generator, 1, 0) == 3
+        assert Xval(generator, 1, 1) == 4
+        assert Xval(generator, 1, 2) == 5
+        assert Xval(generator, 2, 0) == 6
+        assert Xval(generator, 2, 1) == 7
+        assert Xval(generator, 2, 2) == 8
+
+    gen1 = CachedDataHolderInputGenerator(["test1.npz"], cache=True, batch_size=3, autoshuffle=False)
+    gen2 = CachedDataHolderInputGenerator(["test1.npz"], cache=False, batch_size=3, autoshuffle=False)
+    run_on_gen(gen1)
+    run_on_gen(gen2)
+
 
 def test_data_generator_3():
     d = DataHolder()
-    for x in range( 0, 10 ):
-        t = [x,]
-        d.append( t, t, t, t )
-    assert len( d.Xs ) == 10
+    for x in range(0, 10):
+        t = [x, ]
+        d.append(t, t, t, t)
+    assert len(d.Xs) == 10
     assert d.size() == 10
-    d.save_to_file( "test1" )
+    d.save_to_file("test1")
 
-    def run_on_gen( generator ):
-    
+    def run_on_gen(generator):
+
         assert len(generator) == 6
 
-        def Xlen( generator, i ):
-            inp, out = generator[ i ]
-            print( "    length: ", len( inp[ 0 ] ) )
-            return len( inp[ 0 ] )
+        def Xlen(generator, i):
+            inp, out = generator[i]
+            print("    length: ", len(inp[0]))
+            return len(inp[0])
 
-        def Xval( generator, i, j ):
-            inp, out = generator[ i ]
-            print( "    value: ", inp[ 0 ][ j ] )
-            return inp[ 0 ][ j ]
+        def Xval(generator, i, j):
+            inp, out = generator[i]
+            print("    value: ", inp[0][j])
+            return inp[0][j]
 
-        assert Xlen( generator, 0 ) == 3
-        assert Xlen( generator, 1 ) == 3
-        assert Xlen( generator, 2 ) == 3
-        assert Xlen( generator, 3 ) == 3
-        assert Xlen( generator, 4 ) == 3
-        assert Xlen( generator, 5 ) == 3
+        assert Xlen(generator, 0) == 3
+        assert Xlen(generator, 1) == 3
+        assert Xlen(generator, 2) == 3
+        assert Xlen(generator, 3) == 3
+        assert Xlen(generator, 4) == 3
+        assert Xlen(generator, 5) == 3
 
-        assert Xval( generator, 0, 0 ) == 0
-        assert Xval( generator, 0, 1 ) == 1
-        assert Xval( generator, 0, 2 ) == 2
-        assert Xval( generator, 1, 0 ) == 3
-        assert Xval( generator, 1, 1 ) == 4
-        assert Xval( generator, 1, 2 ) == 5
-        assert Xval( generator, 2, 0 ) == 6
-        assert Xval( generator, 2, 1 ) == 7
-        assert Xval( generator, 2, 2 ) == 8
-        assert Xval( generator, 3, 0 ) == 0
-        assert Xval( generator, 3, 1 ) == 1
-        assert Xval( generator, 3, 2 ) == 2
-        assert Xval( generator, 4, 0 ) == 3
-        assert Xval( generator, 4, 1 ) == 4
-        assert Xval( generator, 4, 2 ) == 5
-        assert Xval( generator, 5, 0 ) == 6
-        assert Xval( generator, 5, 1 ) == 7
-        assert Xval( generator, 5, 2 ) == 8
-    
-    gen1 = CachedDataHolderInputGenerator( ["test1.npz","test1.npz"], cache=True, batch_size=3, autoshuffle = False )
-    gen2 = CachedDataHolderInputGenerator( ["test1.npz","test1.npz"], cache=False, batch_size=3, autoshuffle = False )
-    run_on_gen( gen1 )
-    run_on_gen( gen2 )
+        assert Xval(generator, 0, 0) == 0
+        assert Xval(generator, 0, 1) == 1
+        assert Xval(generator, 0, 2) == 2
+        assert Xval(generator, 1, 0) == 3
+        assert Xval(generator, 1, 1) == 4
+        assert Xval(generator, 1, 2) == 5
+        assert Xval(generator, 2, 0) == 6
+        assert Xval(generator, 2, 1) == 7
+        assert Xval(generator, 2, 2) == 8
+        assert Xval(generator, 3, 0) == 0
+        assert Xval(generator, 3, 1) == 1
+        assert Xval(generator, 3, 2) == 2
+        assert Xval(generator, 4, 0) == 3
+        assert Xval(generator, 4, 1) == 4
+        assert Xval(generator, 4, 2) == 5
+        assert Xval(generator, 5, 0) == 6
+        assert Xval(generator, 5, 1) == 7
+        assert Xval(generator, 5, 2) == 8
+
+    gen1 = CachedDataHolderInputGenerator(["test1.npz", "test1.npz"], cache=True, batch_size=3, autoshuffle=False)
+    gen2 = CachedDataHolderInputGenerator(["test1.npz", "test1.npz"], cache=False, batch_size=3, autoshuffle=False)
+    run_on_gen(gen1)
+    run_on_gen(gen2)
+
 
 def test_data_generator_4():
     d = DataHolder()
-    for x in range( 0, 10 ):
-        t = [x,]
-        d.append( t, t, t, t )
-    assert len( d.Xs ) == 10
+    for x in range(0, 10):
+        t = [x, ]
+        d.append(t, t, t, t)
+    assert len(d.Xs) == 10
     assert d.size() == 10
-    d.save_to_file( "test1" )
+    d.save_to_file("test1")
 
-    def run_on_gen( generator ):
-    
+    def run_on_gen(generator):
+
         assert len(generator) == 6
 
-        def Xlen( generator, i ):
-            inp, out = generator[ i ]
-            return len( inp[ 0 ] )
+        def Xlen(generator, i):
+            inp, out = generator[i]
+            return len(inp[0])
 
-        def Xval( generator, i, j ):
-            inp, out = generator[ i ]
-            return inp[ 0 ][ j ]
+        def Xval(generator, i, j):
+            inp, out = generator[i]
+            return inp[0][j]
 
-        assert Xlen( generator, 0 ) == 3
-        assert Xlen( generator, 1 ) == 3
-        assert Xlen( generator, 2 ) == 3
-        assert Xlen( generator, 3 ) == 3
-        assert Xlen( generator, 4 ) == 3
-        assert Xlen( generator, 5 ) == 3
+        assert Xlen(generator, 0) == 3
+        assert Xlen(generator, 1) == 3
+        assert Xlen(generator, 2) == 3
+        assert Xlen(generator, 3) == 3
+        assert Xlen(generator, 4) == 3
+        assert Xlen(generator, 5) == 3
 
-        for epoch in range( 0, 10 ):
-            log = np.zeros( 10 )
-            for i in range( 0, 6 ):
-                for j in range( 0, 3 ):
-                    log[ Xval( generator, i, j ) ] += 1
-            assert( max(log) == 2 )
-            assert( min(log) <= 1 )
-            assert( sum(log) == 18 )
-    
-    gen1 = CachedDataHolderInputGenerator( ["test1.npz","test1.npz"], cache=False, batch_size=3, autoshuffle = True )
-    run_on_gen( gen1 )
+        for epoch in range(0, 10):
+            log = np.zeros(10)
+            for i in range(0, 6):
+                for j in range(0, 3):
+                    log[Xval(generator, i, j)] += 1
+            assert(max(log) == 2)
+            assert(min(log) <= 1)
+            assert(sum(log) == 18)
+
+    gen1 = CachedDataHolderInputGenerator(["test1.npz", "test1.npz"], cache=False, batch_size=3, autoshuffle=True)
+    run_on_gen(gen1)
