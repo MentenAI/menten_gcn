@@ -293,8 +293,8 @@ class DataMaker:
         if data_cache is None:
             data_cache = NullDecoratorDataCache()
 
-        self.bare_bones_decorator.set_focused_resids(focused_resids)
-        all_resids = self._calc_nbrs(wrapped_pose, focused_resids, legal_nbrs=legal_nbrs)
+        self.bare_bones_decorator.set_focused_resids(focus_resids)
+        all_resids = self._calc_nbrs(wrapped_pose, focus_resids, legal_nbrs=legal_nbrs)
         # n_nodes = len(all_resids)
 
         # Node Data

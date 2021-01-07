@@ -185,7 +185,7 @@ class CombinedDecorator(Decorator):
         features = []
         for d in self.decorators:
             features.extend(d.calc_node_features(wrapped_pose, resid=resid, dict_cache=dict_cache))
-        assert(len(features) == self.n_edge_features())
+        assert(len(features) == self.n_node_features())
         return features
 
     def describe_node_features(self):
@@ -219,10 +219,5 @@ class CombinedDecorator(Decorator):
         features = []
         for d in self.decorators:
             features.extend(d.describe_edge_features())
-        '''
-        print( len( features ), self.n_edge_features() )
-        for e in features:
-            print( e )
-        '''
         assert(len(features) == self.n_edge_features())
         return features
