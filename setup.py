@@ -84,4 +84,8 @@ setup(
     setup_requires=[
         'pytest-runner',
     ],
+    test_requires=[
+        'md_traj',
+    ],
+    
 )
