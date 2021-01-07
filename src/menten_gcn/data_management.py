@@ -307,7 +307,6 @@ class CachedDataHolderInputGenerator(tf.keras.utils.Sequence):
 
     def __len__(self):
         """It is mandatory to implement it on Keras Sequence"""
-        # return int(len( self.holder.Xs ) / 100)
         return int(self.total_size / self.batch_size)
 
     def get_npz_index_for_item(self, item_index):

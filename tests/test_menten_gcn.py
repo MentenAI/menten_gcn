@@ -214,3 +214,32 @@ def test_masks():
     equal(np.asarray(expected_Emask), test_out[1], decimal=2)
     equal(np.asarray(expected_out1), test_out[2], decimal=2)
     equal(np.asarray(expected_out2), test_out[3], decimal=2)
+
+def test_data_generator_1():
+    d = DataHolder()
+    for x in range( 0, 10 ):
+        t = [ x, ]
+        d.append( t, t, t, t )
+    assert len( d.Xs ) == 10
+
+    generator = DataHolderInputGenerator( d, 3 )
+    assert len(generator) == 4
+    assert len(generator[0]) == 3
+    assert len(generator[1]) == 3
+    assert len(generator[2]) == 3
+    assert len(generator[3]) == 1
+
+    assert generator[0][0] == 0
+    assert generator[0][1] == 1
+    assert generator[0][2] == 2
+
+    assert generator[1][0] == 3
+    assert generator[1][1] == 4
+    assert generator[1][2] == 5
+
+    assert generator[2][0] == 6
+    assert generator[2][1] == 7
+    assert generator[2][2] == 8
+
+    assert generator[3][0] == 9
+        
