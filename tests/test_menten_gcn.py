@@ -755,3 +755,174 @@ def test_expected_md_traj_results():
     assert_equal(A, expectedA, 2)
     assert_equal(E, expectedE, 2)
     assert_equal(resids, [20, 21, 19, 8, 61], 2)
+
+
+def test_model_sizes():
+    N = 5
+    F = 4
+    S = 3
+    X_in = Input(shape=(N, F), name='X_in')
+    A_in = Input(shape=(N, N), sparse=False, name='A_in')
+    E_in = Input(shape=(N, N, S), name='E_in')
+
+    def assert_n_params(inp, out, expected_size):
+        model = Model(inputs=inp, outputs=out)
+        model.compile(optimizer='adam', loss='mean_squared_error')
+        print(model.count_params())
+        assert(model.count_params() == expected_size)
+
+    NENE = make_NENE(X_in, E_in)
+    assert_n_params([X_in, A_in, E_in], NENE, 0)
+
+    NEENEENEE = make_NEENEENEE(X_in, E_in)
+    assert_n_params([X_in, A_in, E_in], NEENEENEE, 0)
+
+    X, E = make_1body_conv(X_in, A_in, E_in, 10, 20)
+    assert_n_params([X_in, A_in, E_in], [X, E], 130)
+    # 130 = ( 4 + 1 ) * 10 + ( 3 + 1 ) * 20
+    # 130 = 50 + 80
+
+    X, E = make_2body_conv(X_in, A_in, E_in,
+                           [5], 10, 20,
+                           attention=False, apply_T_to_E=False)
+    assert_n_params([X_in, A_in, E_in], [X, E], 530)
+    # t = (4+4+3+3+1)*5 =  75
+    # x = (4+5+5+1)*10  = 150
+    # e = (4+4+3+3+1)*20= 300
+    # p                 =   5    #Prelu
+    # total = t+x+e+p   = 530
+
+    X, E = make_2body_conv(X_in, A_in, E_in,
+                           5, 10, 20,
+                           attention=False, apply_T_to_E=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 350)
+    # int vs list:
+    X, E = make_2body_conv(X_in, A_in, E_in,
+                           [5], 10, 20,
+                           attention=False, apply_T_to_E=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 350)
+    # t = (4+4+3+3+1)*5 =  75
+    # x = (4+5+5+1)*10  = 150
+    # e = (5+1)*20      = 120
+    # p                 =   5    #Prelu
+    # total = t+x+e+p   = 350
+
+    X, E = make_2body_conv(X_in, A_in, E_in,
+                           [5], 10, 20,
+                           attention=True, apply_T_to_E=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 362)
+    # t = (4+4+3+3+1)*5     =  75
+    # a = (5+1)*1   *2      =  12    #Attention
+    # x = (4+5+5+1)*10      = 150
+    # e = (5+1)*20          = 120
+    # p                     =   5    #Prelu
+    # total = t+a+x+e+p     = 362
+
+    X, E = make_2body_conv(X_in, A_in, E_in,
+                           [50, 5], 10, 20,
+                           attention=True, apply_T_to_E=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 1342)
+    # t1 = (4+4+3+3+1)*50   =  750
+    # t2 = (50+1)*5         =  255
+    # a = (5+1)*1   *2      =   12  #Attention
+    # x = (4+5+5+1)*10      =  150
+    # e = (5+1)*20          =  120
+    # p = 50 + 5            =   55  #Prelu
+    # total = t1+t2+a+x+e+p = 1342
+
+    X, E = make_3body_conv(X_in, A_in, E_in,
+                           [5], 10, 20, attention=False)
+    assert_n_params([X_in, A_in, E_in], [X, E], 1100)
+    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p                           =    5    #Prelu
+    # total = t+x+e+p             = 1100
+
+    X, E = make_3body_conv(X_in, A_in, E_in,
+                           [5], 10, 20, attention=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+    # int vs list:
+    X, E = make_3body_conv(X_in, A_in, E_in,
+                           5, 10, 20, attention=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+    # a = (5+1)*1   *6            =   36    #Attention
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p                           =    5    #Prelu
+    # total = t+a+x+e+p           = 1136
+
+    X, E = make_3body_conv(X_in, A_in, E_in,
+                           [7, 5], 10, 20, attention=True)
+    assert_n_params([X_in, A_in, E_in], [X, E], 1245)
+    # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
+    # t2 = (7+1)*5                =   40
+    # a = (5+1)*1   *6            =   36    #Attention
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p = 5 + 7                   =   12    #Prelu
+    # total = t1+t2+a+x+e+p       = 1245
+
+
+def test_clustering():
+    pose = md.load_pdb("tests/6U07.atoms.pdb")
+    # pose = md.load_pdb("6U07.atoms.pdb")
+    wrapped_pose = MDTrajPoseWrapper(mdtraj_trajectory=pose)
+    CAclusters = cluster_all_resids(wrapped_pose, 10, False)
+    # print( repr( CAclusters ) )
+    assert CAclusters == [
+        [
+            66, 63, 64, 65, 67, 68, 69], [
+            89, 90, 91, 92, 93, 195, 196], [
+                193, 190, 191, 192, 194], [
+                    197, 198, 199, 200, 201, 202], [
+                        1, 2, 3, 4, 24, 25, 26, 56], [
+                            28, 27, 29, 30, 31, 79], [
+                                81, 78, 80, 82, 83, 84], [
+                                    53, 48, 49, 50, 51, 52, 54, 55], [
+                                        72, 20, 70, 71, 73, 74, 75, 76], [
+                                            77, 32, 33, 34], [
+                                                35, 36, 37, 38, 39, 40, 41], [
+                                                    87, 7, 8, 85, 86, 88, 106], [
+                                                        5, 6, 21, 22, 23, 58, 107, 110], [
+                                                            57, 43, 44, 45, 46, 47, 59, 144], [
+                                                                61, 18, 19, 42, 60, 62, 164], [
+                                                                    16, 10, 11, 12, 13, 14, 15, 17], [
+                                                                        111, 108, 109, 112, 113, 114, 170, 171], [
+                                                                            105, 9, 102, 103, 104, 216, 217], [
+                                                                                147, 145, 146, 148, 149, 150, 163, 165], [
+                                                                                    155, 151, 152, 153, 154, 156, 157, 158, 159], [
+                                                                                        172, 169, 173, 174, 175, 176, 177, 214, 215], [
+                                                                                            178, 135, 179, 180, 181, 213], [
+                                                                                                136, 132, 133, 134, 137, 138, 139, 182], [
+                                                                                                    140, 131, 141, 142, 143, 167], [
+                                                                                                        168, 115, 116, 117, 166], [
+                                                                                                            212, 99, 100, 101, 183, 210, 211], [
+                                                                                                                118, 98, 119, 120, 121, 130, 184, 185, 209], [
+                                                                                                                    97, 94, 95, 96, 122, 123, 162, 208], [
+                                                                                                                        160, 124, 125, 126, 161], [
+                                                                                                                            127, 128, 129, 186, 187, 188, 189], [
+                                                                                                                                203, 204, 205, 206], [207]]
+
+    CBclusters = cluster_all_resids(wrapped_pose, 15, True)
+    # print( repr( CBclusters ) )
+    assert CBclusters == [
+        [
+            193, 90, 93, 188, 189, 190, 191, 192, 194, 195, 196, 197, 202, 203, 204, 205, 206], [
+            199, 89, 91, 92, 94, 95, 198, 200, 201], [
+                157, 37, 124, 125, 126, 151, 152, 153, 154, 155, 156, 158, 159, 160, 161], [
+                    53, 1, 47, 48, 49, 50, 51, 52, 54, 55, 56, 112, 113, 141, 142, 143, 168, 169, 170], [
+                        66, 16, 17, 18, 20, 36, 38, 39, 40, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73], [
+                            35, 30, 31, 32, 33, 34, 41, 42, 43, 59, 61, 74, 75, 76, 77, 78, 79, 150], [
+                                81, 2, 3, 4, 5, 6, 22, 24, 25, 26, 28, 29, 80, 82, 83, 84, 85], [
+                                    27, 23, 44, 45, 46, 57, 58, 144], [
+                                        87, 7, 8, 9, 10, 21, 86, 88, 104, 105, 106, 107, 108, 109, 110], [
+                                            111, 103, 114, 115, 116, 117, 166, 171, 172, 173, 174, 175, 217], [
+                                                216, 102, 176, 177, 178, 179, 180, 181, 212, 213, 214, 215], [
+                                                    15, 11, 12, 13, 14, 19, 99, 100, 101, 119, 210, 211], [
+                                                        136, 131, 132, 133, 134, 135, 137, 138, 139, 140, 182, 183, 184, 209], [
+                                                            167, 60, 98, 118, 120, 130, 145, 146, 147, 163, 164, 165, 185], [
+                                                                148, 123, 127, 128, 129, 149, 162], [
+                                                                    207, 96, 97, 186, 187, 208], [
+                                                                        121, 122]]

@@ -4,8 +4,10 @@ from tensorflow.keras.layers import *
 
 from menten_gcn.util import *
 
+from typing import Tuple
 
-def make_NENE(X, E):
+
+def make_NENE(X: Layer, E: Layer) -> Layer:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
@@ -36,7 +38,7 @@ def make_NENE(X, E):
     return Concatenate(axis=-1)([Xi, E, Xj, Eprime])
 
 
-def expand_E(E):
+def expand_E(E: Layer) -> Tuple[Layer, Layer, Layer]:
     #E.shape: (None, N, N, S)
     N = E.shape[1]
     assert(N == E.shape[2])
@@ -56,7 +58,7 @@ def expand_E(E):
     return Ei, Ej, Ek
 
 
-def make_NEENEENEE(X, E):
+def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[Layer, Layer]:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
@@ -93,13 +95,34 @@ def make_NEENEENEE(X, E):
     return C, Eprime
 
 
-def make_NEENEENEE_mask(E_mask):
+def make_NEENEENEE_mask(E_mask: Layer) -> Layer:
     assert len(E_mask.shape) == 4
     Ei, Ej, Ek = expand_E(E_mask)
     return Multiply()([Ei, Ej, Ek])
 
 
-def make_NENE_XE_conv(X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None):
+def make_1body_conv(X: Layer, A: Layer, E: Layer,
+                    Xnfeatures: int, Enfeatures: int,
+                    Xactivation='relu', Eactivation='relu',
+                    E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
+    newX = Conv1D(filters=Xnfeatures, kernel_size=1, activation=Xactivation)(X)
+    if X_mask is None:
+        X_mask = make_node_mask(A)
+    newX = apply_node_mask(X=newX, X_mask=X_mask)
+
+    newE = Conv2D(filters=Enfeatures, kernel_size=1, activation=Eactivation)(E)
+    if E_mask is None:
+        E_mask = make_edge_mask(A)
+    newE = apply_edge_mask(E=newE, E_mask=E_mask)
+
+    return newX, newE
+
+
+def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
+                      Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
+                      Xactivation='relu', Eactivation='relu',
+                      attention: bool = False, apply_T_to_E: bool = False,
+                      E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
     """
     We find that current GCN layers undervalue the Edge tensors.
     Not only does this layer use them as input,
@@ -116,16 +139,22 @@ def make_NENE_XE_conv(X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='r
         Adjaceny matrix
     E: layer
         Edge features
-    Xnfeatures: list of 2 ints
+    Tnfeatures: list of ints
+        How large should each intermediate layer be?
+        The length of this list determines the number of intermediate layers.
+    Xnfeatures: int
         How many features do you want each node to end up with?
-        At the moment this asks you to give two values because there is an intermediate layer.
-        Xnfeatures=[64,32] will end up with 32 values for each Node.
     Enfeatures: int
         How many features do you want each edge to end up with?
     Xactivation:
         Which activation function should be applied to the final X?
     Eactivation:
         Which activation function should be applied to the final E?
+    attention: bool
+        Should we apply attention weights to the sum operations?
+    apply_T_to_E: bool
+        Should the input to the final E conv be the Temp tensor or the initial NENE?
+        Feel free to just use the default if that question makes no sense
     E_mask: layer
         If you already made an edge mask, feel free to pass it here to save us time.
     X_mask: layer
@@ -145,32 +174,55 @@ def make_NENE_XE_conv(X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='r
     assert len(A.shape) == 3
     assert len(E.shape) == 4
 
-    NENE = make_NENE(X, E)
-
-    newE = Conv2D(filters=Enfeatures, kernel_size=1, activation=Eactivation)(NENE)
-    if E_mask is None:
-        E_mask = make_edge_mask(A)
-    newE = apply_edge_mask(E=newE, E_mask=E_mask)
-
-    newX = Conv2D(filters=Xnfeatures[0], kernel_size=1, activation=None)(NENE)
-    newX = apply_edge_mask(E=newX, E_mask=E_mask)
-    newX1 = tf.keras.backend.sum(newX, axis=-2, keepdims=False)
-    newX1 = PReLU(shared_axes=[1])(newX1)
-    newX2 = tf.keras.backend.sum(newX, axis=-3, keepdims=False)
-    newX2 = PReLU(shared_axes=[1])(newX2)
-    newX = Concatenate(axis=-1)([X, newX1, newX2])
-
-    newX = Conv1D(filters=Xnfeatures[1], kernel_size=1, activation=Xactivation)(newX)
-
     if X_mask is None:
         X_mask = make_node_mask(A)
-    newX = apply_node_mask(X=newX, X_mask=X_mask)
+    if E_mask is None:
+        E_mask = make_edge_mask(A)
+
+    NENE = make_NENE(X, E)
+    Temp = NENE
+
+    if hasattr(Tnfeatures, "__len__"):
+        assert len(Tnfeatures) > 0
+        for t in Tnfeatures:
+            Temp = Conv2D(filters=t, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
+    else:
+        Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
+
+    Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
+
+    if attention:
+        Att1 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att1 = Multiply()([Temp, Att1])
+        newX1 = tf.keras.backend.sum(Att1, axis=-2, keepdims=False)
+
+        Att2 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att2 = Multiply()([Temp, Att2])
+        newX2 = tf.keras.backend.sum(Att2, axis=-3, keepdims=False)
+    else:
+        newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
+        newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
+
+    #newX1 = PReLU(shared_axes=[1])(newX1)
+    #newX2 = PReLU(shared_axes=[1])(newX2)
+    superX = Concatenate(axis=-1)([X, newX1, newX2])
+
+    if apply_T_to_E:
+        superE = Temp
+    else:
+        superE = NENE
+
+    newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
+                                 Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
 
 
-def make_NEENEENEE_XE_conv(X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
-                           Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None):
+def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
+                           Tnfeatures: list, Xnfeatures: int,
+                           Enfeatures: int, Xactivation='relu',
+                           Eactivation='relu', attention: bool = False,
+                           E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
     """
     Same idea as make_NENE_XE_conv but considers all possible 3-body interactions.
     Warning: this will use a ton of memory if your graph is large.
@@ -197,6 +249,8 @@ def make_NEENEENEE_XE_conv(X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeature
         Which activation function should be applied to the final X?
     Eactivation:
         Which activation function should be applied to the final E?
+    attention: bool
+        Should we apply attention weights to the sum operations?
     E_mask: layer
         If you already made an edge mask, feel free to pass it here to save us time.
     X_mask: layer
@@ -227,37 +281,60 @@ def make_NEENEENEE_XE_conv(X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeature
     if hasattr(Tnfeatures, "__len__"):
         Temp = NEE3
         for t in Tnfeatures:
-            Temp = Conv3D(filters=t, kernel_size=1, activation=None)(Temp)
+            Temp = Conv3D(filters=t, kernel_size=1,
+                          activation=PReLU(shared_axes=[1, 2, 3]))(Temp)
     else:
-        Temp = Conv3D(filters=Tnfeatures, kernel_size=1, activation=None)(NEE3)
+        Temp = Conv3D(filters=Tnfeatures, kernel_size=1,
+                      activation=PReLU(shared_axes=[1, 2, 3]))(NEE3)
 
     mask = make_NEENEENEE_mask(E_mask)
     Temp = Multiply()([Temp, mask])
 
-    Xi = tf.keras.backend.sum(Temp, axis=[-4, -3], keepdims=False)
-    #print( Xi.shape )
-    Xj = tf.keras.backend.sum(Temp, axis=[-4, -2], keepdims=False)
-    Xk = tf.keras.backend.sum(Temp, axis=[-3, -2], keepdims=False)
-    X = Concatenate(axis=-1)([X, Xi, Xj, Xk])  # Activation here?
-    newX = Conv1D(filters=Xnfeatures, kernel_size=1, activation=Xactivation)(X)
+    if attention:
+        Att_xi = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_xj = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_xk = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ei = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ej = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ek = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
 
-    Ei = tf.keras.backend.sum(Temp, axis=[-4], keepdims=False)
-    #print( Ei.shape )
-    Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
-    Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
+        Att_xi = Multiply()([Temp, Att_xi])
+        Att_xj = Multiply()([Temp, Att_xj])
+        Att_xk = Multiply()([Temp, Att_xk])
+        Att_ei = Multiply()([Temp, Att_ei])
+        Att_ej = Multiply()([Temp, Att_ej])
+        Att_ek = Multiply()([Temp, Att_ek])
+
+        Xi = tf.keras.backend.sum(Att_xi, axis=[-4, -3], keepdims=False)
+        Xj = tf.keras.backend.sum(Att_xj, axis=[-4, -2], keepdims=False)
+        Xk = tf.keras.backend.sum(Att_xk, axis=[-3, -2], keepdims=False)
+
+        Ei = tf.keras.backend.sum(Att_ei, axis=[-4], keepdims=False)
+        Ek = tf.keras.backend.sum(Att_ej, axis=[-3], keepdims=False)
+        Ej = tf.keras.backend.sum(Att_ek, axis=[-2], keepdims=False)
+    else:
+        Xi = tf.keras.backend.sum(Temp, axis=[-4, -3], keepdims=False)
+        Xj = tf.keras.backend.sum(Temp, axis=[-4, -2], keepdims=False)
+        Xk = tf.keras.backend.sum(Temp, axis=[-3, -2], keepdims=False)
+
+        Ei = tf.keras.backend.sum(Temp, axis=[-4], keepdims=False)
+        Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
+        Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
+
+    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])  # Activation here?
+
     Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
     Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
     Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
-    E = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
-    #print( E.shape )
-    newE = Conv2D(filters=Enfeatures, kernel_size=1, activation=Eactivation)(E)
+    superE = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
 
-    newE = apply_edge_mask(E=newE, E_mask=E_mask)
-    newX = apply_node_mask(X=newX, X_mask=X_mask)
+    newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
+                                 Xactivation, Eactivation, E_mask, X_mask)
+
     return newX, newE
 
 
-def add_n_edges_for_node(X, A):
+def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
     #print( A.shape )
     n_edges = tf.keras.backend.mean(A, axis=-1, keepdims=False)
     #print( n_edges.shape )
@@ -265,3 +342,8 @@ def add_n_edges_for_node(X, A):
     #print( n_edges.shape )
     newX = Concatenate(axis=-1)([X, n_edges])
     return newX
+
+
+make_2body_conv = make_NENE_XE_conv
+
+make_3body_conv = make_NEENEENEE_XE_conv
