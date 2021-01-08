@@ -22,11 +22,9 @@ Technical Overview
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/MentenAI/menten_gcn
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/MentenAI/menten_gcn/v0.0.1.svg
-    :alt: Commits since latest release
-    :target: https://github.com/MentenAI/menten_gcn/compare/v0.0.1...main
-
-
+.. |versions| image:: https://img.shields.io/pypi/pyversions/menten_gcn
+    :alt: Supported Python Versions
+    :target: https://github.com/MentenAI/menten_gcn/
 
 .. end-badges
 
@@ -43,14 +41,14 @@ Installation
 
 You can also install the in-development version with::
 
-    pip install https://github.com/MentenAI/menten_gcn/archive/master.zip
+    pip install https://github.com/MentenAI/menten_gcn/archive/main.zip
 
 
 Documentation
 =============
 
 
-https://menten_gcn.readthedocs.io/
+https://menten-gcn.readthedocs.io/
 
 
 Development
