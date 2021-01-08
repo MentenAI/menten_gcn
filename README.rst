@@ -39,9 +39,13 @@ Technical Overview
 
 .. end-badges
 
-This package decorates graph tensors with data from protein models
+Documentation
+=============
 
-* Free software: MIT license
+
+https://menten-gcn.readthedocs.io/
+
+
 
 Installation
 ============
@@ -55,33 +59,10 @@ You can also install the in-development version with::
     pip install https://github.com/MentenAI/menten_gcn/archive/main.zip
 
 
-Documentation
-=============
-
-
-https://menten-gcn.readthedocs.io/
-
 
 Development
 ===========
 
-To run all the tests run::
+To run all the tests locally run::
 
     tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
