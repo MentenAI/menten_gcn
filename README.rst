@@ -16,6 +16,7 @@ Technical Overview
     * - support
       - | |versions|
         | |size|
+        | |license|
 .. |docs| image:: https://readthedocs.org/projects/menten_gcn/badge/?style=flat
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
@@ -31,6 +32,10 @@ Technical Overview
 .. |size| image:: https://img.shields.io/github/repo-size/MentenAI/menten_gcn
     :alt: Repo Size
     :target: https://github.com/MentenAI/menten_gcn/
+    
+.. |license| image:: https://img.shields.io/github/license/MentenAI/menten_gcn
+    :alt: Repo Size
+    :target: https://github.com/MentenAI/menten_gcn/blob/main/LICENSE
 
 .. end-badges
 
