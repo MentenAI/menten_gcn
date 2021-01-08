@@ -8,11 +8,12 @@ Technical Overview
     :stub-columns: 1
 
     * - docs
-      - |docs|
+      - | |docs|
+        |
     * - tests
       - | |travis|
         |
-    * - package
+    * - support
       - | |versions|
 .. |docs| image:: https://readthedocs.org/projects/menten_gcn/badge/?style=flat
     :target: https://readthedocs.org/projects/menten_gcn
