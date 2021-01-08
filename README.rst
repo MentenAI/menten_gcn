@@ -17,6 +17,7 @@ Technical Overview
       - | |versions|
         | |size|
         | |license|
+        |
 .. |docs| image:: https://readthedocs.org/projects/menten_gcn/badge/?style=flat
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
