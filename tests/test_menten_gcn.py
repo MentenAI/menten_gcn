@@ -16,63 +16,6 @@ import mdtraj as md
 def test_main():
     pass
 
-def test_masks():
-    X_in = Input(shape=(3, 3), name='X_in')
-    A_in = Input(shape=(3, 3), name='A_in')
-    E_in = Input(shape=(3, 2), name='E_in')
-    X_mask = make_node_mask(A_in)
-    E_mask = make_edge_mask(A_in)
-    model = Model(inputs=[X_in,A_in,E_in], outputs=[X_mask,E_mask])
-    model.compile(optimizer='adam',
-                  loss='mean_squared_error' )
-    
-    testX = [[[ 0.,         -1.21597895,  1.94387676],
-              [ 1.,          2.01919905, -0.10534814],
-              [ 2.,          4.,          6.        ]]]
-    testA = [[[0., 1., 0.],
-              [1., 0., 0.],
-              [0., 0., 0.]]]
-    testE = [[[[1.,         2.        ],
-               [3.1,        4.1],
-               [5.,         6.        ],],
-
-              [[7.1,        8.1],
-               [9.,         1.        ],
-               [9.,         2.        ],],
-
-              [[8.,         3.        ],
-               [7.,         4.        ],
-               [6.,         5.        ],],]]
-
-    testX = np.asarray( testX ).astype('float32')
-    testA = np.asarray( testA ).astype('float32')
-    testE = np.asarray( testE ).astype('float32')
-
-    expectedX = [[[ 0.,         -1.21597895,  1.94387676],
-                  [ 1.,          2.01919905, -0.10534814],
-                  [ 0.,          0.,          0.        ]]]
-    expectedE = [[[[0.,         0.        ],
-                   [3.1,        4.1],
-                   [0.,         0.        ],],
-
-                  [[7.1,        8.1],
-                   [0.,         0.        ],
-                   [0.,         0.        ],],
-
-                  [[0.,         0.        ],
-                   [0.,         0.        ],
-                   [0.,         0.        ],],]]
-
-    expectedX = np.asarray( expectedX ).astype('float32')
-    expectedE = np.asarray( expectedE ).astype('float32')
-
-    
-    test_out = model.predict([testX,testA,testE])
-    equal = np.testing.assert_almost_equal
-    equal(np.asarray(expectedX), test_out[0], decimal=2)
-    equal(np.asarray(expectedE), test_out[1], decimal=2)
-    
-
 
 def NEE3_test_mask(Xval, Aval, Eval, N, F, S):
     # X_in = Input(shape=(N, F), name='X_in')
