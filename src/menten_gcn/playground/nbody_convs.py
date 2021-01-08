@@ -190,7 +190,6 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
         Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1,2]))(Temp)
     
     Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
-    #Temp = PReLU(shared_axes=[1,2])(Temp)
     
     if attention:
         Att1 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
