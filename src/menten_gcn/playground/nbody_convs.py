@@ -6,6 +6,7 @@ from menten_gcn.util import *
 
 from typing import Tuple
 
+
 def make_NENE(X: Layer, E: Layer) -> Layer:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
@@ -37,7 +38,7 @@ def make_NENE(X: Layer, E: Layer) -> Layer:
     return Concatenate(axis=-1)([Xi, E, Xj, Eprime])
 
 
-def expand_E(E: Layer) -> Tuple[ Layer, Layer, Layer ]:
+def expand_E(E: Layer) -> Tuple[Layer, Layer, Layer]:
     #E.shape: (None, N, N, S)
     N = E.shape[1]
     assert(N == E.shape[2])
@@ -57,7 +58,7 @@ def expand_E(E: Layer) -> Tuple[ Layer, Layer, Layer ]:
     return Ei, Ej, Ek
 
 
-def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[ Layer, Layer ]:
+def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[Layer, Layer]:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
@@ -103,13 +104,13 @@ def make_NEENEENEE_mask(E_mask: Layer) -> Layer:
 def make_1body_conv(X: Layer, A: Layer, E: Layer,
                     Xnfeatures: int, Enfeatures: int,
                     Xactivation='relu', Eactivation='relu',
-                    E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
-    newX = Conv1D(filters=Xnfeatures,kernel_size=1,activation=Xactivation)(X)
+                    E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
+    newX = Conv1D(filters=Xnfeatures, kernel_size=1, activation=Xactivation)(X)
     if X_mask is None:
         X_mask = make_node_mask(A)
     newX = apply_node_mask(X=newX, X_mask=X_mask)
 
-    newE = Conv2D(filters=Enfeatures,kernel_size=1,activation=Eactivation)(E)
+    newE = Conv2D(filters=Enfeatures, kernel_size=1, activation=Eactivation)(E)
     if E_mask is None:
         E_mask = make_edge_mask(A)
     newE = apply_edge_mask(E=newE, E_mask=E_mask)
@@ -121,7 +122,7 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
                       Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
                       Xactivation='relu', Eactivation='relu',
                       attention: bool = False, apply_T_to_E: bool = False,
-                      E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
+                      E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
     """
     We find that current GCN layers undervalue the Edge tensors.
     Not only does this layer use them as input,
@@ -164,7 +165,7 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     - keras layer which is the new X
     - keras layer which is the new E
     """
-    
+
     # X: shape=(None,N,F)
     # A: shape=(None,N,N)
     # E: shape=(None,N,N,S)
@@ -174,35 +175,34 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     assert len(E.shape) == 4
 
     if X_mask is None:
-        X_mask = make_node_mask(A)    
+        X_mask = make_node_mask(A)
     if E_mask is None:
         E_mask = make_edge_mask(A)
-    
+
     NENE = make_NENE(X, E)
     Temp = NENE
-    
 
     if hasattr(Tnfeatures, "__len__"):
-        assert len( Tnfeatures ) > 0        
+        assert len(Tnfeatures) > 0
         for t in Tnfeatures:
-            Temp = Conv2D(filters=t, kernel_size=1, activation=PReLU(shared_axes=[1,2]))(Temp)
+            Temp = Conv2D(filters=t, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
     else:
-        Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1,2]))(Temp)
-    
+        Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
+
     Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
-    
+
     if attention:
         Att1 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
         newX1 = tf.keras.backend.sum(Att1, axis=-2, keepdims=False)
-        
+
         Att2 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
         Att2 = Multiply()([Temp, Att2])
         newX2 = tf.keras.backend.sum(Att2, axis=-3, keepdims=False)
     else:
         newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
         newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
-        
+
     #newX1 = PReLU(shared_axes=[1])(newX1)
     #newX2 = PReLU(shared_axes=[1])(newX2)
     superX = Concatenate(axis=-1)([X, newX1, newX2])
@@ -211,10 +211,10 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
         superE = Temp
     else:
         superE = NENE
-        
+
     newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
                                  Xactivation, Eactivation, E_mask, X_mask)
-    
+
     return newX, newE
 
 
@@ -222,7 +222,7 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
                            Tnfeatures: list, Xnfeatures: int,
                            Enfeatures: int, Xactivation='relu',
                            Eactivation='relu', attention: bool = False,
-                           E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
+                           E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
     """
     Same idea as make_NENE_XE_conv but considers all possible 3-body interactions.
     Warning: this will use a ton of memory if your graph is large.
@@ -282,10 +282,10 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
         Temp = NEE3
         for t in Tnfeatures:
             Temp = Conv3D(filters=t, kernel_size=1,
-                          activation=PReLU(shared_axes=[1,2,3]))(Temp)
+                          activation=PReLU(shared_axes=[1, 2, 3]))(Temp)
     else:
         Temp = Conv3D(filters=Tnfeatures, kernel_size=1,
-                      activation=PReLU(shared_axes=[1,2,3]))(NEE3)
+                      activation=PReLU(shared_axes=[1, 2, 3]))(NEE3)
 
     mask = make_NEENEENEE_mask(E_mask)
     Temp = Multiply()([Temp, mask])
@@ -322,15 +322,15 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
         Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
 
     superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])  # Activation here?
-    
+
     Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
     Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
     Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
     superE = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
-    
+
     newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
                                  Xactivation, Eactivation, E_mask, X_mask)
-    
+
     return newX, newE
 
 
