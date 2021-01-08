@@ -13,7 +13,7 @@ Technical Overview
       - | |travis|
         |
     * - package
-      - | |commits-since|
+      - | |versions|
 .. |docs| image:: https://readthedocs.org/projects/menten_gcn/badge/?style=flat
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
