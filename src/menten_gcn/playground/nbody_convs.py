@@ -114,7 +114,7 @@ def make_1body_conv(X: Layer, A: Layer, E: Layer, Xnfeatures: list, Enfeatures: 
     return newX, newE
 
 
-def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
+def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer, Tnfeatures: list, Xnfeatures: int, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
     """
     We find that current GCN layers undervalue the Edge tensors.
     Not only does this layer use them as input,
@@ -167,15 +167,18 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer, Xnfeatures: list, Enfeatures
         E_mask = make_edge_mask(A)
     newE = apply_edge_mask(E=newE, E_mask=E_mask)
 
-    newX = Conv2D(filters=Xnfeatures[0], kernel_size=1, activation=None)(NENE)
-    newX = apply_edge_mask(E=newX, E_mask=E_mask)
-    newX1 = tf.keras.backend.sum(newX, axis=-2, keepdims=False)
+    assert len( Tnfeatures ) > 0
+    for t in Tnfeatures:
+        Temp = Conv2D(filters=t, kernel_size=1, activation=None)(NENE)
+    Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
+    
+    newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
     newX1 = PReLU(shared_axes=[1])(newX1)
-    newX2 = tf.keras.backend.sum(newX, axis=-3, keepdims=False)
+    newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
     newX2 = PReLU(shared_axes=[1])(newX2)
     newX = Concatenate(axis=-1)([X, newX1, newX2])
 
-    newX = Conv1D(filters=Xnfeatures[1], kernel_size=1, activation=Xactivation)(newX)
+    newX = Conv1D(filters=Xnfeatures, kernel_size=1, activation=Xactivation)(newX)
 
     if X_mask is None:
         X_mask = make_node_mask(A)
