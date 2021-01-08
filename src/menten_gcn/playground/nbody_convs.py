@@ -131,10 +131,11 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer, Tnfeatures: list, Xnfeatures
         Adjaceny matrix
     E: layer
         Edge features
-    Xnfeatures: list of 2 ints
+    Tnfeatures: list of ints
+        How large should each intermediate layer be?
+        The length of this list determines the number of intermediate layers.
+    Xnfeatures: int
         How many features do you want each node to end up with?
-        At the moment this asks you to give two values because there is an intermediate layer.
-        Xnfeatures=[64,32] will end up with 32 values for each Node.
     Enfeatures: int
         How many features do you want each edge to end up with?
     Xactivation:
