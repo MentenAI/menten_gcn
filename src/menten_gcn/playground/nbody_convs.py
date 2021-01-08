@@ -37,7 +37,7 @@ def make_NENE(X: Layer, E: Layer) -> Layer:
     return Concatenate(axis=-1)([Xi, E, Xj, Eprime])
 
 
-def expand_E(E: Layer) -> Tuple( Layer, Layer, Layer ):
+def expand_E(E: Layer) -> Tuple[ Layer, Layer, Layer ]:
     #E.shape: (None, N, N, S)
     N = E.shape[1]
     assert(N == E.shape[2])
@@ -164,7 +164,7 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     - keras layer which is the new X
     - keras layer which is the new E
     """
-
+    
     # X: shape=(None,N,F)
     # A: shape=(None,N,N)
     # E: shape=(None,N,N,S)
@@ -173,13 +173,25 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     assert len(A.shape) == 3
     assert len(E.shape) == 4
 
+    if X_mask is None:
+        X_mask = make_node_mask(A)    
+    if E_mask is None:
+        E_mask = make_edge_mask(A)
+    
     NENE = make_NENE(X, E)
+    Temp = NENE
+    
 
-    assert len( Tnfeatures ) > 0
-    for t in Tnfeatures:
-        Temp = Conv2D(filters=t, kernel_size=1, activation=None)(NENE)
+    if hasattr(Tnfeatures, "__len__"):
+        assert len( Tnfeatures ) > 0        
+        for t in Tnfeatures:
+            Temp = Conv2D(filters=t, kernel_size=1, activation=PReLU(shared_axes=[1,2]))(Temp)
+    else:
+        Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1,2]))(Temp)
+    
     Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
-
+    #Temp = PReLU(shared_axes=[1,2])(Temp)
+    
     if attention:
         Att1 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
@@ -192,8 +204,8 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
         newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
         newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
         
-    newX1 = PReLU(shared_axes=[1])(newX1)
-    newX2 = PReLU(shared_axes=[1])(newX2)
+    #newX1 = PReLU(shared_axes=[1])(newX1)
+    #newX2 = PReLU(shared_axes=[1])(newX2)
     superX = Concatenate(axis=-1)([X, newX1, newX2])
 
     if apply_T_to_E:
@@ -210,7 +222,7 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
 def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
                            Tnfeatures: list, Xnfeatures: int,
                            Enfeatures: int, Xactivation='relu',
-                           Eactivation='relu', attention: bool = False
+                           Eactivation='relu', attention: bool = False,
                            E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
     """
     Same idea as make_NENE_XE_conv but considers all possible 3-body interactions.
@@ -270,9 +282,11 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
     if hasattr(Tnfeatures, "__len__"):
         Temp = NEE3
         for t in Tnfeatures:
-            Temp = Conv3D(filters=t, kernel_size=1, activation=None)(Temp)
+            Temp = Conv3D(filters=t, kernel_size=1,
+                          activation=PReLU(shared_axes=[1,2,3]))(Temp)
     else:
-        Temp = Conv3D(filters=Tnfeatures, kernel_size=1, activation=None)(NEE3)
+        Temp = Conv3D(filters=Tnfeatures, kernel_size=1,
+                      activation=PReLU(shared_axes=[1,2,3]))(NEE3)
 
     mask = make_NEENEENEE_mask(E_mask)
     Temp = Multiply()([Temp, mask])
@@ -329,3 +343,8 @@ def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
     #print( n_edges.shape )
     newX = Concatenate(axis=-1)([X, n_edges])
     return newX
+
+
+make_2body_conv = make_NENE_XE_conv
+
+make_3body_conv = make_NEENEENEE_XE_conv

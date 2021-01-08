@@ -755,3 +755,122 @@ def test_expected_md_traj_results():
     assert_equal(A, expectedA, 2)
     assert_equal(E, expectedE, 2)
     assert_equal(resids, [20, 21, 19, 8, 61], 2)
+
+def test_model_sizes():
+    N = 5
+    F = 4
+    S = 3
+    X_in = Input(shape=(N, F), name='X_in')
+    A_in = Input(shape=(N, N), sparse=False, name='A_in')
+    E_in = Input(shape=(N, N, S), name='E_in')
+
+    def assert_n_params( inp, out, expected_size ):
+        model = Model(inputs=inp, outputs=out)
+        model.compile(optimizer='adam', loss='mean_squared_error')
+        print( model.count_params() )
+        assert( model.count_params() == expected_size )
+
+    
+    NENE = make_NENE( X_in, E_in )
+    assert_n_params( [X_in,A_in,E_in], NENE, 0 )
+
+    NEENEENEE = make_NEENEENEE( X_in, E_in )
+    assert_n_params( [X_in,A_in,E_in], NEENEENEE, 0 )
+
+    
+    X, E = make_1body_conv( X_in, A_in, E_in, 10, 20 )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 130 )
+    # 130 = ( 4 + 1 ) * 10 + ( 3 + 1 ) * 20
+    # 130 = 50 + 80
+
+
+    
+    X, E = make_2body_conv( X_in, A_in, E_in,
+                            [5], 10, 20,
+                            attention=False, apply_T_to_E=False )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 530 )
+    # t = (4+4+3+3+1)*5 =  75
+    # x = (4+5+5+1)*10  = 150
+    # e = (4+4+3+3+1)*20= 300
+    # p                 =   5    #Prelu
+    # total = t+x+e+p   = 530
+
+
+    
+    X, E = make_2body_conv( X_in, A_in, E_in,
+                            5, 10, 20,
+                            attention=False, apply_T_to_E=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 350 )
+    # int vs list:
+    X, E = make_2body_conv( X_in, A_in, E_in,
+                            [5], 10, 20,
+                            attention=False, apply_T_to_E=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 350 )
+    # t = (4+4+3+3+1)*5 =  75
+    # x = (4+5+5+1)*10  = 150
+    # e = (5+1)*20      = 120
+    # p                 =   5    #Prelu
+    # total = t+x+e+p   = 350
+
+    
+    X, E = make_2body_conv( X_in, A_in, E_in,
+                            [5], 10, 20,
+                            attention=True, apply_T_to_E=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 362 )
+    # t = (4+4+3+3+1)*5     =  75
+    # a = (5+1)*1   *2      =  12    #Attention
+    # x = (4+5+5+1)*10      = 150
+    # e = (5+1)*20          = 120
+    # p                     =   5    #Prelu    
+    # total = t+a+x+e+p     = 362
+
+    X, E = make_2body_conv( X_in, A_in, E_in,
+                            [50,5], 10, 20,
+                            attention=True, apply_T_to_E=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 1342 )
+    # t1 = (4+4+3+3+1)*50   =  750
+    # t2 = (50+1)*5         =  255
+    # a = (5+1)*1   *2      =   12  #Attention
+    # x = (4+5+5+1)*10      =  150
+    # e = (5+1)*20          =  120
+    # p = 50 + 5            =   55  #Prelu    
+    # total = t1+t2+a+x+e+p = 1342
+    
+
+    X, E = make_3body_conv( X_in, A_in, E_in,
+                            [5], 10, 20, attention=False )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 1100 )
+    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p                           =    5    #Prelu    
+    # total = t+x+e+p             = 1100
+
+    
+    X, E = make_3body_conv( X_in, A_in, E_in,
+                            [5], 10, 20, attention=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 1136 )
+    # int vs list:
+    X, E = make_3body_conv( X_in, A_in, E_in,
+                            5, 10, 20, attention=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 1136 )
+    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+    # a = (5+1)*1   *6            =   36    #Attention
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p                           =    5    #Prelu    
+    # total = t+a+x+e+p           = 1136
+
+    
+    X, E = make_3body_conv( X_in, A_in, E_in,
+                            [7,5], 10, 20, attention=True )
+    assert_n_params( [X_in,A_in,E_in], [X,E], 1245 )
+    # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
+    # t2 = (7+1)*5                =   40
+    # a = (5+1)*1   *6            =   36    #Attention
+    # x = (4+5+5+5+1)*10          =  200
+    # e = (3+3+(6*5)+1)*20        =  740
+    # p = 5 + 7                   =   12    #Prelu    
+    # total = t1+t2+a+x+e+p       = 1245
+
+    
