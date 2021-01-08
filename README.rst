@@ -8,12 +8,16 @@ Technical Overview
     :stub-columns: 1
 
     * - docs
-      - |docs|
+      - | |docs|
+        |
     * - tests
       - | |travis|
         |
-    * - package
-      - | |commits-since|
+    * - support
+      - | |versions|
+        | |size|
+        | |license|
+        |
 .. |docs| image:: https://readthedocs.org/projects/menten_gcn/badge/?style=flat
     :target: https://readthedocs.org/projects/menten_gcn
     :alt: Documentation Status
@@ -22,17 +26,27 @@ Technical Overview
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/MentenAI/menten_gcn
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/MentenAI/menten_gcn/v0.0.1.svg
-    :alt: Commits since latest release
-    :target: https://github.com/MentenAI/menten_gcn/compare/v0.0.1...main
-
-
+.. |versions| image:: https://img.shields.io/pypi/pyversions/menten_gcn
+    :alt: Supported Python Versions
+    :target: https://github.com/MentenAI/menten_gcn/
+    
+.. |size| image:: https://img.shields.io/github/repo-size/MentenAI/menten_gcn
+    :alt: Repo Size
+    :target: https://github.com/MentenAI/menten_gcn/
+    
+.. |license| image:: https://img.shields.io/github/license/MentenAI/menten_gcn
+    :alt: Repo Size
+    :target: https://github.com/MentenAI/menten_gcn/blob/main/LICENSE
 
 .. end-badges
 
-This package decorates graph tensors with data from protein models
+Documentation
+=============
 
-* Free software: MIT license
+
+https://menten-gcn.readthedocs.io/
+
+
 
 Installation
 ============
@@ -43,36 +57,13 @@ Installation
 
 You can also install the in-development version with::
 
-    pip install https://github.com/MentenAI/menten_gcn/archive/master.zip
+    pip install https://github.com/MentenAI/menten_gcn/archive/main.zip
 
-
-Documentation
-=============
-
-
-https://menten_gcn.readthedocs.io/
 
 
 Development
 ===========
 
-To run all the tests run::
+To run all the tests locally run::
 
     tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
