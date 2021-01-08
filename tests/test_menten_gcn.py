@@ -396,7 +396,7 @@ def test_data_generator_4():
 
 
 def test_expected_md_traj_results():
-    pose = md.load_pdb("6U07.atoms.pdb")
+    pose = md.load_pdb("tests/6U07.atoms.pdb")
     wrapped_pose = MDTrajPoseWrapper(mdtraj_trajectory=pose)
 
     focus_resid = 20
