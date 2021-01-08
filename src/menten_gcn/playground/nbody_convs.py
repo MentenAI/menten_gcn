@@ -4,8 +4,9 @@ from tensorflow.keras.layers import *
 
 from menten_gcn.util import *
 
+from typing import Tuple
 
-def make_NENE(X, E):
+def make_NENE(X: Layer, E: Layer) -> Layer:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
@@ -36,7 +37,7 @@ def make_NENE(X, E):
     return Concatenate(axis=-1)([Xi, E, Xj, Eprime])
 
 
-def expand_E(E):
+def expand_E(E: Layer) -> Tuple( Layer, Layer, Layer ):
     #E.shape: (None, N, N, S)
     N = E.shape[1]
     assert(N == E.shape[2])
@@ -56,7 +57,7 @@ def expand_E(E):
     return Ei, Ej, Ek
 
 
-def make_NEENEENEE(X, E):
+def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[ Layer, Layer ]:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
@@ -93,13 +94,27 @@ def make_NEENEENEE(X, E):
     return C, Eprime
 
 
-def make_NEENEENEE_mask(E_mask):
+def make_NEENEENEE_mask(E_mask: Layer) -> Layer:
     assert len(E_mask.shape) == 4
     Ei, Ej, Ek = expand_E(E_mask)
     return Multiply()([Ei, Ej, Ek])
 
 
-def make_NENE_XE_conv(X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None):
+def make_1body_conv(X: Layer, A: Layer, E: Layer, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
+    newX = Conv1D(filters=Xnfeatures,kernel_size=1,activation=Xactivation)(X)
+    if X_mask is None:
+        X_mask = make_node_mask(A)
+    newX = apply_node_mask(X=newX, X_mask=X_mask)
+
+    newE = Conv2D(filters=Enfeatures,kernel_size=1,activation=Eactivation)(E)
+    if E_mask is None:
+        E_mask = make_edge_mask(A)
+    newE = apply_edge_mask(E=newE, E_mask=E_mask)
+
+    return newX, newE
+
+
+def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer, Xnfeatures: list, Enfeatures: int, Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None) -> Tuple[ Layer, Layer ]:
     """
     We find that current GCN layers undervalue the Edge tensors.
     Not only does this layer use them as input,
@@ -169,8 +184,10 @@ def make_NENE_XE_conv(X, A, E, Xnfeatures: list, Enfeatures: int, Xactivation='r
     return newX, newE
 
 
-def make_NEENEENEE_XE_conv(X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
-                           Xactivation='relu', Eactivation='relu', E_mask=None, X_mask=None):
+def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
+                           Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
+                           Xactivation='relu', Eactivation='relu', E_mask=None,
+                           X_mask=None) -> Tuple[ Layer, Layer ]:
     """
     Same idea as make_NENE_XE_conv but considers all possible 3-body interactions.
     Warning: this will use a ton of memory if your graph is large.
@@ -257,7 +274,7 @@ def make_NEENEENEE_XE_conv(X, A, E, Tnfeatures: list, Xnfeatures: int, Enfeature
     return newX, newE
 
 
-def add_n_edges_for_node(X, A):
+def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
     #print( A.shape )
     n_edges = tf.keras.backend.mean(A, axis=-1, keepdims=False)
     #print( n_edges.shape )
