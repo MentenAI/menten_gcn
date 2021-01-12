@@ -1045,3 +1045,108 @@ def test_sanity_check_flat_nbody():
     
     equal = np.testing.assert_almost_equal
     equal( stitch1_np, target, decimal=3 )
+
+"""
+def test_flat_nbody_layer():
+
+    class TestFlat(tf.keras.layers.Layer):
+        def __init__(self):
+            super(TestFlat, self).__init__()
+            self.N = -1
+            self.S = -1
+
+        def build(self, input_shape):
+            print( "input_shape: ", input_shape )
+            # TensorShape([None, 3, 3]), TensorShape([None, 3, 3, 2])]
+            assert( len( input_shape ) == 2 )
+            assert( len( input_shape[0] ) == 3 )
+            assert( len( input_shape[1] ) == 4 )
+            assert( input_shape[0][1] == input_shape[1][1] )
+            assert( input_shape[0][2] == input_shape[1][2] )
+            self.N = input_shape[0][1]
+            self.S = input_shape[1][3]
+            pass
+            
+        def call(self, inputs):
+            print( "inputs: ", inputs )
+            #[<tf.Tensor 'A_in:0' shape=(None, 3, 3)    dtype=float32>,
+            # <tf.Tensor 'E_in:0' shape=(None, 3, 3, 2) dtype=float32>]
+            
+            A = inputs[0]
+            E = inputs[1]
+
+            A_int = tf.cast( A, "int32" )
+            
+            part = tf.dynamic_partition( E, A_int, 2 )
+            print( len( part ) )
+            print( part[0] )
+            print( part[1] )
+            """
+            2
+            tf.Tensor(
+            [[1. 2.]
+            [5. 6.]
+            [9. 1.]
+            [9. 2.]
+            [8. 3.]
+            [7. 4.]
+            [6. 5.]], shape=(7, 2), dtype=float32)
+            tf.Tensor(
+            [[3.1 4.1]
+            [7.1 8.1]], shape=(2, 2), dtype=float32)
+            """
+
+            sum1 = tf.math.reduce_sum( part[1], axis=-1, keepdims=True )
+
+            # none of the rest of this works
+            r = tf.range(self.N*self.N*self.S)
+            #tf.shape((None,self.N,self.N,1))
+            s = tf.shape(E)
+            aa=tf.Variable(s)
+            aa[-1].assign( 1 )
+            r = tf.reshape( r, s )
+            indices = tf.dynamic_partition( r, A_int, 2 )
+            print( indices )
+            """
+            partitioned_data = [
+                np.zeros( shape=(7,1) ),
+                sum1
+            ]
+            """
+            
+            return inputs[0] #dummy for now
+
+    N = 3
+    #F = 3
+    S = 2
+
+    # X_in = Input(shape=(N, F), name='X_in')
+    A_in = Input(shape=(N, N), name='A_in')
+    E_in = Input(shape=(N, N, S), name='E_in')
+
+    out = TestFlat()( [A_in,E_in] )
+    
+    model = Model(inputs=[A_in,E_in], outputs=out)
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.summary()
+
+    testA = [[[0., 1., 0.],
+              [1., 0., 0.],
+              [0., 0., 0.]]]
+    testE = [[[[1., 2.],
+               [3.1, 4.1],
+               [5., 6.], ],
+
+              [[7.1, 8.1],
+               [9., 1.],
+               [9., 2.], ],
+
+              [[8., 3.],
+               [7., 4.],
+               [6., 5.], ], ]]
+    
+    testA = np.asarray(testA).astype('float32')
+    testE = np.asarray(testE).astype('float32')
+
+    print( model([testA,testE]) )
+"""
