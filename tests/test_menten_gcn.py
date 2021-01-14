@@ -1046,7 +1046,131 @@ def test_sanity_check_flat_nbody():
     equal = np.testing.assert_almost_equal
     equal( stitch1_np, target, decimal=3 )
 
-"""
+def test_sanity_check_flat_nbody2():
+    N = 3
+    #F = 3
+    #S = 2
+    testA = [[[0., 1., 0.],
+              [1., 0., 0.],
+              [0., 0., 0.]]]
+    testE = [[[[1., 2.],
+               [3.1, 4.1],
+               [5., 6.], ],
+
+              [[7.1, 8.1],
+               [9., 1.],
+               [9., 2.], ],
+
+              [[8., 3.],
+               [7., 4.],
+               [6., 5.], ], ]]
+    
+    #testX = np.asarray(testX).astype('float32')
+    testA = np.asarray(testA).astype('float32')
+    testE = np.asarray(testE).astype('float32')
+    #testE_ind = np.asarray(testE_ind).astype('float32')
+        
+    part1 = tf.dynamic_partition( testE, testA, 2 )
+    print( len( part1 ) )
+    print( part1[0] )
+    print( part1[1] )
+    """
+    2
+    tf.Tensor(
+    [[1. 2.]
+    [5. 6.]
+    [9. 1.]
+    [9. 2.]
+    [8. 3.]
+    [7. 4.]
+    [6. 5.]], shape=(7, 2), dtype=float32)
+    tf.Tensor(
+    [[3.1 4.1]
+    [7.1 8.1]], shape=(2, 2), dtype=float32)
+    """
+    
+    sum1 = tf.math.reduce_sum( part1[1], axis=-1, keepdims=1 )
+    print( sum1 )
+    """
+    tf.Tensor(
+    [[ 7.2     ]
+    [15.200001]], shape=(2, 1), dtype=float32)
+    """
+    
+    indices1 = [
+        [ 0 ],
+        # [ 0, 1 ],
+        [ 2 ],
+        # [ 1, 0 ],
+        [ 4 ],
+        [ 5 ],
+        [ 6 ],
+        [ 7 ],
+        [ 8 ],
+        ]
+
+    indices2 = [
+        [ 1 ],
+        [ 3 ],
+        ]
+
+    
+    indices = [ indices2 ]
+    
+    partitioned_data = [
+        sum1
+    ]
+    
+    stitch1_flat = tf.dynamic_stitch( indices, partitioned_data )
+    print( stitch1_flat )
+    """
+    tf.Tensor([ 0.        7.2       0.       15.200001], shape=(4,), dtype=float32)
+    """
+
+    zero_padding = tf.zeros(9 - tf.shape(stitch1_flat), dtype=stitch1_flat.dtype)
+    print( zero_padding )
+    #tf.Tensor([0. 0. 0. 0. 0.], shape=(5,), dtype=float32)
+    
+    stitch1_flat = tf.concat([stitch1_flat,zero_padding], -1)
+    print( stitch1_flat )
+    #[ 0.  7.2    0.    15.200001  0.  0.  0.  0.  0. ]
+    
+    stitch1 = tf.reshape( stitch1_flat, (N,N,1) )
+    print( stitch1 )
+    """
+    tf.Tensor(
+    [[[ 0.      ]
+    [ 7.2     ]
+    [ 0.      ]]
+
+    [[15.200001]
+    [ 0.      ]
+    [ 0.      ]]
+
+    [[ 0.      ]
+    [ 0.      ]
+    [ 0.      ]]], shape=(3, 3, 1), dtype=float32)
+    """
+
+    stitch1_np = stitch1.numpy()
+    #print( repr( stitch1_np ) )
+    target = np.array([[[ 0.      ],
+                        [ 7.2     ],
+                        [ 0.      ]],
+
+                       [[15.200001],
+                        [ 0.      ],
+                        [ 0.      ]],
+
+                       [[ 0.      ],
+                        [ 0.      ],
+                       [ 0.      ]]])
+    
+    equal = np.testing.assert_almost_equal
+    equal( stitch1_np, target, decimal=3 )
+
+    
+
 def test_flat_nbody_layer():
 
     class TestFlat(tf.keras.layers.Layer):
@@ -1099,6 +1223,7 @@ def test_flat_nbody_layer():
             sum1 = tf.math.reduce_sum( part[1], axis=-1, keepdims=True )
 
             # none of the rest of this works
+            
             r = tf.range(self.N*self.N*self.S)
             #tf.shape((None,self.N,self.N,1))
             s = tf.shape(E)
@@ -1149,4 +1274,4 @@ def test_flat_nbody_layer():
     testE = np.asarray(testE).astype('float32')
 
     print( model([testA,testE]) )
-"""
+
