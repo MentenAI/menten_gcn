@@ -1115,10 +1115,10 @@ def test_sanity_check_flat_nbody2():
         [3],
     ]
 
-    indices = [indices1,indices2]
+    indices = [indices1, indices2]
 
     zero_padding1 = tf.zeros(tf.shape(indices1), dtype=sum1.dtype)
-    
+
     partitioned_data = [
         zero_padding1,
         sum1
@@ -1252,11 +1252,11 @@ def test_flat_nbody_layer():
             s_1 = tf.shape(condition_indices[0])[0]
             s_2 = int(1)
             s = [s_1, s_2]
-            print( "s", s, s_1, s_2 )
-            zero_padding1 = tf.zeros( shape=s )
-            
+            print("s", s, s_1, s_2)
+            zero_padding1 = tf.zeros(shape=s)
+
             #indices = [condition_indices[1]]
-            partitioned_data = [zero_padding1,sum1]
+            partitioned_data = [zero_padding1, sum1]
             stitch_flat = tf.dynamic_stitch(condition_indices, partitioned_data)
             print("stitch_flat", stitch_flat)
             # Tensor("test_flat/DynamicStitch:0", shape=(None, 1), dtype=float32)
