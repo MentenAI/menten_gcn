@@ -1098,6 +1098,18 @@ def test_sanity_check_flat_nbody2():
     [15.200001]], shape=(2, 1), dtype=float32)
     """
 
+    indices1 = [
+        [0],
+        # [ 0, 1 ],
+        [2],
+        # [ 1, 0 ],
+        [4],
+        [5],
+        [6],
+        [7],
+        [8],
+    ]
+
     indices2 = [
         [1],
         [3],
