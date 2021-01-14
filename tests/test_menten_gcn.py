@@ -1259,14 +1259,28 @@ def test_flat_nbody_layer():
             indices = [ condition_indices[ 1 ] ]
             partitioned_data = [ sum1 ]
             stitch_flat = tf.dynamic_stitch( indices, partitioned_data )
-            print( stitch_flat )
+            print( "stitch_flat", stitch_flat )
             # Tensor("test_flat/DynamicStitch:0", shape=(None, 1), dtype=float32)
 
             #npad = tf.constant( tf.shape(E)[0]*n*n - tf.shape(stitch_flat)[0] )
-            npad1 = tf.constant( tf.shape(E)[0] ) * n * n
+            npad1 = tf.shape(E)[0] * n * n
             print( "npad1", npad1 )
+            npad2 = tf.shape(stitch_flat)[0]
+            print( "npad2", npad2 )
+            nz = npad1 - npad2
+            print( "nz", nz )
+
+            zero_padding = tf.zeros(nz, dtype=stitch_flat.dtype)
+            print( "zeros", zero_padding )
+            zero_padding = tf.reshape( zero_padding, [nz,1] )
+            print( "zeros", zero_padding )
+
+            print( "tf.shape(stitch_flat)", tf.shape(stitch_flat) )
+            stitch = tf.concat([stitch_flat,zero_padding], -2 )
+
+            stitch = tf.reshape( stitch, [tf.shape(E)[0],n,n,1] )
             
-            return stitch_flat #dummy for now
+            return stitch #dummy for now
 
     N = 3
     #F = 3
@@ -1296,11 +1310,26 @@ def test_flat_nbody_layer():
               [[8., 3.],
                [7., 4.],
                [6., 5.], ], ]]
+
+
+    target = np.array([[[ 0.      ],
+                        [ 7.2     ],
+                        [ 0.      ]],
+
+                       [[15.200001],
+                        [ 0.      ],
+                        [ 0.      ]],
+
+                       [[ 0.      ],
+                        [ 0.      ],
+                       [ 0.      ]]])
+    assert_almost_equal = np.testing.assert_almost_equal
     
     testA = np.asarray(testA).astype('float32')
     testE = np.asarray(testE).astype('float32')
 
-    print( "test1", model([testA,testE]) )
+    batch1_pred = model([testA,testE])
+    print( "test1", batch1_pred )
     """
     tf.Tensor(
     [[ 0.      ]
@@ -1308,7 +1337,7 @@ def test_flat_nbody_layer():
     [ 0.      ]
     [15.200001]], shape=(4, 1), dtype=float32)
     """
-
+    assert_almost_equal( batch1_pred[0], target, decimal=3 )
     
     testA2 = np.asarray([ testA[0], testA[0] ])
     testE2 = np.asarray([ testE[0], testE[0] ])
@@ -1319,5 +1348,10 @@ def test_flat_nbody_layer():
     testA2 (2, 3, 3)
     testE2 (2, 3, 3, 2)
     """
+
+    batch2_pred = model([testA2,testE2])
+    print( "test2", batch2_pred )
     
-    print( "test2", model([testA2,testE2]) )
+    for output in batch2_pred:
+        assert_almost_equal( output, target, decimal=3 )
+    
