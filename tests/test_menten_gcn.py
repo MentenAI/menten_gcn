@@ -1198,10 +1198,10 @@ def test_flat_nbody_layer():
             
             A = inputs[0]
             E = inputs[1]
-
+            
             print( A ) #shape=(None, 3, 3)
             print( E ) #shape=(None, 3, 3, 2)
-
+            
             A_int = tf.cast( A, "int32" )
             '''
             A_int_flat = tf.keras.layers.Flatten()(tf.cast( A, "int32" ))
@@ -1234,40 +1234,39 @@ def test_flat_nbody_layer():
             sum1 = tf.math.reduce_sum( part[1], axis=-1, keepdims=True )
             print( sum1.shape )
 
-            '''
-            flat_sum1 = tf.flatten( sum1 )
-            print( flat_sum1 )
-            exit( 0 )
-            '''
-            
-            # none of the rest of this works
-
-            #r = tf.range(self.N*self.N)
+            #print( "???", tf.shape(E)[0], tf.shape(E) )
+            #BS = tf.shape(E)[0]
+            #print( "batch size:", BS )
             
             x=tf.constant(self.N*self.N)
             n=tf.constant(self.N)
-            r = tf.range(x)
+            r = tf.range(x*tf.shape(E)[0])
             print( r ) #Tensor("test_flat/range:0", shape=(9,), dtype=int32)
+
+            print( "!!!", tf.shape(E)[0] )
             r2 = tf.reshape( r, shape=[tf.shape(E)[0],n,n] )
-            print( r2 ) #Tensor("test_flat/Reshape:0", shape=(3, 3), dtype=int32)
+            """
+            This pops up when calling with batch size == 2
+            tensorflow.python.framework.errors_impl.InvalidArgumentError:
+            Input to reshape is a tensor with 9 values, but the requested shape has 18 [Op:Reshape]
+            """
+            print( r2 ) #Tensor("test_flat/Reshape:0", shape=(1, 3, 3), dtype=int32)
             condition_indices = tf.dynamic_partition( r2, A_int, 2 )
             print( condition_indices )
-            exit( 0 )
+            #[<tf.Tensor 'test_flat/DynamicPartition_1:0' shape=(None,) dtype=int32>,
+            # <tf.Tensor 'test_flat/DynamicPartition_1:1' shape=(None,) dtype=int32>]
+
+            indices = [ condition_indices[ 1 ] ]
+            partitioned_data = [ sum1 ]
+            stitch_flat = tf.dynamic_stitch( indices, partitioned_data )
+            print( stitch_flat )
+            # Tensor("test_flat/DynamicStitch:0", shape=(None, 1), dtype=float32)
+
+            #npad = tf.constant( tf.shape(E)[0]*n*n - tf.shape(stitch_flat)[0] )
+            npad1 = tf.constant( tf.shape(E)[0] ) * n * n
+            print( "npad1", npad1 )
             
-            '''
-            #tf.shape((None,self.N,self.N,1))
-            s = tf.shape(E)
-            aa=tf.Variable(s)
-            aa[-1].assign( 1 )
-            r = tf.reshape( r, s )
-            indices = tf.dynamic_partition( r, A_int, 2 )
-            print( indices )
-            '''
-            partitioned_data = [
-                sum1
-            ]
-            
-            return inputs[0] #dummy for now
+            return stitch_flat #dummy for now
 
     N = 3
     #F = 3
@@ -1301,5 +1300,24 @@ def test_flat_nbody_layer():
     testA = np.asarray(testA).astype('float32')
     testE = np.asarray(testE).astype('float32')
 
-    print( model([testA,testE]) )
+    print( "test1", model([testA,testE]) )
+    """
+    tf.Tensor(
+    [[ 0.      ]
+    [ 7.2     ]
+    [ 0.      ]
+    [15.200001]], shape=(4, 1), dtype=float32)
+    """
 
+    
+    testA2 = np.asarray([ testA[0], testA[0] ])
+    testE2 = np.asarray([ testE[0], testE[0] ])
+
+    print( "testA2", testA2.shape )
+    print( "testE2", testE2.shape )
+    """
+    testA2 (2, 3, 3)
+    testE2 (2, 3, 3, 2)
+    """
+    
+    print( "test2", model([testA2,testE2]) )
