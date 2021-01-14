@@ -1248,9 +1248,9 @@ def test_flat_nbody_layer():
             n=tf.constant(self.N)
             r = tf.range(x)
             print( r ) #Tensor("test_flat/range:0", shape=(9,), dtype=int32)
-            r2 = tf.reshape( r, shape=[n,n] )
+            r2 = tf.reshape( r, shape=[tf.shape(E)[0],n,n] )
             print( r2 ) #Tensor("test_flat/Reshape:0", shape=(3, 3), dtype=int32)
-            condition_indices = tf.dynamic_partition( tf.range(x), A_int, 2 )
+            condition_indices = tf.dynamic_partition( r2, A_int, 2 )
             print( condition_indices )
             exit( 0 )
             
