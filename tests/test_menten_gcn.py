@@ -1199,12 +1199,23 @@ def test_flat_nbody_layer():
             A = inputs[0]
             E = inputs[1]
 
+            print( A ) #shape=(None, 3, 3)
+            print( E ) #shape=(None, 3, 3, 2)
+
             A_int = tf.cast( A, "int32" )
+            '''
+            A_int_flat = tf.keras.layers.Flatten()(tf.cast( A, "int32" ))
+            print( A_int_flat ) #shape=(None, 9)
+            
+            E_flat = tf.keras.layers.Flatten()(E)
+            print( E_flat ) #shape=(None, 18)
+            exit( 0 )
+            '''
             
             part = tf.dynamic_partition( E, A_int, 2 )
             print( len( part ) )
-            print( part[0] )
-            print( part[1] )
+            print( part[0] ) #shape=(None, 2)
+            print( part[1] ) #shape=(None, 2)
             """
             2
             tf.Tensor(
@@ -1221,10 +1232,29 @@ def test_flat_nbody_layer():
             """
 
             sum1 = tf.math.reduce_sum( part[1], axis=-1, keepdims=True )
+            print( sum1.shape )
 
-            # none of the rest of this works
+            '''
+            flat_sum1 = tf.flatten( sum1 )
+            print( flat_sum1 )
+            exit( 0 )
+            '''
             
-            r = tf.range(self.N*self.N*self.S)
+            # none of the rest of this works
+
+            #r = tf.range(self.N*self.N)
+            
+            x=tf.constant(self.N*self.N)
+            n=tf.constant(self.N)
+            r = tf.range(x)
+            print( r ) #Tensor("test_flat/range:0", shape=(9,), dtype=int32)
+            r2 = tf.reshape( r, shape=[n,n] )
+            print( r2 ) #Tensor("test_flat/Reshape:0", shape=(3, 3), dtype=int32)
+            condition_indices = tf.dynamic_partition( tf.range(x), A_int, 2 )
+            print( condition_indices )
+            exit( 0 )
+            
+            '''
             #tf.shape((None,self.N,self.N,1))
             s = tf.shape(E)
             aa=tf.Variable(s)
@@ -1232,12 +1262,10 @@ def test_flat_nbody_layer():
             r = tf.reshape( r, s )
             indices = tf.dynamic_partition( r, A_int, 2 )
             print( indices )
-            """
+            '''
             partitioned_data = [
-                np.zeros( shape=(7,1) ),
                 sum1
             ]
-            """
             
             return inputs[0] #dummy for now
 
