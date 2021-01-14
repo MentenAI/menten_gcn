@@ -193,10 +193,10 @@ class RosettaPoseWrapper(WrappedPose):
         return xyz
 
     def resid_is_N_term(self, resid):
-        return self.pose.residue( resid ).is_lower_terminus()
+        return self.pose.residue(resid).is_lower_terminus()
 
     def resid_is_C_term(self, resid):
-        return self.pose.residue( resid ).is_upper_terminus()
+        return self.pose.residue(resid).is_upper_terminus()
 
     def resids_are_same_chain(self, resid1, resid2):
         return self.pose.chain(resid1) == self.pose.chain(resid2)
