@@ -1233,10 +1233,6 @@ def test_flat_nbody_layer():
 
             sum1 = tf.math.reduce_sum( part[1], axis=-1, keepdims=True )
             print( sum1.shape )
-
-            #print( "???", tf.shape(E)[0], tf.shape(E) )
-            #BS = tf.shape(E)[0]
-            #print( "batch size:", BS )
             
             x=tf.constant(self.N*self.N)
             n=tf.constant(self.N)
@@ -1245,11 +1241,6 @@ def test_flat_nbody_layer():
 
             print( "!!!", tf.shape(E)[0] )
             r2 = tf.reshape( r, shape=[tf.shape(E)[0],n,n] )
-            """
-            This pops up when calling with batch size == 2
-            tensorflow.python.framework.errors_impl.InvalidArgumentError:
-            Input to reshape is a tensor with 9 values, but the requested shape has 18 [Op:Reshape]
-            """
             print( r2 ) #Tensor("test_flat/Reshape:0", shape=(1, 3, 3), dtype=int32)
             condition_indices = tf.dynamic_partition( r2, A_int, 2 )
             print( condition_indices )
