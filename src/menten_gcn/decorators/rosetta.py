@@ -197,12 +197,12 @@ class RosettaHBondDecorator_v0(Decorator):
 
 class _RosettaOnebodyEnergies_v0(Decorator):
 
-    def __init__(self, sfxn, individual: bool = False, score_types = None ):
+    def __init__(self, sfxn, individual: bool = False, score_types=None):
         self.sfxn = sfxn
         self.ind = individual
-        
+
         if individual:
-            if score_types == None:
+            if score_types is None:
                 self.terms = sfxn.get_nonzero_weighted_scoretypes()
             else:
                 self.terms = score_types
@@ -251,11 +251,11 @@ class _RosettaOnebodyEnergies_v0(Decorator):
 
 class _RosettaTwobodyEnergies_v0(Decorator):
 
-    def __init__(self, sfxn, individual: bool = False, score_types = None ):
+    def __init__(self, sfxn, individual: bool = False, score_types=None):
         self.sfxn = sfxn
         self.ind = individual
         if individual:
-            if score_types == None:
+            if score_types is None:
                 self.terms = sfxn.get_nonzero_weighted_scoretypes()
             else:
                 self.terms = score_types
@@ -484,13 +484,14 @@ class Ref2015Decorator(CombinedDecorator):
         Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False, score_types = None ):
-        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=individual,score_types=score_types),
-                      Rosetta_Ref2015_TwoBodyEneriges(individual=individual,score_types=score_types)]
+    def __init__(self, individual: bool = False, score_types=None):
+        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=individual, score_types=score_types),
+                      Rosetta_Ref2015_TwoBodyEneriges(individual=individual, score_types=score_types)]
         CombinedDecorator.__init__(self, decorators)
 
     def get_version_name(self):
         return "Ref2015Decorator"
+
 
 class AbbreviatedRef2015Decorator_v0(CombinedDecorator):
 
@@ -504,16 +505,15 @@ class AbbreviatedRef2015Decorator_v0(CombinedDecorator):
     """
 
     def __init__(self):
-        onebody_types = [ fa_atr, fa_rep, fa_sol, fa_intra_rep,
-                          fa_intra_sol_xover4, lk_ball_wtd, fa_elec,
-                          pro_close, hbond_bb_sc, omega, fa_dun,
-                          p_aa_pp, yhh_planarity, ref, rama_prepro ]
-        twobody_types = [ fa_atr, fa_rep, fa_sol, lk_ball_wtd, fa_elec,
-                          hbond_sr_bb, hbond_lr_bb, hbond_bb_sc, hbond_sc, dslf_fa13 ]
-        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=True,score_types=onebody_types),
-                      Rosetta_Ref2015_TwoBodyEneriges(individual=True,score_types=twobody_types)]
+        onebody_types = [fa_atr, fa_rep, fa_sol, fa_intra_rep,
+                         fa_intra_sol_xover4, lk_ball_wtd, fa_elec,
+                         pro_close, hbond_bb_sc, omega, fa_dun,
+                         p_aa_pp, yhh_planarity, ref, rama_prepro]
+        twobody_types = [fa_atr, fa_rep, fa_sol, lk_ball_wtd, fa_elec,
+                         hbond_sr_bb, hbond_lr_bb, hbond_bb_sc, hbond_sc, dslf_fa13]
+        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=True, score_types=onebody_types),
+                      Rosetta_Ref2015_TwoBodyEneriges(individual=True, score_types=twobody_types)]
         CombinedDecorator.__init__(self, decorators)
 
     def get_version_name(self):
         return "AbbreviatedRef2015Decorator_v0"
-    
