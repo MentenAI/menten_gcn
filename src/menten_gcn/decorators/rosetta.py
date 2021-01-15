@@ -440,7 +440,7 @@ class Rosetta_Ref2015_OneBodyEneriges(_RosettaOnebodyEnergies_v0):
 
     def __init__(self, individual: bool = False,score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
-        _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
+        _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
     def get_version_name(self):
         return "Rosetta_Ref2015_OneBodyEneriges"
@@ -466,7 +466,7 @@ class Rosetta_Ref2015_TwoBodyEneriges(_RosettaTwobodyEnergies_v0):
 
     def __init__(self, individual: bool = False,score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
-        _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
+        _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
     def get_version_name(self):
         return "Rosetta_Ref2015_TwoBodyEneriges"
