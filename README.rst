@@ -40,8 +40,6 @@ Technical Overview
 
 .. end-badges
 
-Current Version: 0.1.0
-   
 Documentation
 =============
 
