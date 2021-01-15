@@ -499,14 +499,8 @@ class AbbreviatedRef2015Decorator_v0(CombinedDecorator):
     We try to eliminate one-body types from the edges and two-body types from the nodes but
     be warned that this is all done by hand.
 
-    - 1 or 10-ish Node Features
-    - 1 or 10-ish Edge Features
-
-    Parameters
-    ---------
-    individual: bool
-        If true, list the score for each term individually.
-        Otherwise sum them all into one value.
+    - 15 Node Features
+    - 10 Edge Features
     """
 
     def __init__(self):
