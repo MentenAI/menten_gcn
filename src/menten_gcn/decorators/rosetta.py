@@ -240,11 +240,11 @@ class _RosettaOnebodyEnergies_v0(Decorator):
         if self.ind:
             d = []
             for i in self.terms:
-                desc = str(i) + " onebody term using " + self.get_version_name() + " (symmetric)"
+                desc = str(i) + " onebody term using " + self.get_version_name()
                 d.append(desc)
             return d
         else:
-            desc = "Sum of all Rosetta onebody energies using " + self.get_version_name() + " (symmetric)"
+            desc = "Sum of all Rosetta onebody energies using " + self.get_version_name()
             return [desc]
 
 
@@ -438,7 +438,7 @@ class Rosetta_Ref2015_OneBodyEneriges(_RosettaOnebodyEnergies_v0):
         Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False,score_types=None):
+    def __init__(self, individual: bool = False, score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
         _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
@@ -464,7 +464,7 @@ class Rosetta_Ref2015_TwoBodyEneriges(_RosettaTwobodyEnergies_v0):
         Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False,score_types=None):
+    def __init__(self, individual: bool = False, score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
         _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
