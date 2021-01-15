@@ -6,7 +6,6 @@ from menten_gcn.wrappers import RosettaPoseWrapper
 try:
     from pyrosetta import rosetta
     from pyrosetta.rosetta.core.scoring import *
-    from pyrosetta.rosetta.core.scoring.ScoreType import *
 except BaseException:
     rosetta = None
 
@@ -433,9 +432,13 @@ class Rosetta_Ref2015_OneBodyEneriges(_RosettaOnebodyEnergies_v0):
     individual: bool
         If true, list the score for each term individually.
         Otherwise sum them all into one value.
+    score_types: list of ScoreTypes
+        Only use these score types.
+        None (default) includes all default types.
+        Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False):
+    def __init__(self, individual: bool = False,score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
         _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
 
@@ -455,9 +458,13 @@ class Rosetta_Ref2015_TwoBodyEneriges(_RosettaTwobodyEnergies_v0):
     individual: bool
         If true, list the score for each term individually.
         Otherwise sum them all into one value.
+    score_types: list of ScoreTypes
+        Only use these score types.
+        None (default) includes all default types.
+        Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False):
+    def __init__(self, individual: bool = False,score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
         _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
 
