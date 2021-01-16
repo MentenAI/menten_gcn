@@ -708,12 +708,12 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
     Temp_final_flat = Temp
         
     if attention:
-        Att_xi = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
-        Att_xj = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
-        Att_xk = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
-        Att_ei = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
-        Att_ej = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
-        Att_ek = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_xi = Dense(1, activation='sigmoid')(Temp)
+        Att_xj = Dense(1, activation='sigmoid')(Temp)
+        Att_xk = Dense(1, activation='sigmoid')(Temp)
+        Att_ei = Dense(1, activation='sigmoid')(Temp)
+        Att_ej = Dense(1, activation='sigmoid')(Temp)
+        Att_ek = Dense(1, activation='sigmoid')(Temp)
 
         Att_xi = Multiply()([Temp, Att_xi])
         Att_xj = Multiply()([Temp, Att_xj])
@@ -722,6 +722,19 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Att_ej = Multiply()([Temp, Att_ej])
         Att_ek = Multiply()([Temp, Att_ek])
 
+        Att_xi = flat3_deflatten( Att_xi, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_xi")
+        Att_xj = flat3_deflatten( Att_xj, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_xj")
+        Att_xk = flat3_deflatten( Att_xk, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_xk")
+        Att_ei = flat3_deflatten( Att_ei, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_ei")
+        Att_ej = flat3_deflatten( Att_ej, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_ej")
+        Att_ek = flat3_deflatten( Att_ek, condition_indices, zero_padding1,
+                                  flat_mask, n, prefix="Att_ek")
+        
         Xi = tf.keras.backend.sum(Att_xi, axis=[-4, -3], keepdims=False)
         Xj = tf.keras.backend.sum(Att_xj, axis=[-4, -2], keepdims=False)
         Xk = tf.keras.backend.sum(Att_xk, axis=[-3, -2], keepdims=False)
@@ -738,13 +751,15 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
         Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
 
-    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])  # Activation here?
+    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])
 
     Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
     Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
     Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
     superE = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
 
+    #Reflatten???
+    
     newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
                                  Xactivation, Eactivation, E_mask, X_mask)
 
