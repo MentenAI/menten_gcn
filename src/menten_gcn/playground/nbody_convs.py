@@ -760,20 +760,55 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
         Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
 
-    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])
 
-    Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
-    Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
-    Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
-    superE = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
+    newE = run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation )
 
-    #Reflatten???
-    
-    newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
-                                 Xactivation, Eactivation, E_mask, X_mask)
+    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])    
+    newX, _ = make_1body_conv(superX, A, E, Xnfeatures, Enfeatures,
+                              Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
 
+def run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation ):
+    Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
+    Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
+    Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
+
+    A_int = tf.cast(A, "int32")
+    n = A_int.shape[1]
+    
+    E_flat = tf.dynamic_partition(   E, A_int, 2)[1]
+    Et_flat = tf.dynamic_partition( Et, A_int, 2)[1]
+    Ei_flat = tf.dynamic_partition(   Ei, A_int, 2)[1]
+    Eti_flat = tf.dynamic_partition( Eti, A_int, 2)[1]
+    Ej_flat = tf.dynamic_partition(   Ej, A_int, 2)[1]
+    Etj_flat = tf.dynamic_partition( Etj, A_int, 2)[1]
+    Ek_flat = tf.dynamic_partition(   Ek, A_int, 2)[1]
+    Etk_flat = tf.dynamic_partition( Etk, A_int, 2)[1]
+
+    flat_edges = Concatenate(axis=-1)([E,Et,Ei,Eti,Ej,Etj,Ek,Etk])
+    flat_edges = Dense(Enfeatures, activation=Eactivation)
+
+    # Build back up
+    r = tf.range( tf.size(A_int) )    
+    r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
+                    name=prefix + "_run_NEE3_Edge_conv")
+    condition_indices = tf.dynamic_partition(r2, A_int, 2)
+
+    s_1 = tf.shape(condition_indices[0])[0]
+    s_2 = Enfeatures
+    s = [s_1, s_2]
+    zero_padding1 = tf.zeros(shape=s)
+
+    partitioned_data = [zero_padding1, flat_edges]
+    V = tf.dynamic_stitch(condition_indices, partitioned_data)
+
+    zero_padding = flat2_unnamed_util2(A_int, n, V, "NEE3_Edge_conv")
+
+    V = tf.concat([V, zero_padding], -2)
+    V = tf.reshape(V, [tf.shape(A_int)[0], n, n, V.shape[-1]],
+                   name=(prefix + "_run_NEE3_Edge_conv_again"))
+    return V
 
 def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
     #print( A.shape )
