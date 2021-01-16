@@ -218,14 +218,68 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     return newX, newE
 
 
-def make_flat_NENE(X, A, E):
+
+
+def make_flat_NENE1(X, A, E):
+    assert len(X.shape) == 3
+    assert len(E.shape) == 4
+
+    Xi_shape = [X.shape[1], 1, X.shape[2]]
+    Xj_shape = [1, X.shape[1], X.shape[2]]
+
+    Xi = Reshape(Xi_shape, input_shape=X.shape)(X)
+    Xj = Reshape(Xj_shape, input_shape=X.shape)(X)
+
+    Xi = tf.keras.backend.repeat_elements(Xi, rep=X.shape[1], axis=2)
+    Xj = tf.keras.backend.repeat_elements(Xj, rep=X.shape[1], axis=1)
+
+    # C1: shape=(None,N,N,S+2F)
+    # C2: shape=(None,N,N,nfeatures)
+
+    '''
+    if E ==
+    1 2 3
+    4 5 6
+    7 8 9
+    then Eprime ==
+    1 4 7
+    2 5 8
+    3 6 9
+    '''
+
+    Eprime = tf.transpose(E, perm=[0, 2, 1, 3])
+    NENE = Concatenate(axis=-1)([Xi, E, Xj, Eprime])
+    
     NENE = make_NENE(X, E)  # TODO make_flat_NENE
     A_int = tf.cast(A, "int32")
+    part = tf.dynamic_partition(NENE, A_int, 2)
+    flat_NENE = part[1]
+    return NENE, A_int, flat_NENE
 
-    Temp = NENE
-    part = tf.dynamic_partition(Temp, A_int, 2)
-    Temp = part[1]
-    return NENE, A_int, Temp
+def make_flat_NENE2(X, A, E):
+    assert len(X.shape) == 3
+    assert len(E.shape) == 4
+
+    A_int = tf.cast(A, "int32")
+    
+    Xi_shape = [X.shape[1], 1, X.shape[2]]
+    Xj_shape = [1, X.shape[1], X.shape[2]]
+
+    Xi = Reshape(Xi_shape, input_shape=X.shape)(X)
+    Xj = Reshape(Xj_shape, input_shape=X.shape)(X)
+
+    Xi = tf.keras.backend.repeat_elements(Xi, rep=X.shape[1], axis=2)
+    Xj = tf.keras.backend.repeat_elements(Xj, rep=X.shape[1], axis=1)
+
+    Xi_flat = tf.dynamic_partition(Xi, A_int, 2)[1]
+    Xj_flat = tf.dynamic_partition(Xj, A_int, 2)[1]
+    
+    Et = tf.transpose(E, perm=[0, 2, 1, 3])
+    E_flat = tf.dynamic_partition(E, A_int, 2)[1]
+    Et_flat = tf.dynamic_partition(Et, A_int, 2)[1]
+
+    flat_NENE = Concatenate(axis=-1)([Xi_flat, E_flat, Xj_flat, Et_flat])
+    return A_int, flat_NENE
 
 
 def flat2_unnamed_util(n, A_int, final_t):
@@ -325,8 +379,9 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     if E_mask is None:
         E_mask = make_edge_mask(A)
 
-    NENE, A_int, Temp = make_flat_NENE(X, A, E)
-
+    A_int, flat_NENE = make_flat_NENE2(X, A, E)
+    Temp = flat_NENE
+    
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
         for t in Tnfeatures:
@@ -339,6 +394,8 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     n = tf.constant(N)
     condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, final_t)
 
+    Temp_final_flat = Temp
+    
     if attention:
         Att1 = Dense(1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
@@ -360,15 +417,18 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     superX = Concatenate(axis=-1)([X, newX1, newX2])
 
     if apply_T_to_E:
-        if attention:
-            superE = flat2_deflatten(Temp, condition_indices,
-                                     zero_padding1, A_int, final_t, n)
-        else:
-            superE = Temp
+        superE = Temp_final_flat
     else:
-        superE = NENE  # TODO use flat
+        superE = flat_NENE
 
-    newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
+    newE = Dense(Enfeatures, activation=Eactivation)( superE )
+    condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, Enfeatures)
+    newE = flat2_deflatten( newE, condition_indices, zero_padding1,
+                            A_int, Enfeatures, n )
+
+
+    dummy = E #Doesn't matter
+    newX, _ = make_1body_conv(superX, A, dummy, Xnfeatures, Enfeatures,
                                  Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
