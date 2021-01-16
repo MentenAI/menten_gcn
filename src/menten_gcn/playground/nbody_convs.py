@@ -116,7 +116,6 @@ def make_flat_NEENEENEE(X: Layer, A: Layer, E: Layer,
 
     N = X.shape[1]
     F = X.shape[2]
-    S = E.shape[3]
 
     Xi_shape = [N, 1, 1, F]
     Xj_shape = [1, N, 1, F]
@@ -714,7 +713,6 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
 
     n = tf.constant(A.shape[-1])
     condition_indices, zero_padding1 = flat3_unnamed_util(n, flat_mask, final_t, "1")
-    Temp_final_flat = Temp
 
     if attention:
         Att_xi = Dense(1, activation='sigmoid')(Temp)
