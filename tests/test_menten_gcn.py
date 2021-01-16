@@ -1,7 +1,7 @@
-from my_menten_gcn import *
-from my_menten_gcn.decorators import *
-from my_menten_gcn.playground import *
-from my_menten_gcn.util import *
+from menten_gcn import *
+from menten_gcn.decorators import *
+from menten_gcn.playground import *
+from menten_gcn.util import *
 
 # import spektral
 # import tensorflow as tf
@@ -834,7 +834,7 @@ def test_model_sizes():
 
     for make_3body in [make_3body_conv, make_flat_3body_conv]:
         X, E = make_3body(X_in, A_in, E_in,
-                               [5], 10, 20, attention=False)
+                          [5], 10, 20, attention=False)
         assert_n_params([X_in, A_in, E_in], [X, E], 1100)
         # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
         # x = (4+5+5+5+1)*10          =  200
@@ -843,11 +843,11 @@ def test_model_sizes():
         # total = t+x+e+p             = 1100
 
         X, E = make_3body(X_in, A_in, E_in,
-                               [5], 10, 20, attention=True)
+                          [5], 10, 20, attention=True)
         assert_n_params([X_in, A_in, E_in], [X, E], 1136)
         # int vs list:
         X, E = make_3body(X_in, A_in, E_in,
-                               5, 10, 20, attention=True)
+                          5, 10, 20, attention=True)
         assert_n_params([X_in, A_in, E_in], [X, E], 1136)
         # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
         # a = (5+1)*1   *6            =   36    #Attention
@@ -857,7 +857,7 @@ def test_model_sizes():
         # total = t+a+x+e+p           = 1136
 
         X, E = make_3body(X_in, A_in, E_in,
-                               [7, 5], 10, 20, attention=True)
+                          [7, 5], 10, 20, attention=True)
         assert_n_params([X_in, A_in, E_in], [X, E], 1245)
         # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
         # t2 = (7+1)*5                =   40
@@ -1387,14 +1387,14 @@ def test_flat_2body_feed():
         Px, Pe = make_flat_3body_conv(X_in, A_in, E_in,
                                       [4, 7], outF, outS,
                                       attention=a)
-        
+
         for t2e in [True, False]:
 
             Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
                                           [4, 7], outF, outS,
                                           attention=a, apply_T_to_E=t2e)
-            
-            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe, Px, Pe ])
+
+            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe, Px, Pe])
             model.compile(optimizer='adam', loss='mean_squared_error')
             pred = model.predict([testX, testA, testE])
             assert(len(pred) == 4)

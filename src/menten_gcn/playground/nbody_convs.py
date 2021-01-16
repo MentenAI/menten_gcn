@@ -99,19 +99,21 @@ def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[Layer, Layer]:
         assert(C.shape[i] == target_shape[i])
     return C, Eprime
 
+
 def make_NEENEENEE_mask(E_mask: Layer, trim_final_dim: bool = False) -> Layer:
     assert len(E_mask.shape) == 4
     Ei, Ej, Ek = expand_E(E_mask, trim_final_dim)
-    return Multiply( dtype=tf.int32 )([Ei, Ej, Ek])
+    return Multiply(dtype=tf.int32)([Ei, Ej, Ek])
 
-def make_flat_NEENEENEE(X: Layer, A:Layer, E: Layer,
-                        E_mask: Layer ) -> Tuple[Layer, Layer]:
+
+def make_flat_NEENEENEE(X: Layer, A: Layer, E: Layer,
+                        E_mask: Layer) -> Tuple[Layer, Layer]:
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
-    flat_mask = make_NEENEENEE_mask( E_mask, True )
+    flat_mask = make_NEENEENEE_mask(E_mask, True)
     flat_mask = tf.cast(flat_mask, "int32")
-    
+
     N = X.shape[1]
     F = X.shape[2]
     S = E.shape[3]
@@ -135,19 +137,18 @@ def make_flat_NEENEENEE(X: Layer, A:Layer, E: Layer,
     Xj_flat = tf.dynamic_partition(Xj, flat_mask, 2)[1]
     Xk_flat = tf.dynamic_partition(Xk, flat_mask, 2)[1]
 
-    
     #print( Xi.shape, Xj.shape, Xk.shape )
     Ei, Ej, Ek = expand_E(E)
     Eprime = tf.transpose(E, perm=[0, 2, 1, 3])
     Eti, Etj, Etk = expand_E(Eprime)
 
-    Ei_flat = tf.dynamic_partition( Ei,  flat_mask, 2)[1]
+    Ei_flat = tf.dynamic_partition(Ei, flat_mask, 2)[1]
     Eti_flat = tf.dynamic_partition(Eti, flat_mask, 2)[1]
-    Ej_flat = tf.dynamic_partition( Ej,  flat_mask, 2)[1]
+    Ej_flat = tf.dynamic_partition(Ej, flat_mask, 2)[1]
     Etj_flat = tf.dynamic_partition(Etj, flat_mask, 2)[1]
-    Ek_flat = tf.dynamic_partition( Ek,  flat_mask, 2)[1]
+    Ek_flat = tf.dynamic_partition(Ek, flat_mask, 2)[1]
     Etk_flat = tf.dynamic_partition(Etk, flat_mask, 2)[1]
-    
+
     C = Concatenate(axis=-1)([Xi_flat, Ei_flat, Eti_flat,
                               Xj_flat, Ej_flat, Etj_flat,
                               Xk_flat, Ek_flat, Etk_flat])
@@ -331,13 +332,13 @@ def make_flat_NENE2(X, A, E):
     E_flat = tf.dynamic_partition(E, A_int, 2)[1]
     Et_flat = tf.dynamic_partition(Et, A_int, 2)[1]
     #print( Et_flat )
-    
+
     flat_NENE = Concatenate(axis=-1)([Xi_flat, E_flat, Xj_flat, Et_flat])
     return A_int, flat_NENE
 
 
 def flat2_unnamed_util(n, A_int, final_t, prefix):
-    r = tf.range( tf.size(A_int) )
+    r = tf.range(tf.size(A_int))
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
                     name=prefix + "_flat2_unnamed_util_reshape")
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
@@ -348,8 +349,9 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
     zero_padding1 = tf.zeros(shape=s)
     return condition_indices, zero_padding1
 
+
 def flat3_unnamed_util(n, flat_mask, final_t, prefix):
-    r = tf.range( tf.size(flat_mask) )    
+    r = tf.range(tf.size(flat_mask))
     r2 = tf.reshape(r, shape=[tf.shape(flat_mask)[0], n, n, n],
                     name=prefix + "_flat3_unnamed_util_reshape")
     condition_indices = tf.dynamic_partition(r2, flat_mask, 2)
@@ -359,7 +361,6 @@ def flat3_unnamed_util(n, flat_mask, final_t, prefix):
     s = [s_1, s_2]
     zero_padding1 = tf.zeros(shape=s)
     return condition_indices, zero_padding1
-
 
 
 def flat2_unnamed_util2(A_int, n, Temp, prefix):
@@ -382,7 +383,6 @@ def flat3_unnamed_util2(flat_mask, n, Temp, prefix):
     return zero_padding
 
 
-
 def flat2_deflatten(V, condition_indices, zero_padding1,
                     A_int, n, prefix):
     partitioned_data = [zero_padding1, V]
@@ -394,6 +394,7 @@ def flat2_deflatten(V, condition_indices, zero_padding1,
                    name=(prefix + "_flat2_deflatten_reshape"))
     return V
 
+
 def flat3_deflatten(V, condition_indices, zero_padding1,
                     flat_mask, n, prefix):
     partitioned_data = [zero_padding1, V]
@@ -404,7 +405,6 @@ def flat3_deflatten(V, condition_indices, zero_padding1,
     V = tf.reshape(V, [tf.shape(flat_mask)[0], n, n, n, V.shape[-1]],
                    name=(prefix + "_flat3_deflatten_reshape"))
     return V
-
 
 
 def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
@@ -472,7 +472,7 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
 
     A_int, flat_NENE = make_flat_NENE2(X, A, E)
     Temp = flat_NENE
-    
+
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
         for t in Tnfeatures:
@@ -642,6 +642,7 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
 
     return newX, newE
 
+
 def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
                          Tnfeatures: list, Xnfeatures: int,
                          Enfeatures: int, Xactivation='relu',
@@ -702,7 +703,7 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
 
     flat_NEE3, Et, flat_mask = make_flat_NEENEENEE(X, A, E, E_mask)
     Temp = flat_NEE3
-    
+
     if hasattr(Tnfeatures, "__len__"):
         for t in Tnfeatures:
             Temp = Dense(t, activation=PReLU())(Temp)
@@ -714,7 +715,7 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
     n = tf.constant(A.shape[-1])
     condition_indices, zero_padding1 = flat3_unnamed_util(n, flat_mask, final_t, "1")
     Temp_final_flat = Temp
-        
+
     if attention:
         Att_xi = Dense(1, activation='sigmoid')(Temp)
         Att_xj = Dense(1, activation='sigmoid')(Temp)
@@ -730,19 +731,19 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Att_ej = Multiply()([Temp, Att_ej])
         Att_ek = Multiply()([Temp, Att_ek])
 
-        Att_xi = flat3_deflatten( Att_xi, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_xi")
-        Att_xj = flat3_deflatten( Att_xj, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_xj")
-        Att_xk = flat3_deflatten( Att_xk, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_xk")
-        Att_ei = flat3_deflatten( Att_ei, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_ei")
-        Att_ej = flat3_deflatten( Att_ej, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_ej")
-        Att_ek = flat3_deflatten( Att_ek, condition_indices, zero_padding1,
-                                  flat_mask, n, prefix="Att_ek")
-        
+        Att_xi = flat3_deflatten(Att_xi, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_xi")
+        Att_xj = flat3_deflatten(Att_xj, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_xj")
+        Att_xk = flat3_deflatten(Att_xk, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_xk")
+        Att_ei = flat3_deflatten(Att_ei, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_ei")
+        Att_ej = flat3_deflatten(Att_ej, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_ej")
+        Att_ek = flat3_deflatten(Att_ek, condition_indices, zero_padding1,
+                                 flat_mask, n, prefix="Att_ek")
+
         Xi = tf.keras.backend.sum(Att_xi, axis=[-4, -3], keepdims=False)
         Xj = tf.keras.backend.sum(Att_xj, axis=[-4, -2], keepdims=False)
         Xk = tf.keras.backend.sum(Att_xk, axis=[-3, -2], keepdims=False)
@@ -751,8 +752,8 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Ek = tf.keras.backend.sum(Att_ej, axis=[-3], keepdims=False)
         Ej = tf.keras.backend.sum(Att_ek, axis=[-2], keepdims=False)
     else:
-        Temp = flat3_deflatten( Temp, condition_indices, zero_padding1,
-                                flat_mask, n, prefix="Att_xi")
+        Temp = flat3_deflatten(Temp, condition_indices, zero_padding1,
+                               flat_mask, n, prefix="Att_xi")
 
         Xi = tf.keras.backend.sum(Temp, axis=[-4, -3], keepdims=False)
         Xj = tf.keras.backend.sum(Temp, axis=[-4, -2], keepdims=False)
@@ -762,41 +763,41 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
         Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
 
+    newE = run_NEE3_Edge_conv(E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation)
 
-    newE = run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation )
-
-    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])    
+    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])
     newX, _ = make_1body_conv(superX, A, E, Xnfeatures, Enfeatures,
                               Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
 
-def run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation ):
+
+def run_NEE3_Edge_conv(E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation):
     Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
     Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
     Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
 
     A_int = tf.cast(A, "int32")
     n = A_int.shape[1]
-    
-    E_flat = tf.dynamic_partition(   E, A_int, 2)[1]
-    Et_flat = tf.dynamic_partition( Et, A_int, 2)[1]
-    Ei_flat = tf.dynamic_partition(   Ei, A_int, 2)[1]
-    Eti_flat = tf.dynamic_partition( Eti, A_int, 2)[1]
-    Ej_flat = tf.dynamic_partition(   Ej, A_int, 2)[1]
-    Etj_flat = tf.dynamic_partition( Etj, A_int, 2)[1]
-    Ek_flat = tf.dynamic_partition(   Ek, A_int, 2)[1]
-    Etk_flat = tf.dynamic_partition( Etk, A_int, 2)[1]
 
-    flat_edges = Concatenate(axis=-1)([E_flat, Et_flat, Ei_flat,Eti_flat,
-                                       Ej_flat,Etj_flat,Ek_flat,Etk_flat])
+    E_flat = tf.dynamic_partition(E, A_int, 2)[1]
+    Et_flat = tf.dynamic_partition(Et, A_int, 2)[1]
+    Ei_flat = tf.dynamic_partition(Ei, A_int, 2)[1]
+    Eti_flat = tf.dynamic_partition(Eti, A_int, 2)[1]
+    Ej_flat = tf.dynamic_partition(Ej, A_int, 2)[1]
+    Etj_flat = tf.dynamic_partition(Etj, A_int, 2)[1]
+    Ek_flat = tf.dynamic_partition(Ek, A_int, 2)[1]
+    Etk_flat = tf.dynamic_partition(Etk, A_int, 2)[1]
+
+    flat_edges = Concatenate(axis=-1)([E_flat, Et_flat, Ei_flat, Eti_flat,
+                                       Ej_flat, Etj_flat, Ek_flat, Etk_flat])
     flat_edges = Dense(Enfeatures, activation=Eactivation)(flat_edges)
-    
+
     #print( flat_edges )
     #exit( 0 )
-    
+
     # Build back up
-    r = tf.range( tf.size(A_int) )    
+    r = tf.range(tf.size(A_int))
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
                     name="run_NEE3_Edge_conv")
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
@@ -818,6 +819,7 @@ def run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation ):
     V = tf.reshape(V, [tf.shape(A_int)[0], n, n, V.shape[-1]],
                    name="run_NEE3_Edge_conv_again")
     return V
+
 
 def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
     #print( A.shape )
