@@ -5,6 +5,7 @@ from menten_gcn.wrappers import RosettaPoseWrapper
 
 try:
     from pyrosetta import rosetta
+    from pyrosetta.rosetta.core.scoring import *
 except BaseException:
     rosetta = None
 
@@ -195,11 +196,15 @@ class RosettaHBondDecorator_v0(Decorator):
 
 class _RosettaOnebodyEnergies_v0(Decorator):
 
-    def __init__(self, sfxn, individual: bool = False):
+    def __init__(self, sfxn, individual: bool = False, score_types=None):
         self.sfxn = sfxn
         self.ind = individual
+
         if individual:
-            self.terms = sfxn.get_nonzero_weighted_scoretypes()
+            if score_types is None:
+                self.terms = sfxn.get_nonzero_weighted_scoretypes()
+            else:
+                self.terms = score_types
 
     def get_version_name(self):
         raise NotImplementedError  # Child class needs to define this
@@ -235,21 +240,24 @@ class _RosettaOnebodyEnergies_v0(Decorator):
         if self.ind:
             d = []
             for i in self.terms:
-                desc = str(i) + " onebody term using " + self.get_version_name() + " (symmetric)"
+                desc = str(i) + " onebody term using " + self.get_version_name()
                 d.append(desc)
             return d
         else:
-            desc = "Sum of all Rosetta onebody energies using " + self.get_version_name() + " (symmetric)"
+            desc = "Sum of all Rosetta onebody energies using " + self.get_version_name()
             return [desc]
 
 
 class _RosettaTwobodyEnergies_v0(Decorator):
 
-    def __init__(self, sfxn, individual: bool = False):
+    def __init__(self, sfxn, individual: bool = False, score_types=None):
         self.sfxn = sfxn
         self.ind = individual
         if individual:
-            self.terms = sfxn.get_nonzero_weighted_scoretypes()
+            if score_types is None:
+                self.terms = sfxn.get_nonzero_weighted_scoretypes()
+            else:
+                self.terms = score_types
 
     def get_version_name(self):
         raise NotImplementedError  # Child class needs to define this
@@ -424,11 +432,15 @@ class Rosetta_Ref2015_OneBodyEneriges(_RosettaOnebodyEnergies_v0):
     individual: bool
         If true, list the score for each term individually.
         Otherwise sum them all into one value.
+    score_types: list of ScoreTypes
+        Only use these score types.
+        None (default) includes all default types.
+        Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False):
+    def __init__(self, individual: bool = False, score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
-        _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
+        _RosettaOnebodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
     def get_version_name(self):
         return "Rosetta_Ref2015_OneBodyEneriges"
@@ -446,11 +458,15 @@ class Rosetta_Ref2015_TwoBodyEneriges(_RosettaTwobodyEnergies_v0):
     individual: bool
         If true, list the score for each term individually.
         Otherwise sum them all into one value.
+    score_types: list of ScoreTypes
+        Only use these score types.
+        None (default) includes all default types.
+        Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False):
+    def __init__(self, individual: bool = False, score_types=None):
         sfxn = rosetta.core.scoring.ScoreFunctionFactory.create_score_function("ref2015.wts")
-        _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual)
+        _RosettaTwobodyEnergies_v0.__init__(self, sfxn=sfxn, individual=individual, score_types=score_types)
 
     def get_version_name(self):
         return "Rosetta_Ref2015_TwoBodyEneriges"
@@ -469,11 +485,42 @@ class Ref2015Decorator(CombinedDecorator):
     individual: bool
         If true, list the score for each term individually.
         Otherwise sum them all into one value.
+    score_types: list of ScoreTypes
+        Only use these score types.
+        None (default) includes all default types.
+        Note - this only applies if individual == True
     """
 
-    def __init__(self, individual: bool = False):
-        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=individual), Rosetta_Ref2015_TwoBodyEneriges(individual=individual)]
+    def __init__(self, individual: bool = False, score_types=None):
+        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=individual, score_types=score_types),
+                      Rosetta_Ref2015_TwoBodyEneriges(individual=individual, score_types=score_types)]
         CombinedDecorator.__init__(self, decorators)
 
     def get_version_name(self):
         return "Ref2015Decorator"
+
+
+class AbbreviatedRef2015Decorator_v0(CombinedDecorator):
+
+    """
+    Meta-decorator that attempts to cut down on the feature counts by only using some score types.
+    We try to eliminate one-body types from the edges and two-body types from the nodes but
+    be warned that this is all done by hand.
+
+    - 15 Node Features
+    - 10 Edge Features
+    """
+
+    def __init__(self):
+        onebody_types = [fa_atr, fa_rep, fa_sol, fa_intra_rep,
+                         fa_intra_sol_xover4, lk_ball_wtd, fa_elec,
+                         pro_close, hbond_bb_sc, omega, fa_dun,
+                         p_aa_pp, yhh_planarity, ref, rama_prepro]
+        twobody_types = [fa_atr, fa_rep, fa_sol, lk_ball_wtd, fa_elec,
+                         hbond_sr_bb, hbond_lr_bb, hbond_bb_sc, hbond_sc, dslf_fa13]
+        decorators = [Rosetta_Ref2015_OneBodyEneriges(individual=True, score_types=onebody_types),
+                      Rosetta_Ref2015_TwoBodyEneriges(individual=True, score_types=twobody_types)]
+        CombinedDecorator.__init__(self, decorators)
+
+    def get_version_name(self):
+        return "AbbreviatedRef2015Decorator_v0"
