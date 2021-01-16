@@ -1,7 +1,7 @@
-from menten_gcn import *
-from menten_gcn.decorators import *
-from menten_gcn.playground import *
-from menten_gcn.util import *
+from my_menten_gcn import *
+from my_menten_gcn.decorators import *
+from my_menten_gcn.playground import *
+from my_menten_gcn.util import *
 
 # import spektral
 # import tensorflow as tf
@@ -1378,8 +1378,8 @@ def test_flat_2body_feed():
     A_in = Input(shape=(N, N), sparse=False, name='A_in')
     E_in = Input(shape=(N, N, S), name='E_in')
 
-    outF = 10
-    outS = 6
+    outF = 1
+    outS = 1
 
     for a in [ True, False ]:
         for t2e in [ True, False ]:
