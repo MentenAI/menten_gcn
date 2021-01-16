@@ -298,10 +298,11 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
 def flat2_unnamed_util2(A_int, n, final_t, Temp, prefix):
     #       batch              * N * N * t
     npad1 = tf.shape(A_int)[0] * n * n * final_t
-    npad2 = tf.shape(Temp)[0]
+    #npad2 = tf.shape(Temp)[0] * tf.shape(Temp)[1]
+    npad2 = tf.size(Temp)
     nz = npad1 - npad2
     zero_padding = tf.zeros(nz, dtype=Temp.dtype)
-    zero_padding = tf.reshape(zero_padding, [nz, 1],
+    zero_padding = tf.reshape(zero_padding, [-1, final_t],
                               name=(prefix+"_flat2_unnamed_util2_reshape"))
     return zero_padding
 
@@ -310,7 +311,6 @@ def flat2_deflatten(V, condition_indices, zero_padding1,
                     A_int, final_t, n, prefix):
     partitioned_data = [zero_padding1, V]
     V = tf.dynamic_stitch(condition_indices, partitioned_data)
-
     zero_padding = flat2_unnamed_util2(A_int, n, final_t, V, prefix)
 
     V = tf.concat([V, zero_padding], -2)
