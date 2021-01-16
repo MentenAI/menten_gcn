@@ -274,6 +274,8 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     assert len(A.shape) == 3
     assert len(E.shape) == 4
 
+    N = A.shape[-1]
+    
     if X_mask is None:
         X_mask = make_node_mask(A)
     if E_mask is None:
@@ -285,22 +287,60 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
 
     Temp = NENE
     part = tf.dynamic_partition(Temp, A_int, 2)
-    print(len(part))
-    print(part[0])  # shape=(None, 2)
-    print(part[1])  # shape=(None, 2)
-    exit( 0 )
+    # print(len(part))
+    # print(part[0])  # shape=(None, 2)
+    # print(part[1])  # shape=(None, 2)
+    #exit( 0 )
+    Temp = part[1]
 
-    
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
         for t in Tnfeatures:
-            Temp = Conv2D(filters=t, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
+            Temp = Dense(t, activation=PReLU())(Temp)
+            final_t = t
     else:
-        Temp = Conv2D(filters=Tnfeatures, kernel_size=1, activation=PReLU(shared_axes=[1, 2]))(Temp)
+        Temp = Dense(Tnfeatures, activation=PReLU())(Temp)
+        final_t = Tnfeatures
 
-    Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
+    # print( Temp )
+        
+    #Temp = apply_edge_mask(E=Temp, E_mask=E_mask)
 
+    x = tf.constant(N*N)
+    n = tf.constant(N)
+    r = tf.range(x * tf.shape(NENE)[0])
+    r2 = tf.reshape(r, shape=[tf.shape(NENE)[0], n, n])
+    condition_indices = tf.dynamic_partition(r2, A_int, 2)
+    
+    #print( condition_indices[1] )
+    s_1 = tf.shape(condition_indices[0])[0]
+    s_2 = final_t
+    s = [s_1, s_2]
+    #print("s", s, s_1, s_2)
+    zero_padding1 = tf.zeros(shape=s)
+    partitioned_data = [zero_padding1, Temp]
+    #print( zero_padding1, Temp )
+    #exit( 0 )
+    Temp = tf.dynamic_stitch(condition_indices, partitioned_data)
+    # print( Temp )
+
+    #       batch          * N * N * t
+    npad1 = tf.shape(A)[0] * n * n * final_t
+    # print("npad1", npad1)
+    npad2 = tf.shape(Temp)[0]
+    # print("npad2", npad2)
+    nz = npad1 - npad2
+    # print("nz", nz)
+    zero_padding = tf.zeros(nz, dtype=Temp.dtype)
+    zero_padding = tf.reshape(zero_padding, [-1, final_t])
+    # print( zero_padding )
+
+    Temp = tf.concat([Temp, zero_padding], -2)
+    Temp = tf.reshape(Temp, [tf.shape(NENE)[0], n, n, final_t])
+    # print( Temp )
+    
     if attention:
+        #assert False, "attention"
         Att1 = Conv2D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
         newX1 = tf.keras.backend.sum(Att1, axis=-2, keepdims=False)

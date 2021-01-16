@@ -783,7 +783,7 @@ def test_model_sizes():
     # 130 = ( 4 + 1 ) * 10 + ( 3 + 1 ) * 20
     # 130 = 50 + 80
 
-    for make_2body in make_2body_conv make_flat_2body_conv:    
+    for make_2body in [ make_2body_conv, make_flat_2body_conv ]:
         X, E = make_2body(X_in, A_in, E_in,
                           [5], 10, 20,
                           attention=False, apply_T_to_E=False)
