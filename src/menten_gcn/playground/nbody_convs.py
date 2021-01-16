@@ -327,9 +327,11 @@ def make_flat_NENE2(X, A, E):
     Xj_flat = tf.dynamic_partition(Xj, A_int, 2)[1]
 
     Et = tf.transpose(E, perm=[0, 2, 1, 3])
+    #print( Et )
     E_flat = tf.dynamic_partition(E, A_int, 2)[1]
     Et_flat = tf.dynamic_partition(Et, A_int, 2)[1]
-
+    #print( Et_flat )
+    
     flat_NENE = Concatenate(axis=-1)([Xi_flat, E_flat, Xj_flat, Et_flat])
     return A_int, flat_NENE
 
@@ -470,7 +472,7 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
 
     A_int, flat_NENE = make_flat_NENE2(X, A, E)
     Temp = flat_NENE
-
+    
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
         for t in Tnfeatures:
@@ -786,13 +788,17 @@ def run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation ):
     Ek_flat = tf.dynamic_partition(   Ek, A_int, 2)[1]
     Etk_flat = tf.dynamic_partition( Etk, A_int, 2)[1]
 
-    flat_edges = Concatenate(axis=-1)([E,Et,Ei,Eti,Ej,Etj,Ek,Etk])
-    flat_edges = Dense(Enfeatures, activation=Eactivation)
-
+    flat_edges = Concatenate(axis=-1)([E_flat, Et_flat, Ei_flat,Eti_flat,
+                                       Ej_flat,Etj_flat,Ek_flat,Etk_flat])
+    flat_edges = Dense(Enfeatures, activation=Eactivation)(flat_edges)
+    
+    #print( flat_edges )
+    #exit( 0 )
+    
     # Build back up
     r = tf.range( tf.size(A_int) )    
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
-                    name=prefix + "_run_NEE3_Edge_conv")
+                    name="run_NEE3_Edge_conv")
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
 
     s_1 = tf.shape(condition_indices[0])[0]
@@ -801,13 +807,16 @@ def run_NEE3_Edge_conv( E, Et, Ei, Ej, Ek, A, Enfeatures, Eactivation ):
     zero_padding1 = tf.zeros(shape=s)
 
     partitioned_data = [zero_padding1, flat_edges]
+
+    #print( condition_indices[0], zero_padding1, flat_edges )
+    #exit( 0 )
     V = tf.dynamic_stitch(condition_indices, partitioned_data)
 
     zero_padding = flat2_unnamed_util2(A_int, n, V, "NEE3_Edge_conv")
 
     V = tf.concat([V, zero_padding], -2)
     V = tf.reshape(V, [tf.shape(A_int)[0], n, n, V.shape[-1]],
-                   name=(prefix + "_run_NEE3_Edge_conv_again"))
+                   name="run_NEE3_Edge_conv_again")
     return V
 
 def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
