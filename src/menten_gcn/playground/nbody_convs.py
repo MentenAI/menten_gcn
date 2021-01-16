@@ -38,14 +38,19 @@ def make_NENE(X: Layer, E: Layer) -> Layer:
     return Concatenate(axis=-1)([Xi, E, Xj, Eprime])
 
 
-def expand_E(E: Layer) -> Tuple[Layer, Layer, Layer]:
+def expand_E(E: Layer, trim_final_dim: bool = False) -> Tuple[Layer, Layer, Layer]:
     #E.shape: (None, N, N, S)
     N = E.shape[1]
     assert(N == E.shape[2])
     S = E.shape[3]
-    Ei_shape = [1, N, N, S]
-    Ej_shape = [N, 1, N, S]
-    Ek_shape = [N, N, 1, S]
+    if trim_final_dim:
+        Ei_shape = [1, N, N]
+        Ej_shape = [N, 1, N]
+        Ek_shape = [N, N, 1]
+    else:
+        Ei_shape = [1, N, N, S]
+        Ej_shape = [N, 1, N, S]
+        Ek_shape = [N, N, 1, S]
 
     Ei = Reshape(Ei_shape)(E)
     Ej = Reshape(Ej_shape)(E)
@@ -94,9 +99,9 @@ def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[Layer, Layer]:
         assert(C.shape[i] == target_shape[i])
     return C, Eprime
 
-def make_NEENEENEE_mask(E_mask: Layer) -> Layer:
+def make_NEENEENEE_mask(E_mask: Layer, trim_final_dim: bool = False) -> Layer:
     assert len(E_mask.shape) == 4
-    Ei, Ej, Ek = expand_E(E_mask)
+    Ei, Ej, Ek = expand_E(E_mask, trim_final_dim)
     return Multiply( dtype=tf.int32 )([Ei, Ej, Ek])
 
 def make_flat_NEENEENEE(X: Layer, A:Layer, E: Layer,
@@ -104,7 +109,8 @@ def make_flat_NEENEENEE(X: Layer, A:Layer, E: Layer,
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
-    flat_mask = make_NEENEENEE_mask( E_mask )
+    flat_mask = make_NEENEENEE_mask( E_mask, True )
+    flat_mask = tf.cast(flat_mask, "int32")
     
     N = X.shape[1]
     F = X.shape[2]
@@ -390,7 +396,7 @@ def flat3_deflatten(V, condition_indices, zero_padding1,
                     flat_mask, n, prefix):
     partitioned_data = [zero_padding1, V]
     V = tf.dynamic_stitch(condition_indices, partitioned_data)
-    zero_padding = flat3_unnamed_util2(A_int, n, V, prefix)
+    zero_padding = flat3_unnamed_util2(flat_mask, n, V, prefix)
 
     V = tf.concat([V, zero_padding], -2)
     V = tf.reshape(V, [tf.shape(flat_mask)[0], n, n, n, V.shape[-1]],
@@ -692,7 +698,7 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
     if X_mask is None:
         X_mask = make_node_mask(A)
 
-    flat_NEE3, Et, flat_mask = make_flat_NEENEENEE(X, E, E_mask)
+    flat_NEE3, Et, flat_mask = make_flat_NEENEENEE(X, A, E, E_mask)
     Temp = flat_NEE3
     
     if hasattr(Tnfeatures, "__len__"):
@@ -704,7 +710,7 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         final_t = Tnfeatures
 
     n = tf.constant(A.shape[-1])
-    condition_indices, zero_padding1 = flat3_unnamed_util(n, A_int, final_t, "1")
+    condition_indices, zero_padding1 = flat3_unnamed_util(n, flat_mask, final_t, "1")
     Temp_final_flat = Temp
         
     if attention:
@@ -743,6 +749,9 @@ def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
         Ek = tf.keras.backend.sum(Att_ej, axis=[-3], keepdims=False)
         Ej = tf.keras.backend.sum(Att_ek, axis=[-2], keepdims=False)
     else:
+        Temp = flat3_deflatten( Temp, condition_indices, zero_padding1,
+                                flat_mask, n, prefix="Att_xi")
+
         Xi = tf.keras.backend.sum(Temp, axis=[-4, -3], keepdims=False)
         Xj = tf.keras.backend.sum(Temp, axis=[-4, -2], keepdims=False)
         Xk = tf.keras.backend.sum(Temp, axis=[-3, -2], keepdims=False)

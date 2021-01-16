@@ -1378,19 +1378,26 @@ def test_flat_2body_feed():
     A_in = Input(shape=(N, N), sparse=False, name='A_in')
     E_in = Input(shape=(N, N, S), name='E_in')
 
-    outF = 1
-    outS = 1
+    outF = 2
+    outS = 3
 
     for a in [True, False]:
+
+        Px, Pe = make_flat_3body_conv(X_in, A_in, E_in,
+                                      [4, 7], outF, outS,
+                                      attention=a)
+        
         for t2e in [True, False]:
 
             Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
                                           [4, 7], outF, outS,
                                           attention=a, apply_T_to_E=t2e)
-
-            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe])
+            
+            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe, Px, Pe ])
             model.compile(optimizer='adam', loss='mean_squared_error')
             pred = model.predict([testX, testA, testE])
-            assert(len(pred) == 2)
+            assert(len(pred) == 4)
             assert pred[0].shape[-1] == outF
             assert pred[1].shape[-1] == outS
+            assert pred[2].shape[-1] == outF
+            assert pred[3].shape[-1] == outS
