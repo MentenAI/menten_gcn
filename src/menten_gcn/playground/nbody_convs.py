@@ -218,8 +218,6 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
     return newX, newE
 
 
-
-
 def make_flat_NENE1(X, A, E):
     assert len(X.shape) == 3
     assert len(E.shape) == 4
@@ -249,19 +247,20 @@ def make_flat_NENE1(X, A, E):
 
     Eprime = tf.transpose(E, perm=[0, 2, 1, 3])
     NENE = Concatenate(axis=-1)([Xi, E, Xj, Eprime])
-    
+
     NENE = make_NENE(X, E)  # TODO make_flat_NENE
     A_int = tf.cast(A, "int32")
     part = tf.dynamic_partition(NENE, A_int, 2)
     flat_NENE = part[1]
     return NENE, A_int, flat_NENE
 
+
 def make_flat_NENE2(X, A, E):
     assert len(X.shape) == 3
     assert len(E.shape) == 4
 
     A_int = tf.cast(A, "int32")
-    
+
     Xi_shape = [X.shape[1], 1, X.shape[2]]
     Xj_shape = [1, X.shape[1], X.shape[2]]
 
@@ -273,7 +272,7 @@ def make_flat_NENE2(X, A, E):
 
     Xi_flat = tf.dynamic_partition(Xi, A_int, 2)[1]
     Xj_flat = tf.dynamic_partition(Xj, A_int, 2)[1]
-    
+
     Et = tf.transpose(E, perm=[0, 2, 1, 3])
     E_flat = tf.dynamic_partition(E, A_int, 2)[1]
     Et_flat = tf.dynamic_partition(Et, A_int, 2)[1]
@@ -381,7 +380,7 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
 
     A_int, flat_NENE = make_flat_NENE2(X, A, E)
     Temp = flat_NENE
-    
+
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
         for t in Tnfeatures:
@@ -395,7 +394,7 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, final_t)
 
     Temp_final_flat = Temp
-    
+
     if attention:
         Att1 = Dense(1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
@@ -421,15 +420,14 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     else:
         superE = flat_NENE
 
-    newE = Dense(Enfeatures, activation=Eactivation)( superE )
+    newE = Dense(Enfeatures, activation=Eactivation)(superE)
     condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, Enfeatures)
-    newE = flat2_deflatten( newE, condition_indices, zero_padding1,
-                            A_int, Enfeatures, n )
+    newE = flat2_deflatten(newE, condition_indices, zero_padding1,
+                           A_int, Enfeatures, n)
 
-
-    dummy = E #Doesn't matter
+    dummy = E  # Doesn't matter
     newX, _ = make_1body_conv(superX, A, dummy, Xnfeatures, Enfeatures,
-                                 Xactivation, Eactivation, E_mask, X_mask)
+                              Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
 
