@@ -94,11 +94,58 @@ def make_NEENEENEE(X: Layer, E: Layer) -> Tuple[Layer, Layer]:
         assert(C.shape[i] == target_shape[i])
     return C, Eprime
 
-
 def make_NEENEENEE_mask(E_mask: Layer) -> Layer:
     assert len(E_mask.shape) == 4
     Ei, Ej, Ek = expand_E(E_mask)
-    return Multiply()([Ei, Ej, Ek])
+    return Multiply( dtype=tf.int32 )([Ei, Ej, Ek])
+
+def make_flat_NEENEENEE(X: Layer, A:Layer, E: Layer,
+                        E_mask: Layer ) -> Tuple[Layer, Layer]:
+    assert len(X.shape) == 3
+    assert len(E.shape) == 4
+
+    flat_mask = make_NEENEENEE_mask( E_mask )
+    
+    N = X.shape[1]
+    F = X.shape[2]
+    S = E.shape[3]
+
+    Xi_shape = [N, 1, 1, F]
+    Xj_shape = [1, N, 1, F]
+    Xk_shape = [1, 1, N, F]
+
+    Xi = Reshape(Xi_shape)(X)
+    Xj = Reshape(Xj_shape)(X)
+    Xk = Reshape(Xk_shape)(X)
+
+    Xi = tf.keras.backend.repeat_elements(Xi, rep=N, axis=2)
+    Xi = tf.keras.backend.repeat_elements(Xi, rep=N, axis=3)
+    Xj = tf.keras.backend.repeat_elements(Xj, rep=N, axis=1)
+    Xj = tf.keras.backend.repeat_elements(Xj, rep=N, axis=3)
+    Xk = tf.keras.backend.repeat_elements(Xk, rep=N, axis=1)
+    Xk = tf.keras.backend.repeat_elements(Xk, rep=N, axis=2)
+
+    Xi_flat = tf.dynamic_partition(Xi, flat_mask, 2)[1]
+    Xj_flat = tf.dynamic_partition(Xj, flat_mask, 2)[1]
+    Xk_flat = tf.dynamic_partition(Xk, flat_mask, 2)[1]
+
+    
+    #print( Xi.shape, Xj.shape, Xk.shape )
+    Ei, Ej, Ek = expand_E(E)
+    Eprime = tf.transpose(E, perm=[0, 2, 1, 3])
+    Eti, Etj, Etk = expand_E(Eprime)
+
+    Ei_flat = tf.dynamic_partition( Ei,  flat_mask, 2)[1]
+    Eti_flat = tf.dynamic_partition(Eti, flat_mask, 2)[1]
+    Ej_flat = tf.dynamic_partition( Ej,  flat_mask, 2)[1]
+    Etj_flat = tf.dynamic_partition(Etj, flat_mask, 2)[1]
+    Ek_flat = tf.dynamic_partition( Ek,  flat_mask, 2)[1]
+    Etk_flat = tf.dynamic_partition(Etk, flat_mask, 2)[1]
+    
+    C = Concatenate(axis=-1)([Xi_flat, Ei_flat, Eti_flat,
+                              Xj_flat, Ej_flat, Etj_flat,
+                              Xk_flat, Ek_flat, Etk_flat])
+    return C, Eprime, flat_mask
 
 
 def make_1body_conv(X: Layer, A: Layer, E: Layer,
@@ -282,8 +329,7 @@ def make_flat_NENE2(X, A, E):
 
 
 def flat2_unnamed_util(n, A_int, final_t, prefix):
-    #x = tf.constant(N*N)
-    r = tf.range(n * n * tf.shape(A_int)[0])
+    r = tf.range( tf.size(A_int) )
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
                     name=prefix + "_flat2_unnamed_util_reshape")
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
@@ -294,17 +340,39 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
     zero_padding1 = tf.zeros(shape=s)
     return condition_indices, zero_padding1
 
+def flat3_unnamed_util(n, flat_mask, final_t, prefix):
+    r = tf.range( tf.size(flat_mask) )    
+    r2 = tf.reshape(r, shape=[tf.shape(flat_mask)[0], n, n, n],
+                    name=prefix + "_flat3_unnamed_util_reshape")
+    condition_indices = tf.dynamic_partition(r2, flat_mask, 2)
+
+    s_1 = tf.shape(condition_indices[0])[0]
+    s_2 = final_t
+    s = [s_1, s_2]
+    zero_padding1 = tf.zeros(shape=s)
+    return condition_indices, zero_padding1
+
+
 
 def flat2_unnamed_util2(A_int, n, Temp, prefix):
-    #       batch              * N * N * t
-    npad1 = tf.shape(A_int)[0] * n * n * Temp.shape[-1]
-    #npad2 = tf.shape(Temp)[0] * tf.shape(Temp)[1]
+    npad1 = tf.size(A_int) * Temp.shape[-1]
     npad2 = tf.size(Temp)
     nz = npad1 - npad2
     zero_padding = tf.zeros(nz, dtype=Temp.dtype)
     zero_padding = tf.reshape(zero_padding, [-1, Temp.shape[-1]],
                               name=(prefix + "_flat2_unnamed_util2_reshape"))
     return zero_padding
+
+
+def flat3_unnamed_util2(flat_mask, n, Temp, prefix):
+    npad1 = tf.size(flat_mask) * Temp.shape[-1]
+    npad2 = tf.size(Temp)
+    nz = npad1 - npad2
+    zero_padding = tf.zeros(nz, dtype=Temp.dtype)
+    zero_padding = tf.reshape(zero_padding, [-1, Temp.shape[-1]],
+                              name=(prefix + "_flat3_unnamed_util2_reshape"))
+    return zero_padding
+
 
 
 def flat2_deflatten(V, condition_indices, zero_padding1,
@@ -317,6 +385,18 @@ def flat2_deflatten(V, condition_indices, zero_padding1,
     V = tf.reshape(V, [tf.shape(A_int)[0], n, n, V.shape[-1]],
                    name=(prefix + "_flat2_deflatten_reshape"))
     return V
+
+def flat3_deflatten(V, condition_indices, zero_padding1,
+                    flat_mask, n, prefix):
+    partitioned_data = [zero_padding1, V]
+    V = tf.dynamic_stitch(condition_indices, partitioned_data)
+    zero_padding = flat3_unnamed_util2(A_int, n, V, prefix)
+
+    V = tf.concat([V, zero_padding], -2)
+    V = tf.reshape(V, [tf.shape(flat_mask)[0], n, n, n, V.shape[-1]],
+                   name=(prefix + "_flat3_deflatten_reshape"))
+    return V
+
 
 
 def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
@@ -511,6 +591,122 @@ def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
     mask = make_NEENEENEE_mask(E_mask)
     Temp = Multiply()([Temp, mask])
 
+    if attention:
+        Att_xi = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_xj = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_xk = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ei = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ej = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+        Att_ek = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
+
+        Att_xi = Multiply()([Temp, Att_xi])
+        Att_xj = Multiply()([Temp, Att_xj])
+        Att_xk = Multiply()([Temp, Att_xk])
+        Att_ei = Multiply()([Temp, Att_ei])
+        Att_ej = Multiply()([Temp, Att_ej])
+        Att_ek = Multiply()([Temp, Att_ek])
+
+        Xi = tf.keras.backend.sum(Att_xi, axis=[-4, -3], keepdims=False)
+        Xj = tf.keras.backend.sum(Att_xj, axis=[-4, -2], keepdims=False)
+        Xk = tf.keras.backend.sum(Att_xk, axis=[-3, -2], keepdims=False)
+
+        Ei = tf.keras.backend.sum(Att_ei, axis=[-4], keepdims=False)
+        Ek = tf.keras.backend.sum(Att_ej, axis=[-3], keepdims=False)
+        Ej = tf.keras.backend.sum(Att_ek, axis=[-2], keepdims=False)
+    else:
+        Xi = tf.keras.backend.sum(Temp, axis=[-4, -3], keepdims=False)
+        Xj = tf.keras.backend.sum(Temp, axis=[-4, -2], keepdims=False)
+        Xk = tf.keras.backend.sum(Temp, axis=[-3, -2], keepdims=False)
+
+        Ei = tf.keras.backend.sum(Temp, axis=[-4], keepdims=False)
+        Ek = tf.keras.backend.sum(Temp, axis=[-3], keepdims=False)
+        Ej = tf.keras.backend.sum(Temp, axis=[-2], keepdims=False)
+
+    superX = Concatenate(axis=-1)([X, Xi, Xj, Xk])  # Activation here?
+
+    Eti = tf.transpose(Ei, perm=[0, 2, 1, 3])
+    Etj = tf.transpose(Ej, perm=[0, 2, 1, 3])
+    Etk = tf.transpose(Ek, perm=[0, 2, 1, 3])
+    superE = Concatenate(axis=-1)([E, Et, Ei, Eti, Ej, Etj, Ek, Etk])
+
+    newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
+                                 Xactivation, Eactivation, E_mask, X_mask)
+
+    return newX, newE
+
+def make_flat_3body_conv(X: Layer, A: Layer, E: Layer,
+                         Tnfeatures: list, Xnfeatures: int,
+                         Enfeatures: int, Xactivation='relu',
+                         Eactivation='relu', attention: bool = False,
+                         E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
+    """
+    Same idea as make_NENE_XE_conv but considers all possible 3-body interactions.
+    Warning: this will use a ton of memory if your graph is large.
+
+    Disclaimer: this isn't actually a layer at the moment.
+    It's a method that hacks layers together and returns the result.
+
+    Parameters
+    ---------
+    X: layer
+        Node features
+    A: layer
+        Adjaceny matrix
+    E: layer
+        Edge features
+    Tnfeatures: list of ints
+        This time, you get to decide the number of middle layers.
+        Make this list as long as you want
+    Xnfeatures: int
+        How many features do you want each node to end up with?
+    Enfeatures: int
+        How many features do you want each edge to end up with?
+    Xactivation:
+        Which activation function should be applied to the final X?
+    Eactivation:
+        Which activation function should be applied to the final E?
+    attention: bool
+        Should we apply attention weights to the sum operations?
+    E_mask: layer
+        If you already made an edge mask, feel free to pass it here to save us time.
+    X_mask: layer
+        If you already made a node mask, feel free to pass it here to save us time.
+
+    Returns
+    ---------
+    - keras layer which is the new X
+    - keras layer which is the new E
+    """
+
+    # X: shape=(None,N,F)
+    # A: shape=(None,N,N)
+    # E: shape=(None,N,N,S)
+
+    assert len(X.shape) == 3
+    assert len(A.shape) == 3
+    assert len(E.shape) == 4
+
+    if E_mask is None:
+        E_mask = make_edge_mask(A)
+
+    if X_mask is None:
+        X_mask = make_node_mask(A)
+
+    flat_NEE3, Et, flat_mask = make_flat_NEENEENEE(X, E, E_mask)
+    Temp = flat_NEE3
+    
+    if hasattr(Tnfeatures, "__len__"):
+        for t in Tnfeatures:
+            Temp = Dense(t, activation=PReLU())(Temp)
+            final_t = t
+    else:
+        Temp = Dense(Tnfeatures, activation=PReLU())(Temp)
+        final_t = Tnfeatures
+
+    n = tf.constant(A.shape[-1])
+    condition_indices, zero_padding1 = flat3_unnamed_util(n, A_int, final_t, "1")
+    Temp_final_flat = Temp
+        
     if attention:
         Att_xi = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
         Att_xj = Conv3D(filters=1, kernel_size=1, activation='sigmoid')(Temp)
