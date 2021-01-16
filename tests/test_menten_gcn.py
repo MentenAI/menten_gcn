@@ -1345,3 +1345,52 @@ def test_flat_nbody_layer():
 
     for output in batch2_pred:
         assert_almost_equal(output, target, decimal=3)
+
+
+def test_flat_2body_feed():
+    testX = [[[0., 1., 0.],
+              [1., 2., 0.],
+              [0., 3., 3.]]]
+    testA = [[[0., 1., 0.],
+              [1., 0., 0.],
+              [0., 0., 0.]]]
+    testE = [[[[1., 2.],
+               [3.1, 4.1],
+               [5., 6.], ],
+
+              [[7.1, 8.1],
+               [9., 1.],
+               [9., 2.], ],
+
+              [[8., 3.],
+               [7., 4.],
+               [6., 5.], ], ]]
+
+    testX = np.asarray( testX )
+    testA = np.asarray( testA )
+    testE = np.asarray( testE )
+    
+    N = 3
+    F = 3
+    S = 2
+
+    X_in = Input(shape=(N, F), name='X_in')
+    A_in = Input(shape=(N, N), sparse=False, name='A_in')
+    E_in = Input(shape=(N, N, S), name='E_in')
+
+    outF = 10
+    outS = 6
+
+    for a in [ True, False ]:
+        for t2e in [ True, False ]:
+    
+            Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
+                                          [4,7], outF, outS,
+                                          attention = a, apply_T_to_E = t2e )
+
+            model = Model(inputs=[X_in,A_in,E_in], outputs=[Ox,Oe])
+            model.compile(optimizer='adam', loss='mean_squared_error')
+            pred = model.predict( [ testX, testA, testE ] )
+            assert( len(pred) == 2 )
+            assert pred[0].shape[-1] == outF
+            assert pred[1].shape[-1] == outS
