@@ -285,7 +285,7 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
     #x = tf.constant(N*N)
     r = tf.range(n * n * tf.shape(A_int)[0])
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n],
-                    name = prefix + "_flat2_unnamed_util_reshape")
+                    name=prefix + "_flat2_unnamed_util_reshape")
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
 
     s_1 = tf.shape(condition_indices[0])[0]
@@ -295,27 +295,27 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
     return condition_indices, zero_padding1
 
 
-def flat2_unnamed_util2(A_int, n, final_t, Temp, prefix):
+def flat2_unnamed_util2(A_int, n, Temp, prefix):
     #       batch              * N * N * t
-    npad1 = tf.shape(A_int)[0] * n * n * final_t
+    npad1 = tf.shape(A_int)[0] * n * n * Temp.shape[-1]
     #npad2 = tf.shape(Temp)[0] * tf.shape(Temp)[1]
     npad2 = tf.size(Temp)
     nz = npad1 - npad2
     zero_padding = tf.zeros(nz, dtype=Temp.dtype)
-    zero_padding = tf.reshape(zero_padding, [-1, final_t],
-                              name=(prefix+"_flat2_unnamed_util2_reshape"))
+    zero_padding = tf.reshape(zero_padding, [-1, Temp.shape[-1]],
+                              name=(prefix + "_flat2_unnamed_util2_reshape"))
     return zero_padding
 
 
 def flat2_deflatten(V, condition_indices, zero_padding1,
-                    A_int, final_t, n, prefix):
+                    A_int, n, prefix):
     partitioned_data = [zero_padding1, V]
     V = tf.dynamic_stitch(condition_indices, partitioned_data)
-    zero_padding = flat2_unnamed_util2(A_int, n, final_t, V, prefix)
+    zero_padding = flat2_unnamed_util2(A_int, n, V, prefix)
 
     V = tf.concat([V, zero_padding], -2)
-    V = tf.reshape(V, [tf.shape(A_int)[0], n, n, final_t],
-                   name=(prefix+"_flat2_deflatten_reshape"))
+    V = tf.reshape(V, [tf.shape(A_int)[0], n, n, V.shape[-1]],
+                   name=(prefix + "_flat2_deflatten_reshape"))
     return V
 
 
@@ -403,19 +403,19 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
         Att1 = Dense(1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
         Att1 = flat2_deflatten(Att1, condition_indices,
-                               zero_padding1, A_int, final_t, n,
+                               zero_padding1, A_int, n,
                                prefix="df1")
         newX1 = tf.keras.backend.sum(Att1, axis=-2, keepdims=False)
 
         Att2 = Dense(1, activation='sigmoid')(Temp)
         Att2 = Multiply()([Temp, Att2])
         Att2 = flat2_deflatten(Att2, condition_indices,
-                               zero_padding1, A_int, final_t, n,
+                               zero_padding1, A_int, n,
                                prefix="df2")
         newX2 = tf.keras.backend.sum(Att2, axis=-3, keepdims=False)
     else:
         Temp = flat2_deflatten(Temp, condition_indices,
-                               zero_padding1, A_int, final_t, n,
+                               zero_padding1, A_int, n,
                                prefix="df3")
         newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
         newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
@@ -430,7 +430,7 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     newE = Dense(Enfeatures, activation=Eactivation)(superE)
     condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, Enfeatures, prefix="2")
     newE = flat2_deflatten(newE, condition_indices, zero_padding1,
-                           A_int, Enfeatures, n, prefix="df4")
+                           A_int, n, prefix="df4")
 
     dummy = E  # Doesn't matter
     newX, _ = make_1body_conv(superX, A, dummy, Xnfeatures, Enfeatures,

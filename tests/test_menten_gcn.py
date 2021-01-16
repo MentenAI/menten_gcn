@@ -1,7 +1,7 @@
-from menten_gcn import *
-from menten_gcn.decorators import *
-from menten_gcn.playground import *
-from menten_gcn.util import *
+from my_menten_gcn import *
+from my_menten_gcn.decorators import *
+from my_menten_gcn.playground import *
+from my_menten_gcn.util import *
 
 # import spektral
 # import tensorflow as tf
@@ -1366,10 +1366,10 @@ def test_flat_2body_feed():
                [7., 4.],
                [6., 5.], ], ]]
 
-    testX = np.asarray( testX )
-    testA = np.asarray( testA )
-    testE = np.asarray( testE )
-    
+    testX = np.asarray(testX)
+    testA = np.asarray(testA)
+    testE = np.asarray(testE)
+
     N = 3
     F = 3
     S = 2
@@ -1381,16 +1381,16 @@ def test_flat_2body_feed():
     outF = 1
     outS = 1
 
-    for a in [ True, False ]:
-        for t2e in [ True, False ]:
-    
-            Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
-                                          [4,7], outF, outS,
-                                          attention = a, apply_T_to_E = t2e )
+    for a in [True, False]:
+        for t2e in [True, False]:
 
-            model = Model(inputs=[X_in,A_in,E_in], outputs=[Ox,Oe])
+            Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
+                                          [4, 7], outF, outS,
+                                          attention=a, apply_T_to_E=t2e)
+
+            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe])
             model.compile(optimizer='adam', loss='mean_squared_error')
-            pred = model.predict( [ testX, testA, testE ] )
-            assert( len(pred) == 2 )
+            pred = model.predict([testX, testA, testE])
+            assert(len(pred) == 2)
             assert pred[0].shape[-1] == outF
             assert pred[1].shape[-1] == outS
