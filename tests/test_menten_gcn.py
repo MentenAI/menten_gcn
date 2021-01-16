@@ -832,39 +832,40 @@ def test_model_sizes():
         # p = 50 + 5            =   55  #Prelu
         # total = t1+t2+a+x+e+p = 1342
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [5], 10, 20, attention=False)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1100)
-    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p                           =    5    #Prelu
-    # total = t+x+e+p             = 1100
+    for make_3body in [make_3body_conv, make_flat_3body_conv]:
+        X, E = make_3body(X_in, A_in, E_in,
+                               [5], 10, 20, attention=False)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1100)
+        # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p                           =    5    #Prelu
+        # total = t+x+e+p             = 1100
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [5], 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
-    # int vs list:
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           5, 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
-    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
-    # a = (5+1)*1   *6            =   36    #Attention
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p                           =    5    #Prelu
-    # total = t+a+x+e+p           = 1136
+        X, E = make_3body(X_in, A_in, E_in,
+                               [5], 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+        # int vs list:
+        X, E = make_3body(X_in, A_in, E_in,
+                               5, 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+        # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+        # a = (5+1)*1   *6            =   36    #Attention
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p                           =    5    #Prelu
+        # total = t+a+x+e+p           = 1136
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [7, 5], 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1245)
-    # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
-    # t2 = (7+1)*5                =   40
-    # a = (5+1)*1   *6            =   36    #Attention
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p = 5 + 7                   =   12    #Prelu
-    # total = t1+t2+a+x+e+p       = 1245
+        X, E = make_3body(X_in, A_in, E_in,
+                               [7, 5], 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1245)
+        # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
+        # t2 = (7+1)*5                =   40
+        # a = (5+1)*1   *6            =   36    #Attention
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p = 5 + 7                   =   12    #Prelu
+        # total = t1+t2+a+x+e+p       = 1245
 
 
 def test_clustering():
