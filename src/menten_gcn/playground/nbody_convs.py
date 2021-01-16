@@ -217,8 +217,9 @@ def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
 
     return newX, newE
 
-def make_flat_NENE( X, A, E ):
-    NENE = make_NENE(X, E) #TODO make_flat_NENE
+
+def make_flat_NENE(X, A, E):
+    NENE = make_NENE(X, E)  # TODO make_flat_NENE
     A_int = tf.cast(A, "int32")
 
     Temp = NENE
@@ -226,19 +227,21 @@ def make_flat_NENE( X, A, E ):
     Temp = part[1]
     return NENE, A_int, Temp
 
-def flat2_unnamed_util( n, A_int, final_t ):
+
+def flat2_unnamed_util(n, A_int, final_t):
     #x = tf.constant(N*N)
-    r = tf.range(n*n * tf.shape(A_int)[0])
+    r = tf.range(n * n * tf.shape(A_int)[0])
     r2 = tf.reshape(r, shape=[tf.shape(A_int)[0], n, n])
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
-    
+
     s_1 = tf.shape(condition_indices[0])[0]
     s_2 = final_t
     s = [s_1, s_2]
     zero_padding1 = tf.zeros(shape=s)
     return condition_indices, zero_padding1
 
-def flat2_unnamed_util2( A_int, n, final_t, Temp ):
+
+def flat2_unnamed_util2(A_int, n, final_t, Temp):
     #       batch              * N * N * t
     npad1 = tf.shape(A_int)[0] * n * n * final_t
     npad2 = tf.shape(Temp)[0]
@@ -247,16 +250,18 @@ def flat2_unnamed_util2( A_int, n, final_t, Temp ):
     zero_padding = tf.reshape(zero_padding, [-1, final_t])
     return zero_padding
 
-def flat2_deflatten( V, condition_indices, zero_padding1, A_int, final_t, n ):
+
+def flat2_deflatten(V, condition_indices, zero_padding1, A_int, final_t, n):
     partitioned_data = [zero_padding1, V]
     V = tf.dynamic_stitch(condition_indices, partitioned_data)
 
-    zero_padding = flat2_unnamed_util2( A_int, n, final_t, V )
-    
+    zero_padding = flat2_unnamed_util2(A_int, n, final_t, V)
+
     V = tf.concat([V, zero_padding], -2)
     V = tf.reshape(V, [tf.shape(A_int)[0], n, n, final_t])
     return V
-    
+
+
 def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
                          Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
                          Xactivation='relu', Eactivation='relu',
@@ -314,13 +319,13 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     assert len(E.shape) == 4
 
     N = A.shape[-1]
-    
+
     if X_mask is None:
         X_mask = make_node_mask(A)
     if E_mask is None:
         E_mask = make_edge_mask(A)
 
-    NENE, A_int, Temp = make_flat_NENE( X, A, E )
+    NENE, A_int, Temp = make_flat_NENE(X, A, E)
 
     if hasattr(Tnfeatures, "__len__"):
         assert len(Tnfeatures) > 0
@@ -330,44 +335,43 @@ def make_flat_2body_conv(X: Layer, A: Layer, E: Layer,
     else:
         Temp = Dense(Tnfeatures, activation=PReLU())(Temp)
         final_t = Tnfeatures
-        
+
     n = tf.constant(N)
-    condition_indices, zero_padding1 = flat2_unnamed_util( n, A_int, final_t )
+    condition_indices, zero_padding1 = flat2_unnamed_util(n, A_int, final_t)
 
     if attention:
         Att1 = Dense(1, activation='sigmoid')(Temp)
         Att1 = Multiply()([Temp, Att1])
-        Att1 = flat2_deflatten( Att1, condition_indices,
-                                zero_padding1, A_int, final_t, n )
+        Att1 = flat2_deflatten(Att1, condition_indices,
+                               zero_padding1, A_int, final_t, n)
         newX1 = tf.keras.backend.sum(Att1, axis=-2, keepdims=False)
 
         Att2 = Dense(1, activation='sigmoid')(Temp)
         Att2 = Multiply()([Temp, Att2])
-        Att2 = flat2_deflatten( Att2, condition_indices,
-                                zero_padding1, A_int, final_t, n )        
+        Att2 = flat2_deflatten(Att2, condition_indices,
+                               zero_padding1, A_int, final_t, n)
         newX2 = tf.keras.backend.sum(Att2, axis=-3, keepdims=False)
     else:
-        Temp = flat2_deflatten( Temp, condition_indices,
-                                zero_padding1, A_int, final_t, n )
+        Temp = flat2_deflatten(Temp, condition_indices,
+                               zero_padding1, A_int, final_t, n)
         newX1 = tf.keras.backend.sum(Temp, axis=-2, keepdims=False)
         newX2 = tf.keras.backend.sum(Temp, axis=-3, keepdims=False)
-        
+
     superX = Concatenate(axis=-1)([X, newX1, newX2])
 
     if apply_T_to_E:
         if attention:
-            superE = flat2_deflatten( Temp, condition_indices,
-                                      zero_padding1, A_int, final_t, n )
+            superE = flat2_deflatten(Temp, condition_indices,
+                                     zero_padding1, A_int, final_t, n)
         else:
             superE = Temp
     else:
-        superE = NENE #TODO use flat
+        superE = NENE  # TODO use flat
 
     newX, newE = make_1body_conv(superX, A, superE, Xnfeatures, Enfeatures,
                                  Xactivation, Eactivation, E_mask, X_mask)
 
     return newX, newE
-
 
 
 def make_NEENEENEE_XE_conv(X: Layer, A: Layer, E: Layer,
