@@ -783,87 +783,89 @@ def test_model_sizes():
     # 130 = ( 4 + 1 ) * 10 + ( 3 + 1 ) * 20
     # 130 = 50 + 80
 
-    X, E = make_2body_conv(X_in, A_in, E_in,
-                           [5], 10, 20,
-                           attention=False, apply_T_to_E=False)
-    assert_n_params([X_in, A_in, E_in], [X, E], 530)
-    # t = (4+4+3+3+1)*5 =  75
-    # x = (4+5+5+1)*10  = 150
-    # e = (4+4+3+3+1)*20= 300
-    # p                 =   5    #Prelu
-    # total = t+x+e+p   = 530
+    for make_2body in [make_2body_conv, make_flat_2body_conv]:
+        X, E = make_2body(X_in, A_in, E_in,
+                          [5], 10, 20,
+                          attention=False, apply_T_to_E=False)
+        assert_n_params([X_in, A_in, E_in], [X, E], 530)
+        # t = (4+4+3+3+1)*5 =  75
+        # x = (4+5+5+1)*10  = 150
+        # e = (4+4+3+3+1)*20= 300
+        # p                 =   5    #Prelu
+        # total = t+x+e+p   = 530
 
-    X, E = make_2body_conv(X_in, A_in, E_in,
-                           5, 10, 20,
-                           attention=False, apply_T_to_E=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 350)
-    # int vs list:
-    X, E = make_2body_conv(X_in, A_in, E_in,
-                           [5], 10, 20,
-                           attention=False, apply_T_to_E=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 350)
-    # t = (4+4+3+3+1)*5 =  75
-    # x = (4+5+5+1)*10  = 150
-    # e = (5+1)*20      = 120
-    # p                 =   5    #Prelu
-    # total = t+x+e+p   = 350
+        X, E = make_2body(X_in, A_in, E_in,
+                          5, 10, 20,
+                          attention=False, apply_T_to_E=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 350)
+        # int vs list:
+        X, E = make_2body(X_in, A_in, E_in,
+                          [5], 10, 20,
+                          attention=False, apply_T_to_E=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 350)
+        # t = (4+4+3+3+1)*5 =  75
+        # x = (4+5+5+1)*10  = 150
+        # e = (5+1)*20      = 120
+        # p                 =   5    #Prelu
+        # total = t+x+e+p   = 350
 
-    X, E = make_2body_conv(X_in, A_in, E_in,
-                           [5], 10, 20,
-                           attention=True, apply_T_to_E=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 362)
-    # t = (4+4+3+3+1)*5     =  75
-    # a = (5+1)*1   *2      =  12    #Attention
-    # x = (4+5+5+1)*10      = 150
-    # e = (5+1)*20          = 120
-    # p                     =   5    #Prelu
-    # total = t+a+x+e+p     = 362
+        X, E = make_2body(X_in, A_in, E_in,
+                          [5], 10, 20,
+                          attention=True, apply_T_to_E=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 362)
+        # t = (4+4+3+3+1)*5     =  75
+        # a = (5+1)*1   *2      =  12    #Attention
+        # x = (4+5+5+1)*10      = 150
+        # e = (5+1)*20          = 120
+        # p                     =   5    #Prelu
+        # total = t+a+x+e+p     = 362
 
-    X, E = make_2body_conv(X_in, A_in, E_in,
-                           [50, 5], 10, 20,
-                           attention=True, apply_T_to_E=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1342)
-    # t1 = (4+4+3+3+1)*50   =  750
-    # t2 = (50+1)*5         =  255
-    # a = (5+1)*1   *2      =   12  #Attention
-    # x = (4+5+5+1)*10      =  150
-    # e = (5+1)*20          =  120
-    # p = 50 + 5            =   55  #Prelu
-    # total = t1+t2+a+x+e+p = 1342
+        X, E = make_2body(X_in, A_in, E_in,
+                          [50, 5], 10, 20,
+                          attention=True, apply_T_to_E=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1342)
+        # t1 = (4+4+3+3+1)*50   =  750
+        # t2 = (50+1)*5         =  255
+        # a = (5+1)*1   *2      =   12  #Attention
+        # x = (4+5+5+1)*10      =  150
+        # e = (5+1)*20          =  120
+        # p = 50 + 5            =   55  #Prelu
+        # total = t1+t2+a+x+e+p = 1342
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [5], 10, 20, attention=False)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1100)
-    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p                           =    5    #Prelu
-    # total = t+x+e+p             = 1100
+    for make_3body in [make_3body_conv, make_flat_3body_conv]:
+        X, E = make_3body(X_in, A_in, E_in,
+                          [5], 10, 20, attention=False)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1100)
+        # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p                           =    5    #Prelu
+        # total = t+x+e+p             = 1100
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [5], 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
-    # int vs list:
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           5, 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1136)
-    # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
-    # a = (5+1)*1   *6            =   36    #Attention
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p                           =    5    #Prelu
-    # total = t+a+x+e+p           = 1136
+        X, E = make_3body(X_in, A_in, E_in,
+                          [5], 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+        # int vs list:
+        X, E = make_3body(X_in, A_in, E_in,
+                          5, 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1136)
+        # t = (4+4+4+3+3+3+3+3+3+1)*5 =  155
+        # a = (5+1)*1   *6            =   36    #Attention
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p                           =    5    #Prelu
+        # total = t+a+x+e+p           = 1136
 
-    X, E = make_3body_conv(X_in, A_in, E_in,
-                           [7, 5], 10, 20, attention=True)
-    assert_n_params([X_in, A_in, E_in], [X, E], 1245)
-    # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
-    # t2 = (7+1)*5                =   40
-    # a = (5+1)*1   *6            =   36    #Attention
-    # x = (4+5+5+5+1)*10          =  200
-    # e = (3+3+(6*5)+1)*20        =  740
-    # p = 5 + 7                   =   12    #Prelu
-    # total = t1+t2+a+x+e+p       = 1245
+        X, E = make_3body(X_in, A_in, E_in,
+                          [7, 5], 10, 20, attention=True)
+        assert_n_params([X_in, A_in, E_in], [X, E], 1245)
+        # t1 = (4+4+4+3+3+3+3+3+3+1)*7=  217
+        # t2 = (7+1)*5                =   40
+        # a = (5+1)*1   *6            =   36    #Attention
+        # x = (4+5+5+5+1)*10          =  200
+        # e = (3+3+(6*5)+1)*20        =  740
+        # p = 5 + 7                   =   12    #Prelu
+        # total = t1+t2+a+x+e+p       = 1245
 
 
 def test_clustering():
@@ -1205,14 +1207,6 @@ def test_flat_nbody_layer():
             print(E)  # shape=(None, 3, 3, 2)
 
             A_int = tf.cast(A, "int32")
-            '''
-            A_int_flat = tf.keras.layers.Flatten()(tf.cast( A, "int32" ))
-            print( A_int_flat ) #shape=(None, 9)
-
-            E_flat = tf.keras.layers.Flatten()(E)
-            print( E_flat ) #shape=(None, 18)
-            exit( 0 )
-            '''
 
             part = tf.dynamic_partition(E, A_int, 2)
             print(len(part))
@@ -1352,3 +1346,59 @@ def test_flat_nbody_layer():
 
     for output in batch2_pred:
         assert_almost_equal(output, target, decimal=3)
+
+
+def test_flat_2body_feed():
+    testX = [[[0., 1., 0.],
+              [1., 2., 0.],
+              [0., 3., 3.]]]
+    testA = [[[0., 1., 0.],
+              [1., 0., 0.],
+              [0., 0., 0.]]]
+    testE = [[[[1., 2.],
+               [3.1, 4.1],
+               [5., 6.], ],
+
+              [[7.1, 8.1],
+               [9., 1.],
+               [9., 2.], ],
+
+              [[8., 3.],
+               [7., 4.],
+               [6., 5.], ], ]]
+
+    testX = np.asarray(testX)
+    testA = np.asarray(testA)
+    testE = np.asarray(testE)
+
+    N = 3
+    F = 3
+    S = 2
+
+    X_in = Input(shape=(N, F), name='X_in')
+    A_in = Input(shape=(N, N), sparse=False, name='A_in')
+    E_in = Input(shape=(N, N, S), name='E_in')
+
+    outF = 2
+    outS = 3
+
+    for a in [True, False]:
+
+        Px, Pe = make_flat_3body_conv(X_in, A_in, E_in,
+                                      [4, 7], outF, outS,
+                                      attention=a)
+
+        for t2e in [True, False]:
+
+            Ox, Oe = make_flat_2body_conv(X_in, A_in, E_in,
+                                          [4, 7], outF, outS,
+                                          attention=a, apply_T_to_E=t2e)
+
+            model = Model(inputs=[X_in, A_in, E_in], outputs=[Ox, Oe, Px, Pe])
+            model.compile(optimizer='adam', loss='mean_squared_error')
+            pred = model.predict([testX, testA, testE])
+            assert(len(pred) == 4)
+            assert pred[0].shape[-1] == outF
+            assert pred[1].shape[-1] == outS
+            assert pred[2].shape[-1] == outF
+            assert pred[3].shape[-1] == outS
