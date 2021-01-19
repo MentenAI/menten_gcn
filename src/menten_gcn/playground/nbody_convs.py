@@ -832,3 +832,49 @@ def add_n_edges_for_node(X: Layer, A: Layer) -> Layer:
 make_2body_conv = make_NENE_XE_conv
 
 make_3body_conv = make_NEENEENEE_XE_conv
+
+# StARC2 ?
+'''
+def make_NENE_XE_conv(X: Layer, A: Layer, E: Layer,
+                      Tnfeatures: list, Xnfeatures: int, Enfeatures: int,
+                      Xactivation='relu', Eactivation='relu',
+                      attention: bool = False, apply_T_to_E: bool = False,
+                      E_mask=None, X_mask=None) -> Tuple[Layer, Layer]:
+'''
+class SRC2( Layer ):
+    def __init__(self, Tfs: list, Ff: int, Sf: int,
+                 Xactivation=None, Eactivation=None,
+                 attention: bool = False, apply_T_to_E: bool = False ):
+        super(SRC2, self).__init__()
+        self.Tfs = Tfs
+        self.Ff = Ff
+        self.Sf = Sf
+        self.Xact = Xactivation
+        self.Eact = Eactivation
+        self.att = attention
+        self.T2E = apply_T_to_E
+
+        self.N = -1
+        
+    def build(self, input_shape):
+        print("input_shape: ", input_shape)
+        # TensorShape([None, 3, 3]), TensorShape([None, 3, 3, 2])]
+        assert(len(input_shape) == 3)
+        assert(len(input_shape[0]) == 3) #X
+        assert(len(input_shape[1]) == 3) #A
+        assert(len(input_shape[2]) == 4) #E
+        assert(input_shape[0][1] == input_shape[1][1]) #comparing N
+        assert(input_shape[0][1] == input_shape[1][2]) #comparing N
+        assert(input_shape[0][1] == input_shape[2][1]) #comparing N
+        assert(input_shape[0][1] == input_shape[2][2]) #comparing N
+        self.N = input_shape[0][1]
+
+    def call(self, inputs):
+        print("inputs: ", inputs)
+        X, E = make_NENE_XE_conv(inputs[0], inputs[1], inputs[2],
+                                 self.Tfs, self.Ff, self.Sf,
+                                 Xactivation=self.Xact, Eactivation=self.Eact,
+                                 attention=self.att, apply_T_to_E=self.T2E,
+                                 E_mask=None, X_mask=None)
+        return X,E
+        

@@ -1,7 +1,7 @@
-from menten_gcn import *
-from menten_gcn.decorators import *
-from menten_gcn.playground import *
-from menten_gcn.util import *
+from my_menten_gcn import *
+from my_menten_gcn.decorators import *
+from my_menten_gcn.playground import *
+from my_menten_gcn.util import *
 
 # import spektral
 # import tensorflow as tf
@@ -769,6 +769,7 @@ def test_model_sizes():
     def assert_n_params(inp, out, expected_size):
         model = Model(inputs=inp, outputs=out)
         model.compile(optimizer='adam', loss='mean_squared_error')
+        model.summary()
         print(model.count_params())
         assert(model.count_params() == expected_size)
 
@@ -787,6 +788,10 @@ def test_model_sizes():
         X, E = make_2body(X_in, A_in, E_in,
                           [5], 10, 20,
                           attention=False, apply_T_to_E=False)
+        assert_n_params([X_in, A_in, E_in], [X, E], 530)
+        X, E = SRC2([5], 10, 20,
+                    attention=False,
+                    apply_T_to_E=False )([X_in,A_in,E_in])
         assert_n_params([X_in, A_in, E_in], [X, E], 530)
         # t = (4+4+3+3+1)*5 =  75
         # x = (4+5+5+1)*10  = 150
