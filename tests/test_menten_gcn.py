@@ -1403,16 +1403,17 @@ def test_flat_2body_feed():
             assert pred[2].shape[-1] == outF
             assert pred[3].shape[-1] == outS
 
+
 def test_approx_ALA():
     pose = md.load_pdb("tests/6U07.atoms.pdb")
     wrapped_pose = MDTrajPoseWrapper(mdtraj_trajectory=pose)
-    for resid in range( 1, wrapped_pose.size() + 1 ):
-        if wrapped_pose.get_name1( resid ) == "G":
+    for resid in range(1, wrapped_pose.size() + 1):
+        if wrapped_pose.get_name1(resid) == "G":
             continue
-        actual_xyz = wrapped_pose.get_atom_xyz( resid, "CB" )
-        approx_xyz = wrapped_pose.approximate_ALA_CB( resid )
-        distance = np.linalg.norm( actual_xyz-approx_xyz )
-        print( distance )
+        actual_xyz = wrapped_pose.get_atom_xyz(resid, "CB")
+        approx_xyz = wrapped_pose.approximate_ALA_CB(resid)
+        distance = np.linalg.norm(actual_xyz - approx_xyz)
+        print(distance)
 
         # TODO we'd love to get this lower
-        assert distance < 1.5 # Å
+        assert distance < 1.5  # Å

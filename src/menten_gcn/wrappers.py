@@ -108,7 +108,7 @@ class WrappedPose:
 
     def size(self):
         return self.n_residues()
-    
+
     def resid_is_N_term(self, resid):
         raise NotImplementedError
 
