@@ -46,13 +46,19 @@ class DataHolder:
 
     There are descriptions for each method below but perhaps the best way to grasp
     the DataHolder's usage is to see the example at the bottom.
+
+    Parameters
+    ----------
+    dtype: np.dtype
+        What NumPy dtype should we use to represent your data?
     """
 
-    def __init__(self):
+    def __init__(self, dtype: np.dtype = np.float32):
         self.Xs = []
         self.As = []
         self.Es = []
         self.outs = []
+        self.dtype = dtype
 
     def assert_mode(self, mode=spektral.layers.ops.modes.BATCH):
         """
@@ -85,10 +91,10 @@ class DataHolder:
         """
 
         # TODO assert shape
-        self.Xs.append(np.asarray(X))
-        self.As.append(np.asarray(A))
-        self.Es.append(np.asarray(E))
-        self.outs.append(np.asarray(out))
+        self.Xs.append(np.asarray(X, dtype=self.dtype))
+        self.As.append(np.asarray(A, dtype=self.dtype))
+        self.Es.append(np.asarray(E, dtype=self.dtype))
+        self.outs.append(np.asarray(out, dtype=self.dtype))
 
     def size(self) -> int:
         return len(self.Xs)
@@ -139,14 +145,10 @@ class DataHolder:
         """
         np.savez_compressed(
             fileprefix + '.npz',
-            x=np.asarray(
-                self.Xs),
-            a=np.asarray(
-                self.As),
-            e=np.asarray(
-                self.Es),
-            o=np.asarray(
-                self.outs))
+            x=np.asarray(self.Xs, dtype=self.dtype),
+            a=np.asarray(self.As, dtype=self.dtype),
+            e=np.asarray(self.Es, dtype=self.dtype),
+            o=np.asarray(self.outs, dtype=self.dtype))
 
     def load_from_file(self, fileprefix: str = None, filename: str = None):
         """
