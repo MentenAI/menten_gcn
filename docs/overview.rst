@@ -26,8 +26,6 @@ Menten GCN will also automatically add edges between any two nodes that are clos
 Graph Tensors
 #############
 
-We are basing our format off of Spektral's batch mode.
-
 We have 3 primary parameters in this system:
 
 - "N" is maximum the number of nodes in any graph.
@@ -53,25 +51,21 @@ will have different values for each of the two slots in "E".
 Usage
 #####
 
-This workflow may be overwhelming but keep in mind that this is the entire training process.
-Let's walk through this slowly:
-
 .. image:: _images/MentenGCNOverview.png
 
 1. Start by loading your pose in python using any of our supported packages.
 
-  - Just Rosetta and MDTraj right now. Get in touch if you want more!
-  - You will hopefully be training on more than just one pose
+   - Just Rosetta and MDTraj right now. Get in touch if you want more!
     
 2. Wrap your pose using the appropiate wrapper for your package.
 
-  - See Classes -> Pose Wrappers
+   - See Classes -> Pose Wrappers
     
 3. Define a list of decorators to use to represent your pose.
 
-  - See Classes -> Decorators
-  - An example decorator would be PhiPsiRadians,
-    which decorates each node with its Phi and Psi value
+   - See Classes -> Decorators
+   - An example decorator would be PhiPsiRadians,
+     which decorates each node with its Phi and Psi value
     
 4. Use this list of decorators to build a DataMaker
    
@@ -80,16 +74,8 @@ Let's walk through this slowly:
 6. From here you have a few choices.
 
    - You can train on these tensors directly
-   - You can train on these tensors after wrapping them in a Keras generator
-     - See Classes -> Data Management
+   - You can utilize Spektral's Dataset interface to make training easier with large amounts of data
    - Or you can save these for later. Stick them on disk and come back to them when you're ready to train
-     
-7. Of course in order to train you need to create a model.
 
-   - Menten GCN doesn't do much in that regard.
-     We highly recommend Spektral for this purpose.
-   - However, we do recommend using the DataMaker to generate the input layers for your model.
-     This ensures that the size and shape matches the data
 
-   
 See the DataMaker class and examples for more details.
