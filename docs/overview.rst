@@ -6,32 +6,6 @@ The goal of Menten GCN is to create GCN tensors from protein models (poses).
 We are aligning with Spektral's vocabulary style when talking about GCNs
 and Rosetta's vocabulary when talking about poses.
 
-Prerequisite Knowledge
-######################
-
-This overview assumes general familiarity with
-protein structure,
-machine learning,
-graph data structures,
-and graph neural networks (to a small extent).
-
-
-This is a very niche intersections of fields
-so do not feel bad if you are not up to speed on all of these topics.
-If you find yourself in that position, here are some links that might help:
-
-Protein Structure:
-- `Wikipedia <https://en.wikipedia.org/wiki/Protein_structure>`_
-- `Amino Acids <https://en.wikipedia.org/wiki/Amino_acid>`_
-- `Phi and Psi <https://proteopedia.org/wiki/index.php/Phi_and_Psi_Angles>`_
-- `Rosetta <https://www.rosettacommons.org/support/overview>`_
-
-Machine Learning:
-- `Machine Learning <https://en.wikipedia.org/wiki/Machine_learning>`_
-- `Neural Networks <https://en.wikipedia.org/wiki/Artificial_neural_network>`_
-- `Graph Convolutional Neural Networks <https://tkipf.github.io/graph-convolutional-networks/>`_
-- `Spektral <https://graphneural.network/>`_
-
 
 Graph Layout
 ###############
@@ -74,7 +48,7 @@ have the same value going in both directions.
 Other edge tensors are asymmetric (like relative geometries) so they
 will have different values for each of the two slots in "E".
 
-.. image:: _images/MentenGCN2.png
+.. image:: _images/MentenGCNXEij.png
 
 Usage
 #####
@@ -82,7 +56,7 @@ Usage
 This workflow may be overwhelming but keep in mind that this is the entire training process.
 Let's walk through this slowly:
 
-.. image:: _images/MentenGCN3.png
+.. image:: _images/MentenGCNOverview.png
 
 1. Start by loading your pose in python using any of our supported packages.
 
