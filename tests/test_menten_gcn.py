@@ -387,7 +387,7 @@ def test_data_generator_4():
             log = np.zeros(10)
             for i in range(0, 6):
                 for j in range(0, 3):
-                    log[Xval(generator, i, j)] += 1
+                    log[int(Xval(generator, i, j))] += 1
             assert(max(log) == 2)
             assert(min(log) <= 1)
             assert(sum(log) == 18)
