@@ -28,7 +28,7 @@ With PyRosetta
    data_maker.summary()
 				      
    pose = pyrosetta.pose_from_pdb( "test.pdb" )
-   wrapped_pose = RosettaPoseWrapper( pose )
+   wrapped_pose = mg.RosettaPoseWrapper( pose )
 
    #picking an arbitrary resid to be interested in
    resid_of_interest = 10
@@ -66,7 +66,7 @@ With MDTraj
    data_maker.summary()
 				      
    pose = md.load_pdb( "test.pdb" )
-   wrapped_pose = MDTrajPoseWrapper( pose )   
+   wrapped_pose = mg.MDTrajPoseWrapper( pose )   
 
    #picking an arbitrary resid to be interested in
    resid_of_interest = 10

@@ -5,5 +5,7 @@ Examples
     :glob:
 
     HelloWorld*
-       
+
+    SimpleTrain*
+    
     CustomDec*
