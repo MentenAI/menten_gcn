@@ -33,7 +33,7 @@ With PyRosetta
    #picking an arbitrary resid to be interested in
    resid_of_interest = 10
    
-   X, A, E, resids = data_maker.generate_input_for_resid( wrapped_pose, resid, data_cache=cache )
+   X, A, E, resids = data_maker.generate_input_for_resid( wrapped_pose, resid_of_interest )
 
    # Sanity check:
    print( "X shape:", X.shape )
@@ -71,7 +71,7 @@ With MDTraj
    #picking an arbitrary resid to be interested in
    resid_of_interest = 10
    
-   X, A, E, resids = data_maker.generate_input_for_resid( wrapped_pose, resid, data_cache=cache )
+   X, A, E, resids = data_maker.generate_input_for_resid( wrapped_pose, resid_of_interest )
 
    # Sanity check:
    print( "X shape:", X.shape )
