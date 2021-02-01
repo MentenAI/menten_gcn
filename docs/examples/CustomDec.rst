@@ -86,3 +86,8 @@ All do need to do is inherit a these seven methods from the base class.
 
    .. automethod:: cache_data
 	       
+
+For reference, here are the methods for the WrappedPose that will be passed into your decorator
+		   
+.. autoclass:: menten_gcn.WrappedPose
+   :members:
