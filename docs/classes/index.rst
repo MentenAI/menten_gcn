@@ -12,4 +12,3 @@ Classes
 
     PoseWrappers*
 
-    DataManagement*
