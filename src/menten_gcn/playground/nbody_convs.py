@@ -343,7 +343,7 @@ def flat2_unnamed_util(n, A_int, final_t, prefix):
     condition_indices = tf.dynamic_partition(r2, A_int, 2)
 
     s_1 = tf.shape(condition_indices[0])[0]
-    s_2 = final_t
+    s_2 = int(final_t)
     s = [s_1, s_2]
     zero_padding1 = tf.zeros(shape=s)
     return condition_indices, zero_padding1
