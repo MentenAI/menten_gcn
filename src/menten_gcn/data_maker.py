@@ -259,7 +259,7 @@ class DataMaker:
         """
 
         dtype_str = str(self.dtype).split('.')[-1].split('\'')[0]
-        
+
         N, F, S = self.get_N_F_S()
         X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
         A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
