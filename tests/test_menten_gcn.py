@@ -95,7 +95,7 @@ def observe_NEE3(Xval, Aval, Eval, N, F, S):
     foo(all_outs[11], [300., -12., 12., 200., -13., 13., 100., -23., 23., ])
 
 
-def test_NEE3():
+def extra_test_NEE3():
     '''
          2
         / \
@@ -387,7 +387,7 @@ def test_data_generator_4():
             log = np.zeros(10)
             for i in range(0, 6):
                 for j in range(0, 3):
-                    log[Xval(generator, i, j)] += 1
+                    log[int(Xval(generator, i, j))] += 1
             assert(max(log) == 2)
             assert(min(log) <= 1)
             assert(sum(log) == 18)
@@ -758,7 +758,7 @@ def test_expected_md_traj_results():
     assert_equal(resids, [20, 21, 19, 8, 61], 2)
 
 
-def test_model_sizes():
+def extra_test_model_sizes():
     N = 5
     F = 4
     S = 3
@@ -931,7 +931,7 @@ def test_clustering():
                                                                         121, 122]]
 
 
-def test_sanity_check_flat_nbody():
+def extra_test_sanity_check_flat_nbody():
     N = 3
     #F = 3
     #S = 2
@@ -1049,7 +1049,7 @@ def test_sanity_check_flat_nbody():
     equal(stitch1_np, target, decimal=3)
 
 
-def test_sanity_check_flat_nbody2():
+def extra_test_sanity_check_flat_nbody2():
     N = 3
     #F = 3
     #S = 2
@@ -1175,7 +1175,7 @@ def test_sanity_check_flat_nbody2():
     equal(stitch1_np, target, decimal=3)
 
 
-def test_flat_nbody_layer():
+def extra_test_flat_nbody_layer():
 
     class TestFlat(tf.keras.layers.Layer):
         def __init__(self):
@@ -1348,7 +1348,7 @@ def test_flat_nbody_layer():
         assert_almost_equal(output, target, decimal=3)
 
 
-def test_flat_2body_feed():
+def extra_test_flat_2body_feed():
     testX = [[[0., 1., 0.],
               [1., 2., 0.],
               [0., 3., 3.]]]

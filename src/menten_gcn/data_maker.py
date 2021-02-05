@@ -32,10 +32,13 @@ class DataMaker:
     nbr_distance_cutoff_A: float
         A node will be included in the graph if it is within this distance (Angstroms) of any focus node.
         A value of None will set this equal to edge_distance_cutoff_A
+    dtype: np.dtype
+        What numpy data type should we use to represent your data?
     """
 
     def __init__(self, decorators: List[Decorator], edge_distance_cutoff_A: float, max_residues: int,
-                 exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None):
+                 exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None,
+                 dtype: np.dtype = np.float32):
 
         self.bare_bones_decorator = BareBonesDecorator()
         self.exclude_bbdec = exclude_bbdec
@@ -52,6 +55,8 @@ class DataMaker:
             self.nbr_distance_cutoff_A = edge_distance_cutoff_A
         else:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
+
+        self.dtype = dtype
 
     def get_N_F_S(self) -> Tuple[int, int, int]:
         """
@@ -179,8 +184,8 @@ class DataMaker:
         assert len(f_ij) == self.all_decs.n_edge_features()
         assert len(f_ji) == self.all_decs.n_edge_features()
 
-        f_ij = np.asarray(f_ij)
-        f_ji = np.asarray(f_ji)
+        f_ij = np.asarray(f_ij, dtype=self.dtype)
+        f_ji = np.asarray(f_ji, dtype=self.dtype)
         if data_cache.edge_cache is not None:
             data_cache.edge_cache[resid_i][resid_j] = f_ij
             data_cache.edge_cache[resid_j][resid_i] = f_ji
@@ -188,8 +193,8 @@ class DataMaker:
 
     def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
-        A_dense = np.zeros(shape=[N, N])
-        E_dense = np.zeros(shape=[N, N, S])
+        A_dense = np.zeros(shape=[N, N], dtype=self.dtype)
+        E_dense = np.zeros(shape=[N, N, S], dtype=self.dtype)
 
         for i in range(0, len(all_resids) - 1):
             resid_i = all_resids[i]
@@ -210,7 +215,7 @@ class DataMaker:
 
     def _get_node_data(self, wrapped_pose: WrappedPose, resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
-        X = np.zeros(shape=[N, F])
+        X = np.zeros(shape=[N, F], dtype=self.dtype)
         index = -1
         for resid in resids:
             index += 1
@@ -226,7 +231,7 @@ class DataMaker:
 
             n = self.all_decs.calc_node_features(wrapped_pose, resid)
 
-            n = np.asarray(n)
+            n = np.asarray(n, dtype=self.dtype)
             if data_cache.node_cache is not None:
                 data_cache.node_cache[resid] = n
             X[index] = n
@@ -253,10 +258,12 @@ class DataMaker:
             Edge Feature Input
         """
 
+        dtype_str = str(self.dtype).split('.')[-1].split('\'')[0]
+
         N, F, S = self.get_N_F_S()
-        X_in = Input(shape=(N, F), name='X_in')
-        A_in = Input(shape=(N, N), sparse=False, name='A_in')
-        E_in = Input(shape=(N, N, S), name='E_in')
+        X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
+        A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
+        E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
 
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
