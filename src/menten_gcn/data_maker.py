@@ -258,10 +258,12 @@ class DataMaker:
             Edge Feature Input
         """
 
+        dtype_str = str(self.dtype).split('.')[-1].split('\'')[0]
+        
         N, F, S = self.get_N_F_S()
-        X_in = Input(shape=(N, F), name='X_in')
-        A_in = Input(shape=(N, N), sparse=False, name='A_in')
-        E_in = Input(shape=(N, N, S), name='E_in')
+        X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
+        A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
+        E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
 
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
