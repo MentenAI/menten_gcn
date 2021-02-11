@@ -5,7 +5,20 @@ from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
 #import tensorflow as tf
-from tensorflow.keras.layers import Input, Layer
+try:
+    from tensorflow.keras.layers import Input, Layer
+except:
+    print( "Could not import tensorflow.",
+           "Some features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
+try:
+    import spektral
+    from spektral.data import Graph
+except:
+    spektral = None
+    print( "Could not import spektral.",
+           "Some features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
 
 from typing import List, Tuple
 
@@ -265,11 +278,11 @@ class DataMaker:
         A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
         E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
-
+    
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
                        legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
-        This is does the actual work of creating a graph and representing it as tensors
+        This is does the work of creating a graph and representing it as tensors
 
         Parameters
         -------
@@ -323,7 +336,7 @@ class DataMaker:
         -------
         wrapped_pose: WrappedPose
             Pose to generate data from
-        focus_resid: inr
+        focus_resid: int
             Which resid is the focus residue?
             We use Rosetta conventions here, so the first residue is resid #1,
             second is #2, and so one. No skips.
@@ -345,3 +358,70 @@ class DataMaker:
             Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
         """
         return self.generate_input(wrapped_pose, focus_resids=[resid], data_cache=data_cache, legal_nbrs=legal_nbrs)
+
+    def generate_graph(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
+                       legal_nbrs: List[int] = None):
+        """
+        This is does the work of creating a graph and representing it in Spektral's Graph format
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resids: list of ints
+            Which resids are the focus residues?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+
+        Returns
+        -------
+        G: spektral.data.Graph
+            Spektral Graph, which can be added to your Spektral dataset
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """
+        if spektral is None:
+            raise ImportError( "Failed to load spektral. Cannot create graph" )
+
+        X, A, E, meta = self.generate_input( wrapped_pose, focus_resids, data_cache, legal_nbrs )
+        G = spektral.data.Graph( x=X, a=A, e=E )
+        return G, meta
+        
+    def generate_graph_for_resid(self, wrapped_pose: WrappedPose, focus_resid: int, data_cache: DecoratorDataCache = None,
+                       legal_nbrs: List[int] = None):
+        """
+        This is does the work of creating a graph and representing it in Spektral's Graph format
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resid: int
+            Which resid is the focus residue?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+
+        Returns
+        -------
+        G: spektral.data.Graph
+            Spektral Graph, which can be added to your Spektral dataset
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """
+        if spektral is None:
+            raise ImportError( "Failed to load spektral. Cannot create graph" )
+
+        X, A, E, meta = self.generate_input( wrapped_pose, [focus_resid], data_cache, legal_nbrs )
+        G = spektral.data.Graph( x=X, a=A, e=E )
+        return G, meta
+        
