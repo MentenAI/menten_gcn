@@ -362,7 +362,9 @@ class DataMaker:
     def generate_graph(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
                        legal_nbrs: List[int] = None):
         """
-        This is does the work of creating a graph and representing it in Spektral's Graph format
+        This is does the work of creating a graph and representing it in Spektral's Graph format.
+        Note this only populates the X, A, and E tensors.
+        It is up to the caller to do the rest.
 
         Parameters
         -------
@@ -395,7 +397,9 @@ class DataMaker:
     def generate_graph_for_resid(self, wrapped_pose: WrappedPose, focus_resid: int, data_cache: DecoratorDataCache = None,
                        legal_nbrs: List[int] = None):
         """
-        This is does the work of creating a graph and representing it in Spektral's Graph format
+        This is does the work of creating a graph and representing it in Spektral's Graph format.
+        Note this only populates the X, A, and E tensors.
+        It is up to the caller to do the rest.
 
         Parameters
         -------
