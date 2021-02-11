@@ -5,6 +5,7 @@ from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
 #import tensorflow as tf
+'''
 try:
     from tensorflow.keras.layers import Input, Layer
 except:
@@ -20,6 +21,18 @@ except:
            "Some features may be unavailable.",
            "MentenGCN will fail loudly in this case.")
 
+try:
+    import scipy
+except:
+    scipy = None
+    print( "Could not import scipy.",
+           "Sparse-representation features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
+'''
+from tensorflow.keras.layers import Input, Layer
+import spektral
+import scipy
+from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple
 
 
@@ -206,6 +219,7 @@ class DataMaker:
 
     def _calc_sparse_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose,
                                                     all_resids: List[int], data_cache):
+        #assert scipy is not None, "scipy is required for sparse representation"
         N, F, S = self.get_N_F_S()
         #A_dense = np.zeros(shape=[N, N], dtype=self.dtype)
         #A_sparse = scipy.sparse.csr.csr_matrix( (N,N), dtype=self.dtype )
@@ -234,7 +248,7 @@ class DataMaker:
                     A_col.append( i )
                     E_sparse.append( f_ji )
 
-        A_sparse = scipy.sparse.csr.csr_matrix( (A_data, (A_row, A_col)), dtype=self.dtype )
+        A_sparse = csr_matrix( (A_data, (A_row, A_col)), dtype=self.dtype )
         assert A_sparse.count_nonzero() == len( E_sparse )
         E_sparse = np.asarray( E_sparse )
                      

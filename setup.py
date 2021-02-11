@@ -74,7 +74,7 @@ setup(
     python_requires='>=3.5.0',
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
-        'numpy>=1.16.6', 'tensorflow>=2.1.0', 'spektral>=1.0.0'
+        'numpy>=1.16.6', 'tensorflow>=2.1.0', 'spektral>=1.0.0', 'scipy>=1.0.0'
     ],
     extras_require={
         # eg:
@@ -86,6 +86,7 @@ setup(
     ],
     test_requires=[
         'md_traj',
+        'scipy',
     ],
 
 )
