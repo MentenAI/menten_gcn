@@ -26,7 +26,6 @@ class Maguire_Grattarola_2021(DataMaker):
         assert S == 28
 
         try:
-            import pyrosetta
             from pyrosetta import pose_from_sequence
             from menten_gcn import RosettaPoseWrapper
 
