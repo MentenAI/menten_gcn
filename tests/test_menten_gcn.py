@@ -757,16 +757,16 @@ def test_expected_md_traj_results():
     assert_equal(E, expectedE, 2)
     assert_equal(resids, [20, 21, 19, 8, 61], 2)
 
-    X_sparse, A_sparse, E_sparse, resids_sparse = data_maker.generate_input_for_resid(wrapped_pose, resid=focus_resid, data_cache=data_cache, sparse=True)
-    N,F,S = data_maker.get_N_F_S()
+    X_sparse, A_sparse, E_sparse, resids_sparse = data_maker.generate_input_for_resid(
+        wrapped_pose, resid=focus_resid, data_cache=data_cache, sparse=True)
+    N, F, S = data_maker.get_N_F_S()
     assert_equal(X_sparse, expectedX, 2)
     assert_equal(A_sparse.toarray(), expectedA, 2)
-    E_sparse_dense = np.zeros( shape=(N,N,S) )
+    E_sparse_dense = np.zeros(shape=(N, N, S))
     # HOW TO CONVERT E_SPARSE TO E_DENSE?
     #assert_equal(E_sparse, expectedE, 2)
     assert_equal(resids_sparse, [20, 21, 19, 8, 61], 2)
-    
-    
+
 
 def extra_test_model_sizes():
     N = 5

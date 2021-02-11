@@ -228,7 +228,7 @@ class DataMaker:
         A_data = []
         A_row = []
         A_col = []
-        
+
         for i in range(0, len(all_resids) - 1):
             resid_i = all_resids[i]
             i_xyz = wrapped_pose.get_atom_xyz(resid_i, "CA")
@@ -238,23 +238,22 @@ class DataMaker:
                 dist = np.linalg.norm(i_xyz - j_xyz)
                 if dist < self.edge_distance_cutoff_A:
                     f_ij, f_ji = self._get_edge_data_for_pair(wrapped_pose, resid_i=resid_i, resid_j=resid_j, data_cache=data_cache)
-                    A_data.append( 1.0 )
-                    A_row.append( i )
-                    A_col.append( j )
-                    E_sparse.append( f_ij )
+                    A_data.append(1.0)
+                    A_row.append(i)
+                    A_col.append(j)
+                    E_sparse.append(f_ij)
 
-                    A_data.append( 1.0 )
-                    A_row.append( j )
-                    A_col.append( i )
-                    E_sparse.append( f_ji )
+                    A_data.append(1.0)
+                    A_row.append(j)
+                    A_col.append(i)
+                    E_sparse.append(f_ji)
 
-        A_sparse = csr_matrix( (A_data, (A_row, A_col)), dtype=self.dtype )
-        assert A_sparse.count_nonzero() == len( E_sparse )
-        E_sparse = np.asarray( E_sparse )
-                     
+        A_sparse = csr_matrix((A_data, (A_row, A_col)), dtype=self.dtype)
+        assert A_sparse.count_nonzero() == len(E_sparse)
+        E_sparse = np.asarray(E_sparse)
+
         return A_sparse, E_sparse
 
-    
     def _calc_dense_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose,
                                                    all_resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
@@ -330,7 +329,7 @@ class DataMaker:
         A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
         E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
-    
+
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int],
                        data_cache: DecoratorDataCache = None, sparse: bool = False,
                        legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
@@ -459,12 +458,12 @@ class DataMaker:
             Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
         """
         if spektral is None:
-            raise ImportError( "Failed to load spektral. Cannot create graph" )
+            raise ImportError("Failed to load spektral. Cannot create graph")
 
-        X, A, E, meta = self.generate_input( wrapped_pose, focus_resids, data_cache, sparse, legal_nbrs )
-        G = spektral.data.Graph( x=X, a=A, e=E )
+        X, A, E, meta = self.generate_input(wrapped_pose, focus_resids, data_cache, sparse, legal_nbrs)
+        G = spektral.data.Graph(x=X, a=A, e=E)
         return G, meta
-        
+
     def generate_graph_for_resid(self, wrapped_pose: WrappedPose, focus_resid: int,
                                  data_cache: DecoratorDataCache = None, sparse: bool = False,
                                  legal_nbrs: List[int] = None):
@@ -499,9 +498,8 @@ class DataMaker:
             Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
         """
         if spektral is None:
-            raise ImportError( "Failed to load spektral. Cannot create graph" )
+            raise ImportError("Failed to load spektral. Cannot create graph")
 
-        X, A, E, meta = self.generate_input( wrapped_pose, [focus_resid], data_cache, sparse, legal_nbrs )
-        G = spektral.data.Graph( x=X, a=A, e=E )
+        X, A, E, meta = self.generate_input(wrapped_pose, [focus_resid], data_cache, sparse, legal_nbrs)
+        G = spektral.data.Graph(x=X, a=A, e=E)
         return G, meta
-        
