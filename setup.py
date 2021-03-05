@@ -51,7 +51,7 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
+        # 'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -71,7 +71,7 @@ setup(
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    python_requires='>=3.5.0',
+    python_requires='>=3.6.0',
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
         'numpy>=1.16.6', 'tensorflow>=2.1.0', 'spektral>=1.0.0', 'scipy>=1.0.0'
