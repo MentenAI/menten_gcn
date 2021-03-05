@@ -31,7 +31,7 @@ except:
 '''
 from tensorflow.keras.layers import Input, Layer
 import spektral
-import scipy
+# import scipy
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple
 
