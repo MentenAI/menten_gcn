@@ -1,7 +1,7 @@
 Classes
 =========
 
-.. image:: ../_images/MentenGCN3.png
+.. image:: ../_images/MentenGCNOverview.png
 
 .. toctree::
     :glob:
@@ -12,4 +12,3 @@ Classes
 
     PoseWrappers*
 
-    DataManagement*

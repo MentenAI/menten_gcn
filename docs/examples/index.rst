@@ -4,8 +4,8 @@ Examples
 .. toctree::
     :glob:
 
-    SASA*
-       
-    BB2AA*
+    HelloWorld*
 
+    SimpleTrain*
+    
     CustomDec*
