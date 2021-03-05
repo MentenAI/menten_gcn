@@ -5,8 +5,34 @@ from menten_gcn.wrappers import WrappedPose
 from menten_gcn.data_management import DecoratorDataCache, NullDecoratorDataCache
 
 #import tensorflow as tf
-from tensorflow.keras.layers import Input, Layer
+'''
+try:
+    from tensorflow.keras.layers import Input, Layer
+except:
+    print( "Could not import tensorflow.",
+           "Some features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
+try:
+    import spektral
+    from spektral.data import Graph
+except:
+    spektral = None
+    print( "Could not import spektral.",
+           "Some features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
 
+try:
+    import scipy
+except:
+    scipy = None
+    print( "Could not import scipy.",
+           "Sparse-representation features may be unavailable.",
+           "MentenGCN will fail loudly in this case.")
+'''
+from tensorflow.keras.layers import Input, Layer
+import spektral
+# import scipy
+from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple
 
 
@@ -32,10 +58,13 @@ class DataMaker:
     nbr_distance_cutoff_A: float
         A node will be included in the graph if it is within this distance (Angstroms) of any focus node.
         A value of None will set this equal to edge_distance_cutoff_A
+    dtype: np.dtype
+        What numpy data type should we use to represent your data?
     """
 
     def __init__(self, decorators: List[Decorator], edge_distance_cutoff_A: float, max_residues: int,
-                 exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None):
+                 exclude_bbdec: bool = False, nbr_distance_cutoff_A: float = None,
+                 dtype: np.dtype = np.float32):
 
         self.bare_bones_decorator = BareBonesDecorator()
         self.exclude_bbdec = exclude_bbdec
@@ -52,6 +81,8 @@ class DataMaker:
             self.nbr_distance_cutoff_A = edge_distance_cutoff_A
         else:
             self.nbr_distance_cutoff_A = nbr_distance_cutoff_A
+
+        self.dtype = dtype
 
     def get_N_F_S(self) -> Tuple[int, int, int]:
         """
@@ -179,17 +210,55 @@ class DataMaker:
         assert len(f_ij) == self.all_decs.n_edge_features()
         assert len(f_ji) == self.all_decs.n_edge_features()
 
-        f_ij = np.asarray(f_ij)
-        f_ji = np.asarray(f_ji)
+        f_ij = np.asarray(f_ij, dtype=self.dtype)
+        f_ji = np.asarray(f_ji, dtype=self.dtype)
         if data_cache.edge_cache is not None:
             data_cache.edge_cache[resid_i][resid_j] = f_ij
             data_cache.edge_cache[resid_j][resid_i] = f_ji
         return f_ij, f_ji
 
-    def _calc_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose, all_resids: List[int], data_cache):
+    def _calc_sparse_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose,
+                                                    all_resids: List[int], data_cache):
+        #assert scipy is not None, "scipy is required for sparse representation"
         N, F, S = self.get_N_F_S()
-        A_dense = np.zeros(shape=[N, N])
-        E_dense = np.zeros(shape=[N, N, S])
+        #A_dense = np.zeros(shape=[N, N], dtype=self.dtype)
+        #A_sparse = scipy.sparse.csr.csr_matrix( (N,N), dtype=self.dtype )
+        E_sparse = []
+
+        A_data = []
+        A_row = []
+        A_col = []
+
+        for i in range(0, len(all_resids) - 1):
+            resid_i = all_resids[i]
+            i_xyz = wrapped_pose.get_atom_xyz(resid_i, "CA")
+            for j in range(i + 1, len(all_resids)):
+                resid_j = all_resids[j]
+                j_xyz = wrapped_pose.get_atom_xyz(resid_j, "CA")
+                dist = np.linalg.norm(i_xyz - j_xyz)
+                if dist < self.edge_distance_cutoff_A:
+                    f_ij, f_ji = self._get_edge_data_for_pair(wrapped_pose, resid_i=resid_i, resid_j=resid_j, data_cache=data_cache)
+                    A_data.append(1.0)
+                    A_row.append(i)
+                    A_col.append(j)
+                    E_sparse.append(f_ij)
+
+                    A_data.append(1.0)
+                    A_row.append(j)
+                    A_col.append(i)
+                    E_sparse.append(f_ji)
+
+        A_sparse = csr_matrix((A_data, (A_row, A_col)), dtype=self.dtype)
+        assert A_sparse.count_nonzero() == len(E_sparse)
+        E_sparse = np.asarray(E_sparse)
+
+        return A_sparse, E_sparse
+
+    def _calc_dense_adjacency_matrix_and_edge_data(self, wrapped_pose: WrappedPose,
+                                                   all_resids: List[int], data_cache):
+        N, F, S = self.get_N_F_S()
+        A_dense = np.zeros(shape=[N, N], dtype=self.dtype)
+        E_dense = np.zeros(shape=[N, N, S], dtype=self.dtype)
 
         for i in range(0, len(all_resids) - 1):
             resid_i = all_resids[i]
@@ -210,7 +279,7 @@ class DataMaker:
 
     def _get_node_data(self, wrapped_pose: WrappedPose, resids: List[int], data_cache):
         N, F, S = self.get_N_F_S()
-        X = np.zeros(shape=[N, F])
+        X = np.zeros(shape=[N, F], dtype=self.dtype)
         index = -1
         for resid in resids:
             index += 1
@@ -226,7 +295,7 @@ class DataMaker:
 
             n = self.all_decs.calc_node_features(wrapped_pose, resid)
 
-            n = np.asarray(n)
+            n = np.asarray(n, dtype=self.dtype)
             if data_cache.node_cache is not None:
                 data_cache.node_cache[resid] = n
             X[index] = n
@@ -253,16 +322,19 @@ class DataMaker:
             Edge Feature Input
         """
 
+        dtype_str = str(self.dtype).split('.')[-1].split('\'')[0]
+
         N, F, S = self.get_N_F_S()
-        X_in = Input(shape=(N, F), name='X_in')
-        A_in = Input(shape=(N, N), sparse=False, name='A_in')
-        E_in = Input(shape=(N, N, S), name='E_in')
+        X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
+        A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
+        E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
 
-    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int], data_cache: DecoratorDataCache = None,
+    def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int],
+                       data_cache: DecoratorDataCache = None, sparse: bool = False,
                        legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
-        This is does the actual work of creating a graph and representing it as tensors
+        This is does the work of creating a graph and representing it as tensors
 
         Parameters
         -------
@@ -275,6 +347,10 @@ class DataMaker:
         data_cache: DecoratorDataCache
             See make_data_cache for details.
             It is very important that this cache was created from this pose
+        sparse: bool
+            This setting will use sparse representations of A and E.
+            X will still have dimension (N,F) but A will now be a scipy.sparse_matrix and
+            E will have dimension (M,S) where M is the number of edges
         legal_nbrs: list of ints
             Which resids are allowed to be neighbors? All resids are legal if this is None
 
@@ -301,11 +377,15 @@ class DataMaker:
         X = self._get_node_data(wrapped_pose, all_resids, data_cache)
 
         # Adjacency Matrix and Edge Data
-        A, E = self._calc_adjacency_matrix_and_edge_data(wrapped_pose, all_resids, data_cache=data_cache)
+        if sparse:
+            A, E = self._calc_sparse_adjacency_matrix_and_edge_data(wrapped_pose, all_resids, data_cache=data_cache)
+        else:
+            A, E = self._calc_dense_adjacency_matrix_and_edge_data(wrapped_pose, all_resids, data_cache=data_cache)
 
         return X, A, E, all_resids
 
-    def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int, data_cache: DecoratorDataCache = None,
+    def generate_input_for_resid(self, wrapped_pose: WrappedPose, resid: int,
+                                 data_cache: DecoratorDataCache = None, sparse: bool = False,
                                  legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:
         """
         Only have 1 focus resid?
@@ -316,7 +396,7 @@ class DataMaker:
         -------
         wrapped_pose: WrappedPose
             Pose to generate data from
-        focus_resid: inr
+        focus_resid: int
             Which resid is the focus residue?
             We use Rosetta conventions here, so the first residue is resid #1,
             second is #2, and so one. No skips.
@@ -334,7 +414,92 @@ class DataMaker:
             Adjacency Matrix
         E: ndarray
             Edge Feature
+        sparse: bool
+            This setting will use sparse representations of A and E.
+            X will still have dimension (N,F) but A will now be a scipy.sparse_matrix and
+            E will have dimension (M,S) where M is the number of edges
         meta: list of int
             Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
         """
-        return self.generate_input(wrapped_pose, focus_resids=[resid], data_cache=data_cache, legal_nbrs=legal_nbrs)
+        return self.generate_input(wrapped_pose, focus_resids=[resid],
+                                   data_cache=data_cache, sparse=sparse, legal_nbrs=legal_nbrs)
+
+    def generate_graph(self, wrapped_pose: WrappedPose, focus_resids: List[int],
+                       data_cache: DecoratorDataCache = None, sparse: bool = False,
+                       legal_nbrs: List[int] = None):
+        """
+        This is does the work of creating a graph and representing it in Spektral's Graph format.
+        Note this only populates the X, A, and E tensors.
+        It is up to the caller to do the rest.
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resids: list of ints
+            Which resids are the focus residues?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
+        sparse: bool
+            This setting will use sparse representations of A and E.
+            X will still have dimension (N,F) but A will now be a scipy.sparse_matrix and
+            E will have dimension (M,S) where M is the number of edges
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+
+        Returns
+        -------
+        G: spektral.data.Graph
+            Spektral Graph, which can be added to your Spektral dataset
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """
+        if spektral is None:
+            raise ImportError("Failed to load spektral. Cannot create graph")
+
+        X, A, E, meta = self.generate_input(wrapped_pose, focus_resids, data_cache, sparse, legal_nbrs)
+        G = spektral.data.Graph(x=X, a=A, e=E)
+        return G, meta
+
+    def generate_graph_for_resid(self, wrapped_pose: WrappedPose, focus_resid: int,
+                                 data_cache: DecoratorDataCache = None, sparse: bool = False,
+                                 legal_nbrs: List[int] = None):
+        """
+        This is does the work of creating a graph and representing it in Spektral's Graph format.
+        Note this only populates the X, A, and E tensors.
+        It is up to the caller to do the rest.
+
+        Parameters
+        -------
+        wrapped_pose: WrappedPose
+            Pose to generate data from
+        focus_resid: int
+            Which resid is the focus residue?
+            We use Rosetta conventions here, so the first residue is resid #1,
+            second is #2, and so one. No skips.
+        data_cache: DecoratorDataCache
+            See make_data_cache for details.
+            It is very important that this cache was created from this pose
+        sparse: bool
+            This setting will use sparse representations of A and E.
+            X will still have dimension (N,F) but A will now be a scipy.sparse_matrix and
+            E will have dimension (M,S) where M is the number of edges
+        legal_nbrs: list of ints
+            Which resids are allowed to be neighbors? All resids are legal if this is None
+
+        Returns
+        -------
+        G: spektral.data.Graph
+            Spektral Graph, which can be added to your Spektral dataset
+        meta: list of int
+            Metadata. At the moment this is just a list of resids in the same order as they are listed in X, A, and E
+        """
+        if spektral is None:
+            raise ImportError("Failed to load spektral. Cannot create graph")
+
+        X, A, E, meta = self.generate_input(wrapped_pose, [focus_resid], data_cache, sparse, legal_nbrs)
+        G = spektral.data.Graph(x=X, a=A, e=E)
+        return G, meta

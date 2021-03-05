@@ -6,4 +6,6 @@ from .data_maker import DataMaker  # noqa: F401,F403
 from .data_management import *     # noqa: F401,F403
 from .wrappers import *            # noqa: F401,F403
 
-__version__ = '0.0.0'
+from . import published            # noqa: F401,F403
+
+__version__ = '0.2.1'
