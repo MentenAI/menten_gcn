@@ -308,7 +308,7 @@ class DataMaker:
             assert X[0][0] == 1
         return X
 
-    def generate_XAE_input_tensors(self, sparse:bool = False) -> Tuple[Layer, Layer, Layer]:
+    def generate_XAE_input_tensors(self, sparse: bool = False) -> Tuple[Layer, Layer, Layer]:
         """
         This is just a safe way to create the input layers for your keras model with confidence that they are the right shape
 
@@ -341,7 +341,6 @@ class DataMaker:
             E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
         return X_in, A_in, E_in
 
-    
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int],
                        data_cache: DecoratorDataCache = None, sparse: bool = False,
                        legal_nbrs: List[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[int]]:

@@ -16,6 +16,7 @@ import mdtraj as md
 from spektral.layers import *
 import spektral
 
+
 def test_main():
     pass
 
@@ -219,40 +220,42 @@ def test_masks():
     equal(np.asarray(expected_out1), test_out[2], decimal=2)
     equal(np.asarray(expected_out2), test_out[3], decimal=2)
 
+
 def test_sparse():
     max_res = 3
 
     pose = md.load_pdb("tests/6U07.atoms.pdb")
     wrapped_pose = MDTrajPoseWrapper(mdtraj_trajectory=pose)
-    
+
     # PREP MODEL
     decorators = [SimpleBBGeometry()]
     data_maker = DataMaker(decorators=decorators, edge_distance_cutoff_A=10.0, max_residues=max_res)
 
     N, F, S = data_maker.get_N_F_S()
 
-    X_in, A_in, E_in = data_maker.generate_XAE_input_tensors( sparse=True )
+    X_in, A_in, E_in = data_maker.generate_XAE_input_tensors(sparse=True)
 
-    out = CrystalConv( 10 )( X_in, A_in, E_in )
+    out = CrystalConv(10)(X_in, A_in, E_in)
 
     model = Model(inputs=[X_in, A_in, E_in], outputs=out)
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     class MyDataset(spektral.data.dataset.Dataset):
-        def __init__( self ):
+        def __init__(self):
             self.graphs = []
-        
+
         def read(self):
             return self.graphs
-    
+
     dataset = MyDataset()
 
-    for resid in range( 0, 10 ):
-        g = data_maker.generate_graph_for_resid( wrapped_pose, resid, sparse=True )
-        g.y = [ 1.0 ]
+    for resid in range(0, 10):
+        g = data_maker.generate_graph_for_resid(wrapped_pose, resid, sparse=True)
+        g.y = [1.0]
 
-    loader = spektral.data.loaders.DisjointLoader( dataset )
-    model.fit( loader.load(), steps_per_epoch=loader.steps_per_epoch )
+    loader = spektral.data.loaders.DisjointLoader(dataset)
+    model.fit(loader.load(), steps_per_epoch=loader.steps_per_epoch)
+
 
 def test_data_generator_1():
     d = DataHolder()
