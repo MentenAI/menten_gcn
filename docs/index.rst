@@ -16,10 +16,8 @@ Contents
 
    overview
    classes/index
-   tools/index
    examples/index
    readme
-   contributing
    authors
 
 Indices and tables
