@@ -33,7 +33,7 @@ but has some extra complexity and takes us all the way to training
    Es = []
    outs = []
 
-   # This part is all very had-wavy
+   # This part is all very hand-wavy
    for pdb in [ "test1.pdb", "test2.pdb", "test3.pdb", "test4.pdb", "test5.pdb" ]:
    
        pose = pyrosetta.pose_from_pdb( pdb )

@@ -2,7 +2,7 @@ Custom Decorator
 ================
 
 We try and make it relatively easy to create your own decorator.
-All do need to do is inherit a these seven methods from the base class.
+All you need to do is inherit a these seven methods from the base class.
 
 (see full base class description at the bottom)
 
