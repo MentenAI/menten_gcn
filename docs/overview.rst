@@ -89,7 +89,7 @@ Let's walk through this slowly:
   - Just Rosetta and MDTraj right now. Get in touch if you want more!
   - You will hopefully be training on more than just one pose
     
-2. Wrap your pose using the appropiate wrapper for your package.
+2. Wrap your pose using the appropriate wrapper for your package.
 
   - See Classes -> Pose Wrappers
     
