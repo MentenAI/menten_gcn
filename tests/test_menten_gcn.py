@@ -239,7 +239,7 @@ def test_sparse():
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     class MyDataset(spektral.data.dataset.Dataset):
-        def __ini__( self ):
+        def __init__( self ):
             self.graphs = []
         
         def read(self):
