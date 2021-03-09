@@ -248,6 +248,10 @@ class DataMaker:
                     A_col.append(i)
                     E_sparse.append(f_ji)
 
+        # https://github.com/danielegrattarola/spektral/blob/master/spektral/data/utils.py
+        # to_disjoint
+        # list of N,F - N,N - N,N,S
+        
         A_sparse = csr_matrix((A_data, (A_row, A_col)), dtype=self.dtype)
         assert A_sparse.count_nonzero() == len(E_sparse)
         E_sparse = np.asarray(E_sparse)
@@ -326,20 +330,24 @@ class DataMaker:
             Adjacency Matrix Input
         E_in: Layer
             Edge Feature Input
+        I_in: Layer
+            Batch Index Input (sparse mode only)
         """
 
         dtype_str = str(self.dtype).split('.')[-1].split('\'')[0]
 
         N, F, S = self.get_N_F_S()
         if sparse:
-            X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
-            A_in = Input(shape=(N, N), sparse=True, name='A_in', dtype=dtype_str)
-            E_in = Input(shape=(None, S), name='E_in', dtype=dtype_str)
+            X_in = Input(shape=(F,), name='X_in', dtype=dtype_str)
+            A_in = Input(shape=(None,), sparse=True, name='A_in', dtype=dtype_str)
+            E_in = Input(shape=(S,), name='E_in', dtype=dtype_str)
+            I_in = Input(shape=(1,), name='I_in', dtype='int32')
+            return X_in, A_in, E_in, I_in
         else:
             X_in = Input(shape=(N, F), name='X_in', dtype=dtype_str)
             A_in = Input(shape=(N, N), sparse=False, name='A_in', dtype=dtype_str)
             E_in = Input(shape=(N, N, S), name='E_in', dtype=dtype_str)
-        return X_in, A_in, E_in
+            return X_in, A_in, E_in
 
     def generate_input(self, wrapped_pose: WrappedPose, focus_resids: List[int],
                        data_cache: DecoratorDataCache = None, sparse: bool = False,
