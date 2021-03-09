@@ -235,7 +235,7 @@ def test_sparse():
 
     X_in, A_in, E_in, I_in = data_maker.generate_XAE_input_tensors(sparse=True)
 
-    out = CrystalConv(10)([X_in, A_in, E_in])
+    out = CrystalConv(max_res)([X_in, A_in, E_in])
 
     model = Model(inputs=[X_in, A_in, E_in, I_in], outputs=out)
     model.compile(optimizer='adam', loss='mean_squared_error')
