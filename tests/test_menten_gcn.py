@@ -241,8 +241,9 @@ def test_sparse():
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     class MyDataset(spektral.data.dataset.Dataset):
-        def __init__(self):
+        def __init__(self, **kwargs):
             self.graphs = []
+            spektral.data.dataset.Dataset.__init__(**kwargs)
 
         def read(self):
             return self.graphs
