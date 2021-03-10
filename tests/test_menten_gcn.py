@@ -243,7 +243,7 @@ def test_sparse():
     class MyDataset(spektral.data.dataset.Dataset):
         def __init__(self, **kwargs):
             self.graphs = []
-            spektral.data.dataset.Dataset.__init__(**kwargs)
+            spektral.data.dataset.Dataset.__init__(self, **kwargs)
 
         def read(self):
             return self.graphs
