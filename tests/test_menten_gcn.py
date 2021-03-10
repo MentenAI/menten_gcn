@@ -253,6 +253,7 @@ def test_sparse():
     for resid in range(0, 10):
         g, resids = data_maker.generate_graph_for_resid(wrapped_pose, resid, sparse=True)
         g.y = [1.0,]
+        dataset.graphs.append( g )
 
     loader = spektral.data.loaders.DisjointLoader(dataset)
     model.fit(loader.load(), steps_per_epoch=loader.steps_per_epoch)
