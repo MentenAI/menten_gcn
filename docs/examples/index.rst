@@ -7,5 +7,7 @@ Examples
     HelloWorld*
 
     SimpleTrain*
+
+    Sparse*
     
     CustomDec*
