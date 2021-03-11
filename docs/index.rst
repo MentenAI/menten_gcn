@@ -19,6 +19,7 @@ Contents
    classes/index
    examples/index
    readme
+   troubleshooting
    authors
 
 Indices and tables
