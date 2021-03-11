@@ -7,6 +7,23 @@ model a sparse representation of the graph.
 
 This can result in lower memory usage depending on the connectivity of your graph.
 
+The key differences are:
+
+- data_maker.generate_graph_for_resid has sparse=True
+
+- data_maker.generate_XAE_input_tensors has sparse=True and returns a 4th input
+
+  - inputs=[X_in,A_in,E_in,I_in] when building the model
+
+- We are making a Spektral Dataset and feeding it into the DisjointLoader
+
+- We are using a Spektral Graph instead of freefloating lists. This change can be done with dense mode too.
+
+  - 'y' is the output value in spektral graphs
+  
+    - Please read Spektral's documentation for options regarding 'y'
+  
+  
 .. code-block:: python
 
    import pyrosetta
