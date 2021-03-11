@@ -260,7 +260,7 @@ def inner_test_sparse():
 
 def test_sparse():
     try:
-        inner_test_sparse():
+        inner_test_sparse()
     except NotImplementedError:
         print( "NotImplementedError!" )
     
