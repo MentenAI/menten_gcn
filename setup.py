@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='menten-gcn',
-    version='0.2.1',
+    version='0.3.0',
     license='MIT',
     description='This package decorates graph tensors with data from protein models',
     long_description='%s' % (
@@ -74,7 +74,7 @@ setup(
     python_requires='>=3.6.0',
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
-        'numpy>=1.16.6', 'tensorflow>=2.1.0', 'spektral>=1.0.0', 'scipy>=1.0.0'
+        'numpy', 'tensorflow>=2.1.0', 'spektral>=1.0.0', 'scipy>=1.0.0'
     ],
     extras_require={
         # eg:

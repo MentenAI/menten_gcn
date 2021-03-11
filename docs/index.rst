@@ -15,9 +15,11 @@ Contents
    :maxdepth: 3
 
    overview
+   dec_menu
    classes/index
    examples/index
    readme
+   troubleshooting
    authors
 
 Indices and tables

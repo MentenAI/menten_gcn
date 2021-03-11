@@ -57,7 +57,7 @@ Usage
 
    - Just Rosetta and MDTraj right now. Get in touch if you want more!
     
-2. Wrap your pose using the appropiate wrapper for your package.
+2. Wrap your pose using the appropriate wrapper for your package.
 
    - See Classes -> Pose Wrappers
     
