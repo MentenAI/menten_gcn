@@ -252,18 +252,20 @@ def inner_test_sparse():
 
     for resid in range(0, 10):
         g, resids = data_maker.generate_graph_for_resid(wrapped_pose, resid, sparse=True)
-        g.y = [1.0,]
-        dataset.graphs.append( g )
+        g.y = [1.0, ]
+        dataset.graphs.append(g)
 
     loader = spektral.data.loaders.DisjointLoader(dataset)
     model.fit(loader.load(), steps_per_epoch=loader.steps_per_epoch)
+
 
 def test_sparse():
     try:
         inner_test_sparse()
     except NotImplementedError:
-        print( "NotImplementedError!" )
-    
+        print("NotImplementedError!")
+
+
 def test_data_generator_1():
     d = DataHolder()
     for x in range(0, 10):

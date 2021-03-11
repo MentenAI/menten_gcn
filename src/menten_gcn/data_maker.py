@@ -251,7 +251,7 @@ class DataMaker:
         # https://github.com/danielegrattarola/spektral/blob/master/spektral/data/utils.py
         # to_disjoint
         # list of N,F - N,N - N,N,S
-        
+
         A_sparse = csr_matrix((A_data, (A_row, A_col)), dtype=self.dtype)
         assert A_sparse.count_nonzero() == len(E_sparse)
         E_sparse = np.asarray(E_sparse)
