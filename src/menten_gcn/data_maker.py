@@ -141,7 +141,7 @@ class DataMaker:
         if not self.exclude_bbdec:
             print("Note that the BareBonesDecorator is included by default and does not need to be explicitly provided")
 
-        print("\nPlease cite: (no one yet)\n")
+        print("\nPlease cite https://doi.org/10.1101/2021.05.05.442729 for Menten GCN\n")
 
     def make_data_cache(self, wrapped_pose: WrappedPose) -> DecoratorDataCache:
         """
