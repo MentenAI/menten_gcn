@@ -111,7 +111,7 @@ Let's train
        data_maker = menten_gcn.DataMaker( decorators=decorators, edge_distance_cutoff_A=10.0, max_residues=20 )
 
        
-       X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
+       X_in, A_in, E_in = data_maker.generate_XAE_input_layers()
        X1 = EdgeConditionedConv( 30, activation='relu' )([X_in, A_in, E_in])
        X2 = EdgeConditionedConv( 30, activation='relu' )([X1, A_in, E_in])
        FinalPool = GlobalSumPool()(X2)

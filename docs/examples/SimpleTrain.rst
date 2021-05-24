@@ -55,7 +55,7 @@ but has some extra complexity and takes us all the way to training
    # Okay now we need to define a model.
    # The data_maker can tell use the right sizes to use.
    # Better yet, the data_maker can simply create the input layers for us:
-   X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
+   X_in, A_in, E_in = data_maker.generate_XAE_input_layers()
 
    # GCN model architectures are tricky
    # Here's just a very simple one to get us off the ground

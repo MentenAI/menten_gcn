@@ -11,7 +11,7 @@ The key differences are:
 
 - data_maker.generate_graph_for_resid has sparse=True
 
-- data_maker.generate_XAE_input_tensors has sparse=True and returns a 4th input
+- data_maker.generate_XAE_input_layers has sparse=True and returns a 4th input
 
   - inputs=[X_in,A_in,E_in,I_in] when building the model
 
@@ -75,7 +75,7 @@ The key differences are:
 	   dataset.graphs.append( g )
 	   
    # Note we have a 4th input now
-   X_in, A_in, E_in, I_in = data_maker.generate_XAE_input_tensors( sparse=True )
+   X_in, A_in, E_in, I_in = data_maker.generate_XAE_input_layers( sparse=True )
 
    # ECCConv is called EdgeConditionedConv in older versions of spektral
    L1 = ECCConv( 30, activation='relu' )([X_in, A_in, E_in])
