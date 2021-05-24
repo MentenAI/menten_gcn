@@ -312,9 +312,32 @@ class DataMaker:
             assert X[0][0] == 1
         return X
 
-    def generate_XAE_input_tensors(self, sparse: bool = False) -> Tuple[Layer, Layer, Layer]:
+    def generate_XAE_input_layers(self, sparse: bool = False) -> Tuple[Layer, Layer, Layer]:
         """
         This is just a safe way to create the input layers for your keras model with confidence that they are the right shape
+
+        Parameters
+        -------
+        sparse: bool
+            If true, returns shapes that work with Spektral's disjoint mode.
+            Otherwise we align with Spektral's batch mode.
+
+        Returns
+        -------
+        X_in: Layer
+            Node Feature Input
+        A_in: Layer
+            Adjacency Matrix Input
+        E_in: Layer
+            Edge Feature Input
+        I_in: Layer
+            Batch Index Input (sparse mode only)
+        """
+        return self.generate_XAE_input_tensors( sparse=sparse )
+    
+    def generate_XAE_input_tensors(self, sparse: bool = False) -> Tuple[Layer, Layer, Layer]:
+        """
+        This is a legacy equivalent of generate_XAE_input_layers, which has a better name
 
         Parameters
         -------
