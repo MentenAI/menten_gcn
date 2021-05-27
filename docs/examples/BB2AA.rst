@@ -66,7 +66,7 @@ And now it's just a one-stop-shop to get everything done
        Model building is not the point of this example
        """
        
-       X_in, A_in, E_in = data_maker.generate_XAE_input_tensors()
+       X_in, A_in, E_in = data_maker.generate_XAE_input_layers()
        X1 = EdgeConditionedConv( 30, activation='relu' )([X_in, A_in, E_in])
        X2 = EdgeConditionedConv( 30, activation='relu' )([X1, A_in, E_in])
        FinalPool = GlobalSumPool()(X2)

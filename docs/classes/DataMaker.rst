@@ -58,7 +58,7 @@ It has the job of applying decorators to poses and organizing them as tensors.
 
    .. automethod:: generate_input
 
-   .. automethod:: generate_XAE_input_tensors
+   .. automethod:: generate_XAE_input_layers
 
    .. automethod:: make_data_cache
 
