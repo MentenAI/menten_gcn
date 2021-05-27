@@ -334,7 +334,7 @@ class DataMaker:
             Batch Index Input (sparse mode only)
         """
         return self.generate_XAE_input_tensors( sparse=sparse )
-    
+
     def generate_XAE_input_tensors(self, sparse: bool = False) -> Tuple[Layer, Layer, Layer]:
         """
         This is a legacy equivalent of generate_XAE_input_layers, which has a better name
